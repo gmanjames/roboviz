@@ -1,0 +1,12 @@
+/**
+ * style rules for roboviz
+ */
+
+body {
+    margin: 0;
+}
+
+#appWindow {
+    width: 100%;
+    height: 100%;
+}
