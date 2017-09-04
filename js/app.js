@@ -5,19 +5,11 @@
  */
 const App = (fps) =>
 {
-    const scene = new THREE.Scene();
-
-    const camera = new THREE.PerspectiveCamera( 75,    // field of view
-            window.innerWidth / window.innerHeight,    // aspect ratio
-                                                0.1,   // near clipping plane
-                                                1000); // far clippling plane
-
-    const renderer = new THREE.WebGLRenderer();
-
-    // Application control
+    const scene    = new THREE.Scene(),
+          camera   = new THREE.PerspectiveCamera( 75, window.innerWidth / window.innerHeight, 0.1, 1000), // far clippling plane
+          renderer = new THREE.WebGLRenderer();
 
     let isPlaying = false; // toggle to pause or play the model animation
-
     let models = []; // 3D models that will be added to the scene
 
     /*
