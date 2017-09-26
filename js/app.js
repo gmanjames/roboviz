@@ -7,7 +7,8 @@ const App = (fps) =>
 {
     const scene    = new THREE.Scene(),
           camera   = new THREE.PerspectiveCamera( 75, window.innerWidth / window.innerHeight, 0.1, 1000), // far clippling plane
-          renderer = new THREE.WebGLRenderer();
+          renderer = new THREE.WebGLRenderer(),
+          interval = 1000 / fps;
 
     let isPlaying = false; // toggle to pause or play the model animation
     let models = []; // 3D models that will be added to the scene
@@ -65,10 +66,19 @@ const App = (fps) =>
     }
 
     function gameLoop() {
+		let then = Date.now();
+		
         let loop = () => {
             requestAnimationFrame(loop);
-            update();
-            render();
+			
+            let now   = Date.now(),
+                delta = now - then;
+
+            if (delta >= interval) {
+                update();
+                render();
+                then = Date.now();
+            }
         }
 
         loop();
