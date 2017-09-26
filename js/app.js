@@ -17,6 +17,7 @@ const App = (fps) =>
      */
     const init = function() {
         renderer.setSize( window.innerWidth, window.innerHeight );
+        renderer.domElement.id = 'appCanvas';
         document.body.appendChild( renderer.domElement );
 
         camera.position.z = 5;
@@ -26,6 +27,18 @@ const App = (fps) =>
 
         // enter game loop
         gameLoop();
+
+        // add event listener necessary for canvas resize
+        window.addEventListener('resize', (evt) => {
+            const width  = evt.target.innerWidth,
+                  height = evt.target.innerHeight;
+
+            renderer.setSize(width, height);
+
+            // update camera
+            camera.aspect = width / height;
+            camera.updateProjectionMatrix();
+        });
     };
 
     function createModels() {
