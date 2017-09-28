@@ -67,15 +67,19 @@ const App = (fps) =>
 
     function gameLoop() {
 		let then = Date.now();
-		
+
         let loop = () => {
             requestAnimationFrame(loop);
-			
+
             let now   = Date.now(),
                 delta = now - then;
 
             if (delta >= interval) {
-                update();
+
+                if (isPlaying) {
+                    update();
+                }
+
                 render();
                 then = Date.now();
             }
