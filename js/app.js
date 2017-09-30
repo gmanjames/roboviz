@@ -29,7 +29,12 @@ const App = (fps) =>
         // enter game loop
         gameLoop();
 
-        setTimeout(loadAnimation('https://raw.githubusercontent.com/gmanjames/roboviz/master/data/mesh.js'), 2000);
+        // check url for logfile referenece
+        const searchParams = new URLSearchParams(window.location.search);
+        if (searchParams.has('logref')) {
+            initLoading();
+            setTimeout(loadAnimation(searchParams.get('logref')), 2000);
+        }
 
         // add event listener necessary for canvas resize
         window.addEventListener('resize', (evt) => {
@@ -38,18 +43,12 @@ const App = (fps) =>
 
             renderer.setSize(width, height);
 
-            // update camera
             camera.aspect = width / height;
             camera.updateProjectionMatrix();
         });
     };
 
-    function createModels() {
-        // Here we will augment three.js meshes with additional methods and
-        // functionality that will be encapsulated within a model object.
-        // Each model object should contain:
-        //  (1) an update method
-        //  (2) a mesh object instance of THREE.Mesh
+    function createModel(meshData) {
 
         const update = function() {
             this.mesh.rotation.x += 0.1;
@@ -57,8 +56,12 @@ const App = (fps) =>
         };
 
         // three.js mesh object
-        const mesh = new THREE.Mesh( new THREE.BoxGeometry( 1, 1, 1 ), // three.js geometry
-                                     new THREE.MeshBasicMaterial( { color: 0x00ff00 } )); // three.js material
+        const geometry = [
+
+              ],
+              color = new THREE.MeshBasicMaterial( { color: 0x00ff00 } )
+              mesh = new THREE.Mesh(geometry, color);
+
         models.push( {update, mesh} );
 
         // Of course we might have more eventually
@@ -90,9 +93,33 @@ const App = (fps) =>
         loop();
     }
 
+    /*
+     * initLoading():
+     * Called to begin loading animation. After the data is retrieved from the
+     * log-file the the loading animation initialized by this function should
+     * be stopped by the appropriate callback.
+     *
+     */
+    function initLoading() {
+        console.log('loading initialized');
+    }
+
+    /*
+     * loadAnimation(urlRef):
+     *
+     * param urlRef - location of the logfile
+     *
+     * Returns a function that executes fetch of the GlobalFetch mixin from
+     * Fetch API. Method 'fetch' returns a promises that resolves to the
+     * successful aqcuisition of the resource, in this case, the json file.
+     */
     function loadAnimation(urlRef) {
         return () => {
-            fetch(urlRef).then((res) => res.json()).then((data) => { console.log(data); });
+            fetch(urlRef).then((res) => res.json()).then((data) => {
+                for (let meshData in data.meshes) {
+                    createModel(meshData);
+                }
+            });
         }
     }
 
@@ -109,7 +136,7 @@ const App = (fps) =>
 
     /*
      * play:
-     *     Begin or resume the animation
+     * Begin or resume the animation
      */
     const play = function() {
         isPlaying = true;
@@ -118,7 +145,7 @@ const App = (fps) =>
 
     /*
      * pause:
-     *      Halt the animation at current position
+     * Halt the animation at current position
      */
     const pause = function() {
         isPlaying = false;
@@ -128,6 +155,9 @@ const App = (fps) =>
     /*
      * setTime:
      *
+     * param timeVal - The position in the animation to play from
+     *
+     * Move the animation to the frame specified by the param timeVal
      */
     const setTime = function(timeVal) {
         //...
@@ -136,9 +166,14 @@ const App = (fps) =>
     /*
      * setSpeed:
      *
+     * param speedVal - Value for playback speed. Negative numbers correspond to
+     * a negative playback speed. Positive numbers correspond to a forwards
+     * playback
+     *
+     * Set the speed and direction of the animation
      */
     const setSpeed = function(speedVal) {
-
+        //...
     }
 
     // Constructed application object
