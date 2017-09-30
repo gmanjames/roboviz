@@ -29,6 +29,8 @@ const App = (fps) =>
         // enter game loop
         gameLoop();
 
+        setTimeout(loadAnimation('https://raw.githubusercontent.com/gmanjames/roboviz/master/data/mesh.js'), 2000);
+
         // add event listener necessary for canvas resize
         window.addEventListener('resize', (evt) => {
             const width  = evt.target.innerWidth,
@@ -88,6 +90,12 @@ const App = (fps) =>
         loop();
     }
 
+    function loadAnimation(urlRef) {
+        return () => {
+            fetch(urlRef).then((res) => res.json()).then((data) => { console.log(data); });
+        }
+    }
+
     function update() {
         for (const model of models) {
             model.update();
@@ -121,16 +129,24 @@ const App = (fps) =>
      * setTime:
      *
      */
-     const setTime = function(timeVal) {
+    const setTime = function(timeVal) {
         //...
     };
 
+    /*
+     * setSpeed:
+     *
+     */
+    const setSpeed = function(speedVal) {
+
+    }
 
     // Constructed application object
     return {
         init,
         play,
         pause,
-        setTime
+        setTime,
+        setSpeed
     }
 };
