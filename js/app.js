@@ -23,8 +23,8 @@ const App = (fps) =>
 
         camera.position.z = 5;
 
-        // load 3D models and add them to the scene
-        createModel();
+        // add default lighting to the scene
+         scene.add(new THREE.DirectionalLight( 0xffffff, 0.5 ));
 
         // enter game loop
         gameLoop();
@@ -56,8 +56,9 @@ const App = (fps) =>
         };
 
         // three.js mesh object
-        const geometry = new Float32Array(meshData.vertices);
-        geometry.addAttribute('position', new THREE.BufferAttribute(vertices, 3))
+        const geometry = new THREE.BufferGeometry(),
+              vertices = new Float32Array(meshData.vertices);
+        geometry.addAttribute('position', new THREE.BufferAttribute(vertices, 3));
 
         const color = new THREE.MeshBasicMaterial( { color: 0x00ff00 } ),
               mesh = new THREE.Mesh(geometry, color);
@@ -117,9 +118,10 @@ const App = (fps) =>
         return () => {
             fetch(urlRef).then((res) => res.json()).then((data) => {
                 for (let meshData in data.meshes) {
+                    console.log(meshData);
                     createModel(meshData);
                 }
-            });
+            }).catch((err) => {console.log(err)});
         }
     }
 
