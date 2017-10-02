@@ -117,11 +117,11 @@ const App = (fps) =>
     function loadAnimation(urlRef) {
         return () => {
             fetch(urlRef).then((res) => res.json()).then((data) => {
-                for (let meshData in data.meshes) {
-                    console.log(meshData);
+                console.log(data);
+                for (let meshData of data.meshes) {
                     createModel(meshData);
                 }
-            }).catch((err) => {console.log(err)});
+            });
         }
     }
 
