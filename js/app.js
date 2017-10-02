@@ -24,7 +24,7 @@ const App = (fps) =>
         camera.position.z = 5;
 
         // load 3D models and add them to the scene
-        createModels();
+        createModel();
 
         // enter game loop
         gameLoop();
@@ -56,10 +56,10 @@ const App = (fps) =>
         };
 
         // three.js mesh object
-        const geometry = [
+        const geometry = new Float32Array(meshData.vertices);
+        geometry.addAttribute('position', new THREE.BufferAttribute(vertices, 3))
 
-              ],
-              color = new THREE.MeshBasicMaterial( { color: 0x00ff00 } )
+        const color = new THREE.MeshBasicMaterial( { color: 0x00ff00 } ),
               mesh = new THREE.Mesh(geometry, color);
 
         models.push( {update, mesh} );
