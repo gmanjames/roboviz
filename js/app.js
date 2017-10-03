@@ -72,7 +72,7 @@ const App = (fps) =>
     }
 
     function gameLoop() {
-		let then = Date.now();
+        let then = Date.now();
 
         let loop = () => {
             requestAnimationFrame(loop);
@@ -116,11 +116,11 @@ const App = (fps) =>
      */
     function loadAnimation(urlRef) {
         return () => {
-            fetch(urlRef).then((res) => res.json()).then((data) => {
+            fetch(urlRef).then((res) => res.blob()).then((data) => {
                 console.log(data);
-                for (let meshData of data.meshes) {
-                    createModel(meshData);
-                }
+                // for (let meshData of data.meshes) {
+                //     createModel(meshData);
+                // }
             });
         }
     }
