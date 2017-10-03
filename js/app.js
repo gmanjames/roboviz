@@ -23,9 +23,6 @@ const App = (fps) =>
 
         camera.position.z = 5;
 
-        // add default lighting to the scene
-         scene.add(new THREE.DirectionalLight( 0xffffff, 0.5 ));
-
         // enter game loop
         gameLoop();
 
@@ -34,6 +31,10 @@ const App = (fps) =>
         if (searchParams.has('logref')) {
             initLoading();
             setTimeout(loadAnimation(searchParams.get('logref')), 2000);
+        }
+        else {
+            initLoading();
+            setTimeout(loadTestAnimation(0), 2000);
         }
 
         // add event listener necessary for canvas resize
@@ -48,27 +49,36 @@ const App = (fps) =>
         });
     };
 
-    function createModel(meshData) {
+    function createModel(data) {
 
-        const update = function() {
-            this.mesh.rotation.x += 0.1;
-            this.mesh.rotation.y += 0.1;
-        };
+        console.log(data);
+        // outer most grouping that is the model
+        let model = new THREE.Group();
+        for (let group of data.groups) {
 
-        // three.js mesh object
-        const geometry = new THREE.BufferGeometry(),
-              vertices = new Float32Array(meshData.vertices);
-        geometry.addAttribute('position', new THREE.BufferAttribute(vertices, 3));
+            // composite group to which we add objects
+            let comp = new THREE.Group(),
+                geometry,
+                material;
 
-        const color = new THREE.MeshBasicMaterial( { color: 0x00ff00 } ),
-              mesh = new THREE.Mesh(geometry, color);
+            // assign a name for manipulating individual group
+            comp.name = group.name;
 
-        models.push( {update, mesh} );
+            for (let obj of group.objs) {
+                if (obj.type === "box") {
+                    geometry = new THREE.BoxBufferGeometry(obj.scale[0], obj.scale[1], obj.scale[2]);
+                    material = new THREE.MeshBasicMaterial( {color: obj.color} );
 
-        // Of course we might have more eventually
-        for (const model of models) {
-            scene.add( model.mesh );
+                    let box = new THREE.Mesh(geometry, material);
+                    comp.add(box);
+                }
+            }
+
+            model.add(comp);
         }
+
+        //models.add({model, data.frames});
+        scene.add(model);
     }
 
     function gameLoop() {
@@ -116,19 +126,22 @@ const App = (fps) =>
      */
     function loadAnimation(urlRef) {
         return () => {
-            fetch(urlRef).then((res) => res.blob()).then((data) => {
-                console.log(data);
-                // for (let meshData of data.meshes) {
-                //     createModel(meshData);
-                // }
+            fetch(urlRef).then((res) => res.json()).then((data) => {
+                createModel(data);
             });
         }
     }
 
-    function update() {
-        for (const model of models) {
-            model.update();
+    function loadTestAnimation(animation) {
+        return () => {
+            createModel(testModels[animation]);
         }
+    }
+
+    function update() {
+        // for (const model of models) {
+        //     model.update();
+        // }
     }
 
     function render() {
