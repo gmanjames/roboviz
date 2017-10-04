@@ -163,7 +163,13 @@ const App = (fps) =>
     function update(elapsed) {
         for (const model of models) {
             if (elapsed > model.speed) {
-                // calculate frame
+                let timeOffset = totalElapsed % model.totalTime,
+                    frame = timeOffset.toPrecision(1);
+
+                /*
+                 * TODO: update on a per group basis
+                 */
+                 
             }
         }
     }
