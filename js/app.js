@@ -10,10 +10,10 @@ const App = (fps) =>
           renderer = new THREE.WebGLRenderer(),
           interval = 1000 / fps;
 
-    let isPlaying = false, // toggle to pause or play the model animation
+    let isPlaying = true, // toggle to pause or play the model animation
         models = [], // 3D models that will be added to the scene
-        totalElapsed = 0,
-        playbackSpeed = 1;
+        playbackSpeed = 1,
+		startTime;
     /*
      * init:
      */
@@ -92,15 +92,13 @@ const App = (fps) =>
     function animationLoop() {
         let then = Date.now();
 
-        totalElapsed = 0;
+        startTime = then;
 
         let loop = () => {
             requestAnimationFrame(loop);
 
             let now   = Date.now(),
                 delta = now - then;
-
-            totalElapsed += delta;
 
             if (delta >= interval) {
 
@@ -162,15 +160,21 @@ const App = (fps) =>
 
     function update(elapsed) {
         for (const model of models) {
-            if (elapsed > model.speed) {
-                let timeOffset = totalElapsed % model.totalTime,
-                    frame = timeOffset.toPrecision(1);
+            //if (elapsed > model.speed) {
+                let timeOffset = (Date.now() - startTime) % model.totalTime * 1000,
+                    frame = Math.round(timeOffset) / 1000;
 
                 /*
                  * TODO: update on a per group basis
                  */
+
+                // debug
+                let str = `f: ${frame} - tt: ${Date.now() - startTime}, ${model.totalTime * 1000}`;
+                console.log(str);
+				
+                
                  
-            }
+            //}
         }
     }
 
