@@ -10,9 +10,10 @@ const App = (fps) =>
           renderer = new THREE.WebGLRenderer(),
           interval = 1000 / fps;
 
-    let isPlaying = false; // toggle to pause or play the model animation
-    let models = []; // 3D models that will be added to the scene
-
+    let isPlaying = false, // toggle to pause or play the model animation
+        models = [], // 3D models that will be added to the scene
+        totalElapsed = 0,
+        playbackSpeed = 1;
     /*
      * init:
      */
@@ -23,8 +24,8 @@ const App = (fps) =>
 
         camera.position.z = 5;
 
-        // enter game loop
-        gameLoop();
+        // enter animation loop
+        animationLoop();
 
         // check url for logfile referenece
         const searchParams = new URLSearchParams(window.location.search);
@@ -35,6 +36,11 @@ const App = (fps) =>
         else {
             initLoading();
             setTimeout(loadTestAnimation(0), 2000);
+        }
+
+        // add models to the scene
+        for (model of models) {
+            scene.add(model.model);
         }
 
         // add event listener necessary for canvas resize
@@ -51,9 +57,12 @@ const App = (fps) =>
 
     function createModel(data) {
 
-        console.log(data);
         // outer most grouping that is the model
-        let model = new THREE.Group();
+        let model  = new THREE.Group(),
+            frames = data.frames,
+            speed  = data.speed,
+            totalTime = data.totalTime;
+
         for (let group of data.groups) {
 
             // composite group to which we add objects
@@ -77,12 +86,13 @@ const App = (fps) =>
             model.add(comp);
         }
 
-        //models.add({model, data.frames});
-        scene.add(model);
+        models.push({model, speed, totalTime, frames});
     }
 
-    function gameLoop() {
+    function animationLoop() {
         let then = Date.now();
+
+        totalElapsed = 0;
 
         let loop = () => {
             requestAnimationFrame(loop);
@@ -90,10 +100,12 @@ const App = (fps) =>
             let now   = Date.now(),
                 delta = now - then;
 
+            totalElapsed += delta;
+
             if (delta >= interval) {
 
                 if (isPlaying) {
-                    update();
+                    update(delta);
                 }
 
                 render();
@@ -103,6 +115,7 @@ const App = (fps) =>
 
         loop();
     }
+
 
     /*
      * initLoading():
@@ -114,6 +127,7 @@ const App = (fps) =>
     function initLoading() {
         console.log('loading initialized');
     }
+
 
     /*
      * loadAnimation(urlRef):
@@ -128,6 +142,10 @@ const App = (fps) =>
         return () => {
             fetch(urlRef).then((res) => res.json()).then((data) => {
                 createModel(data);
+
+                for (const model of models) {
+                    scene.add(model.model);
+                }
             });
         }
     }
@@ -135,13 +153,19 @@ const App = (fps) =>
     function loadTestAnimation(animation) {
         return () => {
             createModel(testModels[animation]);
+
+            for (const model of models) {
+                scene.add(model.model);
+            }
         }
     }
 
-    function update() {
-        // for (const model of models) {
-        //     model.update();
-        // }
+    function update(elapsed) {
+        for (const model of models) {
+            if (elapsed > model.speed) {
+                // calculate frame
+            }
+        }
     }
 
     function render() {
@@ -178,6 +202,7 @@ const App = (fps) =>
         //...
     };
 
+
     /*
      * setSpeed:
      *
@@ -188,8 +213,9 @@ const App = (fps) =>
      * Set the speed and direction of the animation
      */
     const setSpeed = function(speedVal) {
-        //...
+        playbackSpeed = speedVal;
     }
+
 
     // Constructed application object
     return {
