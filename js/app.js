@@ -8,12 +8,13 @@ const App = (fps) =>
     const scene    = new THREE.Scene(),
           camera   = new THREE.PerspectiveCamera( 75, window.innerWidth / window.innerHeight, 0.1, 1000), // far clippling plane
           renderer = new THREE.WebGLRenderer(),
-          interval = 1000 / fps;
+          interval = 1000 / fps,
+          clock    = new THREE.Clock();
 
-    let isPlaying = false, // toggle to pause or play the model animation
+    let isPlaying = true, // toggle to pause or play the model animation
         models = [], // 3D models that will be added to the scene
-        totalElapsed = 0,
-        playbackSpeed = 1;
+        playbackSpeed = 1,
+        startTime;
     /*
      * init:
      */
@@ -60,8 +61,9 @@ const App = (fps) =>
         // outer most grouping that is the model
         let model  = new THREE.Group(),
             frames = data.frames,
-            speed  = data.speed,
-            totalTime = data.totalTime;
+            step   = data.step,
+            start  = data.start,
+            stop   = data.stop;
 
         for (let group of data.groups) {
 
@@ -86,21 +88,17 @@ const App = (fps) =>
             model.add(comp);
         }
 
-        models.push({model, speed, totalTime, frames});
+        models.push({model, step, start, stop, frames});
     }
 
     function animationLoop() {
         let then = Date.now();
-
-        totalElapsed = 0;
 
         let loop = () => {
             requestAnimationFrame(loop);
 
             let now   = Date.now(),
                 delta = now - then;
-
-            totalElapsed += delta;
 
             if (delta >= interval) {
 
@@ -162,14 +160,26 @@ const App = (fps) =>
 
     function update(elapsed) {
         for (const model of models) {
-            if (elapsed > model.speed) {
-                let timeOffset = totalElapsed % model.totalTime,
-                    frame = timeOffset.toPrecision(1);
+            let current = clock.getElapsedTime(),
+                offset  = current - model.start,
+                frame;
 
-                /*
-                 * TODO: update on a per group basis
-                 */
-                 
+
+            if (offset >= model.start && offset <= model.stop) {
+                frame = Math.round(offset / model.step);
+            }
+            else if (offset < model.start) {
+                frame = 1;
+            }
+            else if (offset > model.stop) {
+                frame = Math.round((offset % model.stop) / model.step) + 1;
+            }
+
+            for (const group of model.model.children) {
+                group.position.set(model.frames[frame - 1][group.name].position[0],
+                                   model.frames[frame - 1][group.name].position[1],
+                                   model.frames[frame - 1][group.name].position[2]
+                );
             }
         }
     }
