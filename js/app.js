@@ -8,61 +8,104 @@ const App = (fps) =>
     const scene    = new THREE.Scene(),
           camera   = new THREE.PerspectiveCamera( 75, window.innerWidth / window.innerHeight, 0.1, 1000), // far clippling plane
           renderer = new THREE.WebGLRenderer(),
-          interval = 1000 / fps;
+          interval = 1000 / fps,
+          clock    = new THREE.Clock();
 
-    let isPlaying = false; // toggle to pause or play the model animation
-    let models = []; // 3D models that will be added to the scene
-
+    let isPlaying = true, // toggle to pause or play the model animation
+        models = [], // 3D models that will be added to the scene
+        playbackSpeed = 1,
+        startTime;
     /*
      * init:
      */
     const init = function() {
         renderer.setSize( window.innerWidth, window.innerHeight );
+        renderer.domElement.id = 'appCanvas';
         document.body.appendChild( renderer.domElement );
 
         camera.position.z = 5;
 
-        // load 3D models and add them to the scene
-        createModels();
+        // enter animation loop
+        animationLoop();
 
-        // enter game loop
-        gameLoop();
+        // check url for logfile referenece
+        const searchParams = new URLSearchParams(window.location.search);
+        if (searchParams.has('logref')) {
+            initLoading();
+            setTimeout(loadAnimation(searchParams.get('logref')), 2000);
+        }
+        else {
+            initLoading();
+            setTimeout(loadTestAnimation(0), 2000);
+        }
+
+        // add models to the scene
+        for (model of models) {
+            scene.add(model.model);
+        }
+
+        // add event listener necessary for canvas resize
+        window.addEventListener('resize', (evt) => {
+            const width  = evt.target.innerWidth,
+                  height = evt.target.innerHeight;
+
+            renderer.setSize(width, height);
+
+            camera.aspect = width / height;
+            camera.updateProjectionMatrix();
+        });
     };
 
-    function createModels() {
-        // Here we will augment three.js meshes with additional methods and
-        // functionality that will be encapsulated within a model object.
-        // Each model object should contain:
-        //  (1) an update method
-        //  (2) a mesh object instance of THREE.Mesh
+    function createModel(data) {
 
-        const update = function() {
-            this.mesh.rotation.x += 0.1;
-            this.mesh.rotation.y += 0.1;
-        };
+        // outer most grouping that is the model
+        let model  = new THREE.Group(),
+            frames = data.frames,
+            step   = data.step,
+            start  = data.start,
+            stop   = data.stop;
 
-        // three.js mesh object
-        const mesh = new THREE.Mesh( new THREE.BoxGeometry( 1, 1, 1 ), // three.js geometry
-                                     new THREE.MeshBasicMaterial( { color: 0x00ff00 } )); // three.js material
-        models.push( {update, mesh} );
+        for (let group of data.groups) {
 
-        // Of course we might have more eventually
-        for (const model of models) {
-            scene.add( model.mesh );
+            // composite group to which we add objects
+            let comp = new THREE.Group(),
+                geometry,
+                material;
+
+            // assign a name for manipulating individual group
+            comp.name = group.name;
+
+            for (let obj of group.objs) {
+                if (obj.type === "box") {
+                    geometry = new THREE.BoxBufferGeometry(obj.scale[0], obj.scale[1], obj.scale[2]);
+                    material = new THREE.MeshBasicMaterial( {color: obj.color} );
+
+                    let box = new THREE.Mesh(geometry, material);
+                    comp.add(box);
+                }
+            }
+
+            model.add(comp);
         }
+
+        models.push({model, step, start, stop, frames});
     }
 
-    function gameLoop() {
-		let then = Date.now();
-		
+    function animationLoop() {
+        let then = Date.now();
+
         let loop = () => {
             requestAnimationFrame(loop);
-			
+
             let now   = Date.now(),
                 delta = now - then;
 
             if (delta >= interval) {
-                update();
+
+                if (isPlaying) {
+                    update(delta);
+                }
+
                 render();
                 then = Date.now();
             }
@@ -71,9 +114,73 @@ const App = (fps) =>
         loop();
     }
 
-    function update() {
+
+    /*
+     * initLoading():
+     * Called to begin loading animation. After the data is retrieved from the
+     * log-file the the loading animation initialized by this function should
+     * be stopped by the appropriate callback.
+     *
+     */
+    function initLoading() {
+        console.log('loading initialized');
+    }
+
+
+    /*
+     * loadAnimation(urlRef):
+     *
+     * param urlRef - location of the logfile
+     *
+     * Returns a function that executes fetch of the GlobalFetch mixin from
+     * Fetch API. Method 'fetch' returns a promises that resolves to the
+     * successful aqcuisition of the resource, in this case, the json file.
+     */
+    function loadAnimation(urlRef) {
+        return () => {
+            fetch(urlRef).then((res) => res.json()).then((data) => {
+                createModel(data);
+
+                for (const model of models) {
+                    scene.add(model.model);
+                }
+            });
+        }
+    }
+
+    function loadTestAnimation(animation) {
+        return () => {
+            createModel(testModels[animation]);
+
+            for (const model of models) {
+                scene.add(model.model);
+            }
+        }
+    }
+
+    function update(elapsed) {
         for (const model of models) {
-            model.update();
+            let current = clock.getElapsedTime(),
+                offset  = current - model.start,
+                frame;
+
+
+            if (offset >= model.start && offset <= model.stop) {
+                frame = Math.round(offset / model.step);
+            }
+            else if (offset < model.start) {
+                frame = 1;
+            }
+            else if (offset > model.stop) {
+                frame = Math.round((offset % model.stop) / model.step) + 1;
+            }
+
+            for (const group of model.model.children) {
+                group.position.set(model.frames[frame - 1][group.name].position[0],
+                                   model.frames[frame - 1][group.name].position[1],
+                                   model.frames[frame - 1][group.name].position[2]
+                );
+            }
         }
     }
 
@@ -84,7 +191,7 @@ const App = (fps) =>
 
     /*
      * play:
-     *     Begin or resume the animation
+     * Begin or resume the animation
      */
     const play = function() {
         isPlaying = true;
@@ -93,7 +200,7 @@ const App = (fps) =>
 
     /*
      * pause:
-     *      Halt the animation at current position
+     * Halt the animation at current position
      */
     const pause = function() {
         isPlaying = false;
@@ -103,10 +210,27 @@ const App = (fps) =>
     /*
      * setTime:
      *
+     * param timeVal - The position in the animation to play from
+     *
+     * Move the animation to the frame specified by the param timeVal
      */
-     const setTime = function(timeVal) {
+    const setTime = function(timeVal) {
         //...
     };
+
+
+    /*
+     * setSpeed:
+     *
+     * param speedVal - Value for playback speed. Negative numbers correspond to
+     * a negative playback speed. Positive numbers correspond to a forwards
+     * playback
+     *
+     * Set the speed and direction of the animation
+     */
+    const setSpeed = function(speedVal) {
+        playbackSpeed = speedVal;
+    }
 
 
     // Constructed application object
@@ -114,6 +238,7 @@ const App = (fps) =>
         init,
         play,
         pause,
-        setTime
+        setTime,
+        setSpeed
     }
 };
