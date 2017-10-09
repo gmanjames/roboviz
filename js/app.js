@@ -25,6 +25,21 @@ const App = (fps) =>
 
         camera.position.z = 5;
 
+        // default scene background color
+        //scene.background = new THREE.Color(0xf0f0f0);
+
+        // directional light to enhance shadow
+        let defaultLight = new THREE.DirectionalLight(0xffffff);
+        defaultLight.position.x = 1;
+        defaultLight.position.y = 1;
+        defaultLight.position.z = 1;
+        defaultLight.position.normalize(); // convert to unit vector
+        scene.add(defaultLight);
+
+        // ambient light to make sure contrast isn't drastic
+        let ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
+        scene.add(ambientLight);
+
         // enter animation loop
         animationLoop();
 
@@ -78,11 +93,15 @@ const App = (fps) =>
             for (let obj of group.objs) {
                 if (obj.type === "box") {
                     geometry = new THREE.BoxBufferGeometry(obj.scale[0], obj.scale[1], obj.scale[2]);
-                    material = new THREE.MeshBasicMaterial( {color: obj.color} );
-
-                    let box = new THREE.Mesh(geometry, material);
-                    comp.add(box);
+                    material = new THREE.MeshLambertMaterial( { color: obj.color, overdraw: 0.5 } );
                 }
+                else if (obj.type === "cylinder") {
+                    geometry = new THREE.CylinderBufferGeometry(obj.scale[0], obj.scale[1], obj.scale[2], obj.scale[3]);
+                    material =  new THREE.MeshLambertMaterial( { color: obj.color, overdraw: 0.5 } );
+                }
+
+                let mesh = new THREE.Mesh(geometry, material);
+                comp.add(mesh);
             }
 
             model.add(comp);
