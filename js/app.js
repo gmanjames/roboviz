@@ -54,6 +54,11 @@ const App = (fps) =>
             camera.aspect = width / height;
             camera.updateProjectionMatrix();
         });
+        
+         // Setup the dnd listeners.
+         var dropZone = document.getElementById('drop_zone');
+         dropZone.addEventListener('dragover', handleDragOver, false);
+         dropZone.addEventListener('drop', handleFileSelect, false);
     };
 
     function createModel(data) {
@@ -157,6 +162,30 @@ const App = (fps) =>
             }
         }
     }
+    
+    function handleFileSelect(evt) {
+      evt.stopPropagation();
+      evt.preventDefault();
+
+      var files = evt.dataTransfer.files; // FileList object.
+      var reader = new FileReader();
+      reader.onload = function(event) {
+           var theLog = event.target.result;
+           console.log(theLog)
+           
+           
+
+      }
+      reader.readAsText(files[0],"UTF-8");
+    }
+
+    function handleDragOver(evt) {
+      evt.stopPropagation();
+      evt.preventDefault();
+      evt.dataTransfer.dropEffect = 'copy'; // Explicitly show this is a copy.
+    }
+
+   
 
     function update(elapsed) {
         for (const model of models) {
@@ -179,7 +208,7 @@ const App = (fps) =>
                 group.position.set(model.frames[frame - 1][group.name].position[0],
                                    model.frames[frame - 1][group.name].position[1],
                                    model.frames[frame - 1][group.name].position[2]
-                );
+                )
             }
         }
     }
