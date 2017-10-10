@@ -6,8 +6,8 @@
 const App = (fps) =>
 {
     const scene    = new THREE.Scene(),
-          camera   = new THREE.PerspectiveCamera( 75, window.innerWidth / window.innerHeight, 0.1, 1000), // far clippling plane
-          renderer = new THREE.WebGLRenderer(),
+          camera   = new THREE.PerspectiveCamera( 45, window.innerWidth / window.innerHeight, 0.1, 4000), // far clippling plane
+          renderer = new THREE.WebGLRenderer({antialias: true, alpha: true}),
           interval = 1000 / fps,
           clock    = new THREE.Clock();
 
@@ -23,17 +23,19 @@ const App = (fps) =>
         renderer.domElement.id = 'appCanvas';
         document.body.appendChild( renderer.domElement );
 
-        camera.position.z = 5;
+        camera.position.set(300, 300, 1120);
+        camera.lookAt(new THREE.Vector3(0,0,0));
+
 
         // default scene background color
         //scene.background = new THREE.Color(0xf0f0f0);
 
         // directional light to enhance shadow
         let defaultLight = new THREE.DirectionalLight(0xffffff);
-        defaultLight.position.x = 1;
-        defaultLight.position.y = 1;
-        defaultLight.position.z = 1;
-        defaultLight.position.normalize(); // convert to unit vector
+        defaultLight.position.x = 0;
+        defaultLight.position.y = 1000;
+        defaultLight.position.z = 0;
+        defaultLight.lookAt(new THREE.Vector3(0, 0, 0));
         scene.add(defaultLight);
 
         // ambient light to make sure contrast isn't drastic
@@ -99,6 +101,12 @@ const App = (fps) =>
                     geometry = new THREE.CylinderBufferGeometry(obj.scale[0], obj.scale[1], obj.scale[2], obj.scale[3]);
                     material =  new THREE.MeshLambertMaterial( { color: obj.color, overdraw: 0.5 } );
                 }
+                else if (obj.type === "elipsoid") {
+                    //...
+                }
+                else if (obj.type === "sphere") {
+                    //...
+                }
 
                 let mesh = new THREE.Mesh(geometry, material);
                 comp.add(mesh);
@@ -122,7 +130,7 @@ const App = (fps) =>
             if (delta >= interval) {
 
                 if (isPlaying) {
-                    update(delta);
+                    update();
                 }
 
                 render();
@@ -177,7 +185,7 @@ const App = (fps) =>
         }
     }
 
-    function update(elapsed) {
+    function update() {
         for (const model of models) {
             let current = clock.getElapsedTime(),
                 offset  = current - model.start,
@@ -191,13 +199,18 @@ const App = (fps) =>
                 frame = 1;
             }
             else if (offset > model.stop) {
-                frame = Math.round((offset % model.stop) / model.step) + 1;
+                frame = Math.round((offset % model.stop) / model.step);
             }
 
             for (const group of model.model.children) {
-                group.position.set(model.frames[frame - 1][group.name].position[0],
-                                   model.frames[frame - 1][group.name].position[1],
-                                   model.frames[frame - 1][group.name].position[2]
+                group.position.set(model.frames[frame][group.name].position[0],
+                                   model.frames[frame][group.name].position[1],
+                                   model.frames[frame][group.name].position[2]
+                );
+                group.quaternion.set(model.frames[frame][group.name].quaternion[0],
+                                     model.frames[frame][group.name].quaternion[1],
+                                     model.frames[frame][group.name].quaternion[2],
+                                     model.frames[frame][group.name].quaternion[3]
                 );
             }
         }
