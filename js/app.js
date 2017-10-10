@@ -99,13 +99,14 @@ const App = (fps) =>
                 }
                 else if (obj.type === "cylinder") {
                     geometry = new THREE.CylinderBufferGeometry(obj.scale[0], obj.scale[1], obj.scale[2], obj.scale[3]);
-                    material =  new THREE.MeshLambertMaterial( { color: obj.color, overdraw: 0.5 } );
+                    material = new THREE.MeshLambertMaterial( { color: obj.color, overdraw: 0.5 } );
                 }
                 else if (obj.type === "elipsoid") {
                     //...
                 }
                 else if (obj.type === "sphere") {
-                    //...
+                    geometry = new THREE.SphereBufferGeometry(obj.diameter, 32, 32);
+                    material = new THREE.MeshLambertMaterial( { color: obj.color, overdraw: 0.5 } );
                 }
 
                 let mesh = new THREE.Mesh(geometry, material);
