@@ -2,6 +2,68 @@ const testModels = [
     {
         "groups": [
             {
+                "name": "prim-test-cylinder",
+                "objs": [
+                    {
+                        "type": "cylinder",
+                        "color": 0x0000ff,
+                        "scale": [75, 50, 86, 32]
+                    }
+                ]
+            }
+        ],
+        "step": 0.04,
+        "start": 0,
+        "stop": 0.04,
+        "frames": {
+            0: {
+                "prim-test-cylinder": {
+                    "position": [0,0,0],
+                    "quaternion": [0,-0,0,1]
+                }
+            },
+            1: {
+                "prim-test-cylinder": {
+                    "position": [0,0,0],
+                    "quaternion": [0,-0,0,1]
+                }
+            }
+        }
+    },
+    {
+        "groups": [
+            {
+                "name": "prim-test-sphere",
+                "objs": [
+                    {
+                        "type": "sphere",
+                        "color": 0x0000ff,
+                        "diameter": 50
+                    }
+                ]
+            }
+        ],
+        "step": 0.04,
+        "start": 0,
+        "stop": 0.04,
+        "frames": {
+            0: {
+                "prim-test-sphere": {
+                    "position": [0,0,0],
+                    "quaternion": [0,-0,0,1]
+                }
+            },
+            1: {
+                "prim-test-sphere": {
+                    "position": [0,0,0],
+                    "quaternion": [0,-0,0,1]
+                }
+            }
+        }
+    },
+    {
+        "groups": [
+            {
                 "name": "body",
                 "objs": [
                     {
