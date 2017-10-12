@@ -159,9 +159,24 @@ const App = (fps) =>
         console.log('loading initialized');
     }
 
+    /*
+     * loadDroppedAnimation(urlRef):
+     *
+     * param file - dragged and dropped log-file
+     *
+     * Returns a promise that resolves to the file data being transfered.
+     */
+    function loadDroppedAnimation(file) {
+        return new Promise((resolve, reject) => {
+            let reader = new FileReader();
+            reader.readAsText(file, "UTF-8");
+
+            reader.onload = resolve;
+        });
+    }
 
     /*
-     * loadAnimation(urlRef):
+     * loadRefAnimation(urlRef):
      *
      * param urlRef - location of the logfile
      *
@@ -169,7 +184,7 @@ const App = (fps) =>
      * Fetch API. Method 'fetch' returns a promises that resolves to the
      * successful aqcuisition of the resource, in this case, the json file.
      */
-    function loadAnimation(urlRef) {
+    function loadRefAnimation(urlRef) {
         return () => {
             fetch(urlRef).then((res) => res.json()).then((data) => {
                 createModel(data);
@@ -192,6 +207,7 @@ const App = (fps) =>
     }
 
     function handleFileSelect(evt) {
+
         // Chrome's default behavior is to open a new tab
         evt.preventDefault();
 
@@ -199,14 +215,11 @@ const App = (fps) =>
         initLoading();
 
         let files = evt.dataTransfer.files; // FileList object.
-        let reader = new FileReader();
-        reader.onload = function(event) {
-            let theLog = event.target.result;
-            createModel(JSON.parse(theLog));
-            scene.add(models[0].model);
-        }
-
-        reader.readAsText(files[0],"UTF-8");
+        loadDroppedAnimation(files[0]).then((evt) => {
+            return JSON.parse(evt.target.result);
+        }).then((dat) => {
+            createModel(dat);
+        });
     }
 
     function handleDragOver(evt) {
