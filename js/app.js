@@ -52,8 +52,8 @@ const App = (fps) =>
             setTimeout(loadAnimation(searchParams.get('logref')), 2000);
         }
         else {
-            initLoading();
-            setTimeout(loadTestAnimation(0), 2000);
+            //initLoading();
+            //setTimeout(loadTestAnimation(0), 2000);
         }
 
         // add models to the scene
@@ -71,6 +71,11 @@ const App = (fps) =>
             camera.aspect = width / height;
             camera.updateProjectionMatrix();
         });
+
+         // Setup the dnd listeners.
+         var dropZone = document.getElementById('drop_zone');
+         dropZone.addEventListener('dragover', handleDragOver, false);
+         dropZone.addEventListener('drop', handleFileSelect, false);
     };
 
     function createModel(data) {
@@ -185,8 +190,33 @@ const App = (fps) =>
         }
     }
 
-    function update() {
+    function handleFileSelect(evt) {
+        // Chrome's default behavior is to open a new tab
+        evt.preventDefault();
+
+        // initialize loading
+        initLoading();
+
+        let files = evt.dataTransfer.files; // FileList object.
+        let reader = new FileReader();
+        reader.onload = function(event) {
+            let theLog = event.target.result;
+            createModel(JSON.parse(theLog));
+            scene.add(models[0].model);
+        }
+
+        reader.readAsText(files[0],"UTF-8");
+    }
+
+    function handleDragOver(evt) {
+        evt.stopPropagation();
+        evt.preventDefault();
+        evt.dataTransfer.dropEffect = 'copy'; // Explicitly show this is a copy.
+    }
+
+    function update(elapsed) {
         for (const model of models) {
+
             let current = clock.getElapsedTime(),
                 offset  = current - model.start,
                 frame;
