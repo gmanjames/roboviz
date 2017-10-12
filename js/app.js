@@ -35,8 +35,8 @@ const App = (fps) =>
             setTimeout(loadAnimation(searchParams.get('logref')), 2000);
         }
         else {
-            initLoading();
-            setTimeout(loadTestAnimation(0), 2000);
+            //initLoading();
+            //setTimeout(loadTestAnimation(0), 2000);
         }
 
         // add models to the scene
@@ -54,6 +54,11 @@ const App = (fps) =>
             camera.aspect = width / height;
             camera.updateProjectionMatrix();
         });
+
+         // Setup the dnd listeners.
+         var dropZone = document.getElementById('drop_zone');
+         dropZone.addEventListener('dragover', handleDragOver, false);
+         dropZone.addEventListener('drop', handleFileSelect, false);
     };
 
     function createModel(data) {
@@ -78,7 +83,7 @@ const App = (fps) =>
             for (let obj of group.objs) {
                 if (obj.type === "box") {
                     geometry = new THREE.BoxBufferGeometry(obj.scale[0], obj.scale[1], obj.scale[2]);
-                    material = new THREE.MeshBasicMaterial( {color: obj.color} );
+                    material = new THREE.MeshBasicMaterial( {color: parseInt(obj.color)} );
 
                     let box = new THREE.Mesh(geometry, material);
                     comp.add(box);
@@ -158,8 +163,33 @@ const App = (fps) =>
         }
     }
 
+    function handleFileSelect(evt) {
+      evt.preventDefault();
+      // initialize loading
+      initLoading();
+
+      var files = evt.dataTransfer.files; // FileList object.
+      var reader = new FileReader();
+      reader.onload = function(event) {
+           var theLog = event.target.result;
+           createModel(JSON.parse(theLog));
+           scene.add(models[0].model);
+      }
+
+      reader.readAsText(files[0],"UTF-8");
+    }
+
+    function handleDragOver(evt) {
+      evt.stopPropagation();
+      evt.preventDefault();
+      evt.dataTransfer.dropEffect = 'copy'; // Explicitly show this is a copy.
+    }
+
+
+
     function update(elapsed) {
         for (const model of models) {
+
             let current = clock.getElapsedTime(),
                 offset  = current - model.start,
                 frame;
@@ -172,14 +202,14 @@ const App = (fps) =>
                 frame = 1;
             }
             else if (offset > model.stop) {
-                frame = Math.round((offset % model.stop) / model.step) + 1;
+                frame = Math.round((offset % model.stop) / model.step);
             }
 
             for (const group of model.model.children) {
-                group.position.set(model.frames[frame - 1][group.name].position[0],
-                                   model.frames[frame - 1][group.name].position[1],
-                                   model.frames[frame - 1][group.name].position[2]
-                );
+                group.position.set(model.frames[frame][group.name].position[0],
+                                   model.frames[frame][group.name].position[1],
+                                   model.frames[frame][group.name].position[2]
+                )
             }
         }
     }
