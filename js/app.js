@@ -8,6 +8,7 @@ const App = (fps) =>
     const scene    = new THREE.Scene(),
           camera   = new THREE.PerspectiveCamera( 45, window.innerWidth / window.innerHeight, 0.1, 4000), // far clippling plane
           renderer = new THREE.WebGLRenderer({antialias: true, alpha: true}),
+          dropZone = document.getElementById('drop_zone'),
           interval = 1000 / fps,
           clock    = new THREE.Clock();
 
@@ -26,15 +27,9 @@ const App = (fps) =>
         camera.position.set(300, 300, 1120);
         camera.lookAt(new THREE.Vector3(0,0,0));
 
-
-        // default scene background color
-        //scene.background = new THREE.Color(0xf0f0f0);
-
         // directional light to enhance shadow
         let defaultLight = new THREE.DirectionalLight(0xffffff);
-        defaultLight.position.x = 0;
-        defaultLight.position.y = 1000;
-        defaultLight.position.z = 0;
+        defaultLight.position.set(0, 1000, 0);
         defaultLight.lookAt(new THREE.Vector3(0, 0, 0));
         scene.add(defaultLight);
 
@@ -45,35 +40,27 @@ const App = (fps) =>
         // enter animation loop
         animationLoop();
 
-        // check url for logfile referenece
+        // check url for logfile referenece, or test model number
         const searchParams = new URLSearchParams(window.location.search);
         if (searchParams.has('logref')) {
             initLoading();
             setTimeout(loadAnimation(searchParams.get('logref')), 2000);
         }
-        else {
-            //initLoading();
-            //setTimeout(loadTestAnimation(0), 2000);
-        }
-
-        // add models to the scene
-        for (model of models) {
-            scene.add(model.model);
+        else if (searchParams.has('test')) {
+            initLoading();
+            setTimeout(loadTestAnimation(parseInt(searchParams.get('test'))), 2000);
         }
 
         // add event listener necessary for canvas resize
         window.addEventListener('resize', (evt) => {
             const width  = evt.target.innerWidth,
                   height = evt.target.innerHeight;
-
             renderer.setSize(width, height);
-
             camera.aspect = width / height;
             camera.updateProjectionMatrix();
         });
 
          // Setup the dnd listeners.
-         var dropZone = document.getElementById('drop_zone');
          dropZone.addEventListener('dragover', handleDragOver, false);
          dropZone.addEventListener('drop', handleFileSelect, false);
     };
@@ -100,18 +87,19 @@ const App = (fps) =>
             for (let obj of group.objs) {
                 if (obj.type === "box") {
                     geometry = new THREE.BoxBufferGeometry(obj.scale[0], obj.scale[1], obj.scale[2]);
-                    material = new THREE.MeshLambertMaterial( { color: obj.color, overdraw: 0.5 } );
+                    material = new THREE.MeshLambertMaterial( { color: parseInt(obj.color), overdraw: 0.5 } );
                 }
                 else if (obj.type === "cylinder") {
-                    geometry = new THREE.CylinderBufferGeometry(obj.scale[0], obj.scale[1], obj.scale[2], obj.scale[3]);
-                    material = new THREE.MeshLambertMaterial( { color: obj.color, overdraw: 0.5 } );
+                    geometry = new THREE.CylinderBufferGeometry(obj.scale[0], obj.scale[1], obj.scale[2], 32, 32);
+                    material = new THREE.MeshLambertMaterial( { color: parseInt(obj.color), overdraw: 0.5 } );
                 }
-                else if (obj.type === "elipsoid") {
-                    //...
+                else if (obj.type === "ellipsoid") {
+                    geometry = new THREE.SphereBufferGeometry(obj.radius, 32, 32, 0, Math.PI);
+                    material = new THREE.MeshLambertMaterial( { color: parseInt(obj.color), overdraw: 0.5 } );
                 }
                 else if (obj.type === "sphere") {
                     geometry = new THREE.SphereBufferGeometry(obj.diameter, 32, 32);
-                    material = new THREE.MeshLambertMaterial( { color: obj.color, overdraw: 0.5 } );
+                    material = new THREE.MeshLambertMaterial( { color: parseInt(obj.color), overdraw: 0.5 } );
                 }
 
                 let mesh = new THREE.Mesh(geometry, material);
@@ -121,6 +109,7 @@ const App = (fps) =>
             model.add(comp);
         }
 
+        scene.add(model);
         models.push({model, step, start, stop, frames});
     }
 
@@ -156,6 +145,7 @@ const App = (fps) =>
      *
      */
     function initLoading() {
+        // here we need to clear scene
         console.log('loading initialized');
     }
 
@@ -164,14 +154,22 @@ const App = (fps) =>
      *
      * param file - dragged and dropped log-file
      *
-     * Returns a promise that resolves to the file data being transfered.
+     * Returns a promise that resolves to a model being loaded from file data
+     * converted to json.
      */
     function loadDroppedAnimation(file) {
+        let loaded;
         return new Promise((resolve, reject) => {
             let reader = new FileReader();
             reader.readAsText(file, "UTF-8");
 
-            reader.onload = resolve;
+            // On load resolve
+            reader.addEventListener('load', resolve);
+
+            // On progress, update progress bar
+            reader.addEventListener('progress', evt => {
+                console.log(evt.loaded / evt.total);
+            });
         });
     }
 
@@ -188,10 +186,6 @@ const App = (fps) =>
         return () => {
             fetch(urlRef).then((res) => res.json()).then((data) => {
                 createModel(data);
-
-                for (const model of models) {
-                    scene.add(model.model);
-                }
             });
         }
     }
@@ -199,10 +193,6 @@ const App = (fps) =>
     function loadTestAnimation(animation) {
         return () => {
             createModel(testModels[animation]);
-
-            for (const model of models) {
-                scene.add(model.model);
-            }
         }
     }
 
@@ -223,7 +213,6 @@ const App = (fps) =>
     }
 
     function handleDragOver(evt) {
-        evt.stopPropagation();
         evt.preventDefault();
         evt.dataTransfer.dropEffect = 'copy'; // Explicitly show this is a copy.
     }
