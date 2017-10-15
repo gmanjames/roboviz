@@ -24,7 +24,7 @@ const App = (fps) =>
         renderer.domElement.id = 'appCanvas';
         document.body.appendChild( renderer.domElement );
 
-        camera.position.set(300, 300, 1120);
+        camera.position.set(600, 600, 1000);
         camera.lookAt(new THREE.Vector3(0,0,0));
 
         // directional light to enhance shadow
@@ -94,8 +94,14 @@ const App = (fps) =>
                     material = new THREE.MeshLambertMaterial( { color: parseInt(obj.color), overdraw: 0.5 } );
                 }
                 else if (obj.type === "ellipsoid") {
-                    geometry = new THREE.SphereBufferGeometry(obj.radius, 32, 32, 0, Math.PI);
+                    geometry = new THREE.SphereBufferGeometry(obj.scale[0] * 0.5, 32, 32);
                     material = new THREE.MeshLambertMaterial( { color: parseInt(obj.color), overdraw: 0.5 } );
+                    let matrix = new THREE.Matrix4();
+                    matrix.makeScale(
+                                1.0,
+                                obj.scale[1] / obj.scale[0],
+                                obj.scale[2] / obj.scale[0]);
+                    geometry.applyMatrix(matrix);
                 }
                 else if (obj.type === "sphere") {
                     geometry = new THREE.SphereBufferGeometry(obj.diameter, 32, 32);

@@ -4,9 +4,9 @@
             "name": "body",
             "objs": [
                 {
-                    "type": "box",
+                    "type": "ellipsoid",
                     "color": "0x00ff00",
-                    "scale": [140, 140, 16.5]
+                    "scale": [140, 140, 25]
                 }
             ]
         },

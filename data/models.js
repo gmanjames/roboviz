@@ -69,7 +69,7 @@ const testModels = [
                     {
                         "type": "ellipsoid",
                         "color": "0x0000ff",
-                        "diameter": 50
+                        "scale": [140, 140, 25]
                     }
                 ]
             },
