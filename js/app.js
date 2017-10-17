@@ -44,7 +44,7 @@ const App = (fps) =>
         const searchParams = new URLSearchParams(window.location.search);
         if (searchParams.has('logref')) {
             initLoading();
-            setTimeout(loadAnimation(searchParams.get('logref')), 2000);
+            setTimeout(loadRefAnimation(searchParams.get('logref')), 2000);
         }
         else if (searchParams.has('test')) {
             initLoading();
