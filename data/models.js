@@ -2,12 +2,43 @@ const testModels = [
     {
         "groups": [
             {
+                "name": "sphere-test",
+                "objs": [
+                    {
+                        "type": "sphere",
+                        "color": "0x0000ff",
+                        "diameter": 100
+                    }
+                ]
+            }
+        ],
+        "step": 0.04,
+        "start": 0,
+        "stop": 0.04,
+        "frames": [
+            {
+                "sphere-test": {
+                    "position": [0, 0, 0],
+                    "quaternion": [1,0,0,1]
+                }
+            },
+            {
+                "sphere-test": {
+                    "position": [0, 0, 0],
+                    "quaternion": [1,0,0,1]
+                }
+            }
+        ]
+    },
+    {
+        "groups": [
+            {
                 "name": "ellipsoid-test",
                 "objs": [
                     {
                         "type": "ellipsoid",
                         "color": "0x0000ff",
-                        "diameter": 50
+                        "scale": [140, 140, 25]
                     }
                 ]
             }
