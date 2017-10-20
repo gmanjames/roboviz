@@ -312,11 +312,13 @@ const App = (fps) =>
                 delta   = playbackSpeed * (current - model.start) - offset,
                 frame;
 
-            frame = Math.round((delta % model.stop) / model.step);
+            if (playbackSpeed < 0) {
 
-            if (frame === 0) {
-                offset = 0; // reset at the beginning of the animation
-            }
+            } else {
+
+            };
+
+            frame = Math.round((delta % model.stop) / model.step);
 
             for (const group of model.model.children) {
                 group.position.set(model.frames[frame][group.name].position[0],
@@ -388,6 +390,10 @@ const App = (fps) =>
      * Set the speed and direction of the animation
      */
     const setSpeed = function(speedVal) {
+        let current = clock.getElapsedTime(),
+            newTime = current * speedVal,
+            correction = newTime - (newTime - current);
+        offset += correction;
         playbackSpeed = speedVal;
     }
 
