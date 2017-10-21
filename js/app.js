@@ -74,6 +74,8 @@ const App = (fps) =>
             start  = data.start,
             stop   = data.stop;
 
+		let texture = new THREE.ImageUtils.loadTexture("assets/images/matrix.png");
+		
         for (let group of data.groups) {
 
             // composite group to which we add objects
@@ -87,15 +89,15 @@ const App = (fps) =>
             for (let obj of group.objs) {
                 if (obj.type === "box") {
                     geometry = new THREE.BoxBufferGeometry(obj.scale[0], obj.scale[1], obj.scale[2]);
-                    material = new THREE.MeshLambertMaterial( { color: parseInt(obj.color), overdraw: 0.5 } );
+                    material = new THREE.MeshLambertMaterial( { color: parseInt(obj.color), map: texture, overdraw: 0.5 } );
                 }
                 else if (obj.type === "cylinder") {
                     geometry = new THREE.CylinderBufferGeometry(obj.scale[0], obj.scale[1], obj.scale[2], 32, 32);
-                    material = new THREE.MeshLambertMaterial( { color: parseInt(obj.color), overdraw: 0.5 } );
+                    material = new THREE.MeshLambertMaterial( { color: parseInt(obj.color), map: texture, overdraw: 0.5 } );
                 }
                 else if (obj.type === "ellipsoid") {
                     geometry = new THREE.SphereBufferGeometry(obj.scale[0] * 0.5, 32, 32);
-                    material = new THREE.MeshLambertMaterial( { color: parseInt(obj.color), overdraw: 0.5 } );
+                    material = new THREE.MeshLambertMaterial( { color: parseInt(obj.color), map: texture, overdraw: 0.5 } );
                     let matrix = new THREE.Matrix4();
                     matrix.makeScale(
                                 1.0,
@@ -105,7 +107,7 @@ const App = (fps) =>
                 }
                 else if (obj.type === "sphere") {
                     geometry = new THREE.SphereBufferGeometry(obj.diameter, 32, 32);
-                    material = new THREE.MeshLambertMaterial( { color: parseInt(obj.color), overdraw: 0.5 } );
+                    material = new THREE.MeshLambertMaterial( { color: parseInt(obj.color), map: texture, overdraw: 0.5 } );
                 }
 				
 				material.transparent = true;
@@ -312,7 +314,7 @@ const App = (fps) =>
 	*/
 	const changeColor = function(modelName, color) {
 		let singleModel = models[0]["model"]["children"];
-		for(let i =0;i < models[0]["model"]["children"].length; i++){
+		for(let i =0;i < singleModel.length; i++){
 			if(singleModel[i].name==modelName){
 				singleModel[i]["children"][0].material.color.setHex(color);
 			}	
@@ -328,33 +330,25 @@ const App = (fps) =>
 	const changeTexture = function(modelName, texturePath) {
 		console.log(models);
 		let loader = new THREE.TextureLoader();
-		loader.load(
-			texturePath,
-			function (texture){
-				let material = new THREE.MeshBasicMaterial({
-					map: texture
-				});
+		let texture = loader.load( 'assets/images/matrix.png', function ( texture ) {
+			console.log("loaded");
+			texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
+			texture.offset.set( 0.0, 1.0 );
+			texture.repeat.set( 4, 4 );
+			
+			let singleModel = models[0]["model"]["children"];
+			for(let i =0;i < singleModel.length; i++){
+				if(singleModel[i].name==modelName){
+					console.log(singleModel[i]);
+					singleModel[i]["children"][0].material.map = texture;
+					singleModel[i]["children"][0].material.map.needsUpdate = true;
+					singleModel[i]["children"][0].geometry.buffersNeedUpdate = true;
+					singleModel[i]["children"][0].geometry.uvsNeedUpdate = true;
+				}	
 			}
-		);
-		//texture.needsUpdate = true;
-		let singleModel = models[0]["model"]["children"];
-		for(let i =0;i < models[0]["model"]["children"].length; i++){
-			if(singleModel[i].name==modelName){
-				console.log(singleModel[i]);
-				singleModel[i]["children"][0].material.map = texturePath;
-			}	
-		}
-	}
-	
-	const testTex = function(modelName) {
-		console.log(models);
-		let singleModel = models[0]["model"]["children"];
-		for(let i =0;i < models[0]["model"]["children"].length; i++){
-			if(singleModel[i].name==modelName){
-				console.log(singleModel[i].name);
-				changeTexture(singleModel[i]["children"][0], "https://solutiondesign.com/documents/10282/21562/bricks.jpg/4f2f824b-d11e-4f39-8efd-4c053032d856?t=1405450112000");
-			}	
-		}
+			texture.needsUpdate = true;
+		} );
+		render();
 	}
 	
 	/*
@@ -365,7 +359,7 @@ const App = (fps) =>
 	*/
 	const changeTransparency = function(modelName, transparency) {
 		let singleModel = models[0]["model"]["children"];
-		for(let i =0;i < models[0]["model"]["children"].length; i++){
+		for(let i =0;i < singleModel.length; i++){
 			if(singleModel[i].name==modelName){
 				singleModel[i]["children"][0].material.opacity = transparency;
 			}	
@@ -382,7 +376,6 @@ const App = (fps) =>
         setSpeed,
 		changeColor,
 		changeTexture,
-		changeTransparency,
-		testTex
+		changeTransparency
     }
 };
