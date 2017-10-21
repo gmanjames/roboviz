@@ -107,7 +107,8 @@ const App = (fps) =>
                     geometry = new THREE.SphereBufferGeometry(obj.diameter, 32, 32);
                     material = new THREE.MeshLambertMaterial( { color: parseInt(obj.color), overdraw: 0.5 } );
                 }
-
+				
+				material.transparent = true;
                 let mesh = new THREE.Mesh(geometry, material);
                 comp.add(mesh);
             }
@@ -324,22 +325,49 @@ const App = (fps) =>
 	*
 	* Change the texture of a specific model
 	*/
-	const changeTexture = function(modelName, texture) {
+	const changeTexture = function(modelName, texturePath) {
+		console.log(models);
+		let loader = new THREE.TextureLoader();
+		loader.load(
+			texturePath,
+			function (texture){
+				let material = new THREE.MeshBasicMaterial({
+					map: texture
+				});
+			}
+		);
+		//texture.needsUpdate = true;
 		let singleModel = models[0]["model"]["children"];
 		for(let i =0;i < models[0]["model"]["children"].length; i++){
 			if(singleModel[i].name==modelName){
-				singleModel[i]["children"][0].material.color.setHex(texture);
+				console.log(singleModel[i]);
+				singleModel[i]["children"][0].material.map = texturePath;
 			}	
 		}
 	}
 	
-	const test = function(modelName) {
+	const testTex = function(modelName) {
 		console.log(models);
 		let singleModel = models[0]["model"]["children"];
 		for(let i =0;i < models[0]["model"]["children"].length; i++){
 			if(singleModel[i].name==modelName){
 				console.log(singleModel[i].name);
-				changeColor(singleModel[i]["children"][0], "0xff0000");
+				changeTexture(singleModel[i]["children"][0], "https://solutiondesign.com/documents/10282/21562/bricks.jpg/4f2f824b-d11e-4f39-8efd-4c053032d856?t=1405450112000");
+			}	
+		}
+	}
+	
+	/*
+	* param modelName - String of the model name to have it's transparency changed
+	* param transparency - Floating point number between 0 and 1 that scales the opacity
+	* 
+	* Change the transparency of the model
+	*/
+	const changeTransparency = function(modelName, transparency) {
+		let singleModel = models[0]["model"]["children"];
+		for(let i =0;i < models[0]["model"]["children"].length; i++){
+			if(singleModel[i].name==modelName){
+				singleModel[i]["children"][0].material.opacity = transparency;
 			}	
 		}
 	}
@@ -354,6 +382,7 @@ const App = (fps) =>
         setSpeed,
 		changeColor,
 		changeTexture,
-		test
+		changeTransparency,
+		testTex
     }
 };
