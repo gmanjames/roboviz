@@ -48,7 +48,7 @@ const App = (fps) =>
         }
         else if (searchParams.has('test')) {
             initLoading();
-            setTimeout(loadTestAnimation(parseInt(searchParams.get('test'))), 2000);
+            setTimeout(loadTestAnimation(parseInt(searchParams.get('test'))), 0);
         }
 
         // add event listener necessary for canvas resize
@@ -302,6 +302,47 @@ const App = (fps) =>
     const setSpeed = function(speedVal) {
         playbackSpeed = speedVal;
     }
+	
+	/*
+	* param modelName - String of the model name to have it's color changed
+	* param color - String of the color to be changed in Hexadecimal
+	*
+	* Change the color of a specific model
+	*/
+	const changeColor = function(modelName, color) {
+		let singleModel = models[0]["model"]["children"];
+		for(let i =0;i < models[0]["model"]["children"].length; i++){
+			if(singleModel[i].name==modelName){
+				singleModel[i]["children"][0].material.color.setHex(color);
+			}	
+		}
+	}
+	
+	/*
+	* param modelName - String of the model name to have it's color changed
+	* param texture - String of the texture to be applied
+	*
+	* Change the texture of a specific model
+	*/
+	const changeTexture = function(modelName, texture) {
+		let singleModel = models[0]["model"]["children"];
+		for(let i =0;i < models[0]["model"]["children"].length; i++){
+			if(singleModel[i].name==modelName){
+				singleModel[i]["children"][0].material.color.setHex(texture);
+			}	
+		}
+	}
+	
+	const test = function(modelName) {
+		console.log(models);
+		let singleModel = models[0]["model"]["children"];
+		for(let i =0;i < models[0]["model"]["children"].length; i++){
+			if(singleModel[i].name==modelName){
+				console.log(singleModel[i].name);
+				changeColor(singleModel[i]["children"][0], "0xff0000");
+			}	
+		}
+	}
 
 
     // Constructed application object
@@ -310,6 +351,9 @@ const App = (fps) =>
         play,
         pause,
         setTime,
-        setSpeed
+        setSpeed,
+		changeColor,
+		changeTexture,
+		test
     }
 };
