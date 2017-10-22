@@ -399,6 +399,10 @@ const Visualizer = (fps) =>
      * Set the speed and direction of the animation
      */
     const setSpeed = function(speedVal) {
+        let current = clock.getElapsedTime(),
+            newTime = current * speedVal,
+            correction = newTime - (newTime - current);
+        offset += correction;
         playbackSpeed = speedVal;
     }
 
