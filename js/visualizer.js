@@ -3,7 +3,7 @@
 /**
  * app.js:
  */
-const App = (fps) =>
+const Visualizer = (fps) =>
 {
     /*
      * Three.js scene to render.
@@ -45,15 +45,15 @@ const App = (fps) =>
      */
     let playbackSpeed = 1;
 
-    /*
-     * Global list to hold all currently loaded animations
-     */
-    let models = [];
+     /*
+      * Current time of the animation.
+      */
+     let currentTime = 0;
 
-    /*
-     * Time since last time animation was paused
+     /*
+     * Global list to hold all currently loaded animations.
      */
-     let offset = 0;
+     let animation;
 
 
     ////////////////////////////////////////////////////
@@ -161,7 +161,7 @@ const App = (fps) =>
         }
 
         scene.add(model);
-        models.push({model, step, start, stop, frames});
+        animation = {model, step, start, stop, frames};
     }
 
 
@@ -180,12 +180,9 @@ const App = (fps) =>
             let now   = Date.now(),
                 delta = now - then;
 
+            update();
+
             if (delta >= interval) {
-
-                if (isPlaying) {
-                    update();
-                }
-
                 render();
                 then = Date.now();
             }
@@ -302,35 +299,43 @@ const App = (fps) =>
 
 
     /*
-     * update(offset):
+     * update():
      *
      * ...
      */
     function update() {
-        for (const model of models) {
-            let current = clock.getElapsedTime(),
-                delta   = playbackSpeed * (current - model.start) - offset,
-                frame;
 
-            if (playbackSpeed < 0) {
+        let delta = clock.getDelta() * playbackSpeed;
 
-            } else {
+        if (isPlaying) {
+            currentTime += delta;
+        }
 
-            };
+        if (animation != null) {
+            updateModel();
+        }
+    }
 
-            frame = Math.round((delta % model.stop) / model.step);
 
-            for (const group of model.model.children) {
-                group.position.set(model.frames[frame][group.name].position[0],
-                                   model.frames[frame][group.name].position[1],
-                                   model.frames[frame][group.name].position[2]
-                );
-                group.quaternion.set(model.frames[frame][group.name].quaternion[0],
-                                     model.frames[frame][group.name].quaternion[1],
-                                     model.frames[frame][group.name].quaternion[2],
-                                     model.frames[frame][group.name].quaternion[3]
-                );
-            }
+    /*
+     * updateModel():
+     *
+     * ...
+     */
+    function updateModel() {
+
+        let frame = Math.round((currentTime % animation.stop) / animation.step);
+
+        for (const group of animation.model.children) {
+            group.position.set(animation.frames[frame][group.name].position[0],
+                animation.frames[frame][group.name].position[1],
+                animation.frames[frame][group.name].position[2]
+            );
+            group.quaternion.set(animation.frames[frame][group.name].quaternion[0],
+                animation.frames[frame][group.name].quaternion[1],
+                animation.frames[frame][group.name].quaternion[2],
+                animation.frames[frame][group.name].quaternion[3]
+            );
         }
     }
 
@@ -355,7 +360,6 @@ const App = (fps) =>
      * Begin or resume the animation
      */
     const play = function() {
-        offset += clock.getDelta() * playbackSpeed;
         isPlaying = true;
     };
 
@@ -378,7 +382,7 @@ const App = (fps) =>
      * Move the animation to the frame specified by the param timeVal
      */
     const setTime = function(timeVal) {
-        //...
+        currentTime = timeVal;
     };
 
 
@@ -390,10 +394,6 @@ const App = (fps) =>
      * Set the speed and direction of the animation
      */
     const setSpeed = function(speedVal) {
-        let current = clock.getElapsedTime(),
-            newTime = current * speedVal,
-            correction = newTime - (newTime - current);
-        offset += correction;
         playbackSpeed = speedVal;
     }
 
