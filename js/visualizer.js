@@ -3,21 +3,67 @@
 /**
  * app.js:
  */
-const App = (fps) =>
+const Visualizer = (fps) =>
 {
-    const scene    = new THREE.Scene(),
-          camera   = new THREE.PerspectiveCamera( 45, window.innerWidth / window.innerHeight, 0.1, 4000), // far clippling plane
-          renderer = new THREE.WebGLRenderer({antialias: true, alpha: true}),
-          dropZone = document.getElementById('drop_zone'),
-          interval = 1000 / fps,
-          clock    = new THREE.Clock();
-
-    let isPlaying = true, // toggle to pause or play the model animation
-        models = [], // 3D models that will be added to the scene
-        playbackSpeed = 1,
-        startTime;
     /*
-     * init:
+     * Three.js scene to render.
+     */
+    const scene    = new THREE.Scene();
+
+    /*
+     * Simple perspective camera with aspect ratio, near and far clipping planes.
+     */
+    const camera   = new THREE.PerspectiveCamera( 45, window.innerWidth / window.innerHeight, 0.1, 4000);
+
+    /*
+     * The visualizer that also holds the camera element.
+     */
+    const renderer = new THREE.WebGLRenderer({antialias: true, alpha: true});
+
+    /*
+     * The area inside of which a log-file can be dropped to be uploaded.
+     */
+    const dropZone = document.getElementById('drop_zone');
+
+    /*
+     * Desired time interval between frames.
+     */
+    const interval = 1000 / fps;
+
+    /*
+     * Clock used for tracking application time.
+     */
+    const clock    = new THREE.Clock();
+
+    /*
+     * Toggle between animation playing and paused states.
+     */
+    let isPlaying = true;
+
+    /*
+     * Multiplier for the speed and direction of the animation.
+     */
+    let playbackSpeed = 1;
+
+     /*
+      * Current time of the animation.
+      */
+     let currentTime = 0;
+
+     /*
+     * Global list to hold all currently loaded animations.
+     */
+     let animation;
+
+
+    ////////////////////////////////////////////////////
+    //              Application Logic                 //
+    ////////////////////////////////////////////////////
+
+    /*
+     * init():
+     *
+     * Logic for setting up the initial Three.js scene, event listeners, etc.
      */
     const init = function() {
         renderer.setSize( window.innerWidth, window.innerHeight );
@@ -27,20 +73,20 @@ const App = (fps) =>
         camera.position.set(600, 600, 1000);
         camera.lookAt(new THREE.Vector3(0,0,0));
 
-        // directional light to enhance shadow
+        // Directional light to enhance shadow.
         let defaultLight = new THREE.DirectionalLight(0xffffff);
         defaultLight.position.set(0, 1000, 0);
         defaultLight.lookAt(new THREE.Vector3(0, 0, 0));
         scene.add(defaultLight);
 
-        // ambient light to make sure contrast isn't drastic
+        // Ambient light to make sure contrast isn't drastic.
         let ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
         scene.add(ambientLight);
 
-        // enter animation loop
+        // Enter animation loop.
         animationLoop();
 
-        // check url for logfile referenece, or test model number
+        // Check url for logfile referenece, or test model number.
         const searchParams = new URLSearchParams(window.location.search);
         if (searchParams.has('logref')) {
             initLoading();
@@ -51,7 +97,7 @@ const App = (fps) =>
             setTimeout(loadTestAnimation(parseInt(searchParams.get('test'))), 2000);
         }
 
-        // add event listener necessary for canvas resize
+        // Add event listener necessary for canvas resize.
         window.addEventListener('resize', (evt) => {
             const width  = evt.target.innerWidth,
                   height = evt.target.innerHeight;
@@ -65,9 +111,14 @@ const App = (fps) =>
          dropZone.addEventListener('drop', handleFileSelect, false);
     };
 
-    function createModel(data) {
 
-        // outer most grouping that is the model
+    /*
+     * createModel():
+     *
+     * Extract model information from JSON data.
+     */
+    function createModel(data)
+    {
         let model  = new THREE.Group(),
             frames = data.frames,
             step   = data.step,
@@ -75,13 +126,10 @@ const App = (fps) =>
             stop   = data.stop;
 
         for (let group of data.groups) {
-
-            // composite group to which we add objects
-            let comp = new THREE.Group(),
+            let comp = new THREE.Group(), // composite group to which we add objects
                 geometry,
                 material;
 
-            // assign a name for manipulating individual group
             comp.name = group.name;
 
             for (let obj of group.objs) {
@@ -97,10 +145,7 @@ const App = (fps) =>
                     geometry = new THREE.SphereBufferGeometry(obj.scale[0] * 0.5, 32, 32);
                     material = new THREE.MeshLambertMaterial( { color: parseInt(obj.color), overdraw: 0.5 } );
                     let matrix = new THREE.Matrix4();
-                    matrix.makeScale(
-                                1.0,
-                                obj.scale[1] / obj.scale[0],
-                                obj.scale[2] / obj.scale[0]);
+                    matrix.makeScale(1.0, obj.scale[1] / obj.scale[0], obj.scale[2] / obj.scale[0]);
                     geometry.applyMatrix(matrix);
                 }
                 else if (obj.type === "sphere") {
@@ -116,24 +161,28 @@ const App = (fps) =>
         }
 
         scene.add(model);
-        models.push({model, step, start, stop, frames});
+        animation = {model, step, start, stop, frames};
     }
 
+
+    /*
+     * animationLoop():
+     *
+     * Game loop implementation for updating logical coordinates of models and
+     * rendering the scene.
+     */
     function animationLoop() {
         let then = Date.now();
-
         let loop = () => {
+
             requestAnimationFrame(loop);
 
             let now   = Date.now(),
                 delta = now - then;
 
+            update();
+
             if (delta >= interval) {
-
-                if (isPlaying) {
-                    update();
-                }
-
                 render();
                 then = Date.now();
             }
@@ -145,15 +194,16 @@ const App = (fps) =>
 
     /*
      * initLoading():
+     *
      * Called to begin loading animation. After the data is retrieved from the
      * log-file the the loading animation initialized by this function should
      * be stopped by the appropriate callback.
-     *
      */
     function initLoading() {
         // here we need to clear scene
         console.log('loading initialized');
     }
+
 
     /*
      * loadDroppedAnimation(urlRef):
@@ -179,6 +229,7 @@ const App = (fps) =>
         });
     }
 
+
     /*
      * loadRefAnimation(urlRef):
      *
@@ -196,18 +247,33 @@ const App = (fps) =>
         }
     }
 
+
+    /*
+     * loadTestAnimation(animation):
+     *
+     * param animation - index for test model array.
+     *
+     * Returns a function that creates a model from the data held in the test
+     * model array at the specified index.
+     */
     function loadTestAnimation(animation) {
         return () => {
             createModel(testModels[animation]);
         }
     }
 
-    function handleFileSelect(evt) {
 
-        // Chrome's default behavior is to open a new tab
+    /*
+     * handleFileSelect(evt):
+     *
+     * param evt - Javascript event
+     *
+     * Callback function for the Javascript 'drop' event used to handle a file
+     * being dropped within the area of the visualizer.
+     */
+    function handleFileSelect(evt) {
         evt.preventDefault();
 
-        // initialize loading
         initLoading();
 
         let files = evt.dataTransfer.files; // FileList object.
@@ -218,50 +284,79 @@ const App = (fps) =>
         });
     }
 
+
+    /*
+     * handleDragOver(evt):
+     *
+     * param evt - Javascript event
+     *
+     * ...
+     */
     function handleDragOver(evt) {
         evt.preventDefault();
         evt.dataTransfer.dropEffect = 'copy'; // Explicitly show this is a copy.
     }
 
-    function update(elapsed) {
-        for (const model of models) {
 
-            let current = clock.getElapsedTime(),
-                offset  = current - model.start,
-                frame;
+    /*
+     * update():
+     *
+     * ...
+     */
+    function update() {
 
+        let delta = clock.getDelta() * playbackSpeed;
 
-            if (offset >= model.start && offset <= model.stop) {
-                frame = Math.round(offset / model.step);
-            }
-            else if (offset < model.start) {
-                frame = 1;
-            }
-            else if (offset > model.stop) {
-                frame = Math.round((offset % model.stop) / model.step);
-            }
+        if (isPlaying) {
+            currentTime += delta;
+        }
 
-            for (const group of model.model.children) {
-                group.position.set(model.frames[frame][group.name].position[0],
-                                   model.frames[frame][group.name].position[1],
-                                   model.frames[frame][group.name].position[2]
-                );
-                group.quaternion.set(model.frames[frame][group.name].quaternion[0],
-                                     model.frames[frame][group.name].quaternion[1],
-                                     model.frames[frame][group.name].quaternion[2],
-                                     model.frames[frame][group.name].quaternion[3]
-                );
-            }
+        if (animation != null) {
+            updateModel();
         }
     }
 
+
+    /*
+     * updateModel():
+     *
+     * ...
+     */
+    function updateModel() {
+
+        let frame = Math.round((currentTime % animation.stop) / animation.step);
+
+        for (const group of animation.model.children) {
+            group.position.set(animation.frames[frame][group.name].position[0],
+                animation.frames[frame][group.name].position[1],
+                animation.frames[frame][group.name].position[2]
+            );
+            group.quaternion.set(animation.frames[frame][group.name].quaternion[0],
+                animation.frames[frame][group.name].quaternion[1],
+                animation.frames[frame][group.name].quaternion[2],
+                animation.frames[frame][group.name].quaternion[3]
+            );
+        }
+    }
+
+
+    /*
+     * render():
+     *
+     * ...
+     */
     function render() {
         renderer.render( scene, camera );
     }
 
 
-    /*
-     * play:
+    ////////////////////////////////////////////////////
+    //              Visualizer Methods                //
+    ////////////////////////////////////////////////////
+
+    /**
+     * play():
+     *
      * Begin or resume the animation
      */
     const play = function() {
@@ -270,7 +365,8 @@ const App = (fps) =>
 
 
     /*
-     * pause:
+     * pause():
+     *
      * Halt the animation at current position
      */
     const pause = function() {
@@ -279,23 +375,21 @@ const App = (fps) =>
 
 
     /*
-     * setTime:
+     * setTime():
      *
      * param timeVal - The position in the animation to play from
      *
      * Move the animation to the frame specified by the param timeVal
      */
     const setTime = function(timeVal) {
-        //...
+        currentTime = timeVal;
     };
 
 
     /*
-     * setSpeed:
+     * setSpeed(speedVal):
      *
-     * param speedVal - Value for playback speed. Negative numbers correspond to
-     * a negative playback speed. Positive numbers correspond to a forwards
-     * playback
+     * param speedVal - Multiplier for playback speed
      *
      * Set the speed and direction of the animation
      */
