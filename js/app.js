@@ -303,7 +303,14 @@ const App = (fps) =>
         playbackSpeed = speedVal;
     }
 
+    //Model Controls
+    var modelControls = document.getElementById('menu');
 
+    modelControls.onclick = function(){
+      this.classList.toggle('active');
+      var displayMenu = getElementById('model-controls');
+      displayMenu.style.display = displayMenu.style.display === 'none' ? '' : 'none';
+    }
     // Constructed application object
     return {
         init,

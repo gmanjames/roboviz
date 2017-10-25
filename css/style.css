@@ -2,6 +2,32 @@
  * style rules for roboviz
  */
 
+button#menu {
+  position: absolute;
+  left: 0px;
+  top: 0px;
+  z-index: 1;
+  height: 100vh;
+  //cursor: pointer;
+}
+
+.model-controls {
+  //display: none;
+}
+
+button#menu.active, button#menu:hover {
+  background-color: #ccc;
+  cursor: pointer;
+}
+
+div#model-controls.active {
+  display: block;
+  position: absolute;
+  top: 0px;
+  left: 30px;
+  z-index: 1;
+}
+
 body {
     margin: 0;
     font-size: 16px;

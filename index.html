@@ -6,29 +6,30 @@
         <link type="text/css" rel="stylesheet" href="css/style.css" />
     </head>
     <body id='drop_zone'>
+      <button id='menu'>Model Controls</button>
       <div class='model-controls'>
-        <div id='inner'>
-          <div>
-            <select>
-              <option value="model-name">model name</option>
-            </select>
-          </div>
-          <div>
-            <select>
-              <option value="group-name">group name</option>
-            </select>
-          </div>
-          <div>
-            <form action="">
-              <input type="radio" name="color" value="red">Red
-              <input type="radio" name="color" value="green">Green
-              <input type="radio" name="color" value="blue">Blue<br>
-              <input type="checkbox" name="transparent">Transparent<br><br>
-              <input type="radio" name="texture">T1
-              <input type="radio" name="texture">T2
-              <input type="radio" name="texture">T3
-            </form>
-          </div>
+        <div>
+          <select>
+            <option value="model-name">model name</option>
+          </select>
+        </div>
+        <br>
+        <div>
+          <select>
+            <option value="group-name">group name</option>
+          </select>
+        </div>
+        <div>
+          <form action="">
+            <br><span>Color: </span><br>
+            <input type="radio" name="color" value="red">Red
+            <input type="radio" name="color" value="green">Green
+            <input type="radio" name="color" value="blue">Blue<br><br>
+            <input type="checkbox" name="transparent">Transparent<br><br>
+            <input type="radio" name="texture">T1
+            <input type="radio" name="texture">T2
+            <input type="radio" name="texture">T3
+          </form>
         </div>
       </div>
 
