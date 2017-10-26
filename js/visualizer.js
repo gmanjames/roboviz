@@ -26,6 +26,11 @@ const Visualizer = (fps) =>
     const dropZone = document.getElementById('dropZone');
 
     /*
+     * Texture Loader for loading new textures.
+     */
+    const textureLoader = new THREE.TextureLoader();
+
+    /*
      * Desired time interval between frames.
      */
     const interval = 1000 / fps;
@@ -131,7 +136,7 @@ const Visualizer = (fps) =>
             start  = data.start,
             stop   = data.stop;
 
-        let texture = new THREE.ImageUtils.loadTexture("assets/images/matrix.png");
+        let texture = textureLoader.load("assets/images/matrix.png");
 
         for (let group of data.groups) {
             let comp = new THREE.Group(), // composite group to which we add objects
