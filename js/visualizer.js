@@ -23,7 +23,7 @@ const Visualizer = (fps) =>
     /*
      * The area inside of which a log-file can be dropped to be uploaded.
      */
-    const dropZone = document.getElementById('drop_zone');
+    const dropZone = document.getElementById('dropZone');
 
     /*
      * Desired time interval between frames.
@@ -48,12 +48,17 @@ const Visualizer = (fps) =>
      /*
       * Current time of the animation.
       */
-     let currentTime = 0;
+    let currentTime = 0;
+
+    /*
+     *
+     */
+    let controls;
 
      /*
      * Global list to hold all currently loaded animations.
      */
-     let animation;
+    let animation;
 
 
     ////////////////////////////////////////////////////
@@ -73,6 +78,7 @@ const Visualizer = (fps) =>
         camera.position.set(600, 600, 1000);
         camera.lookAt(new THREE.Vector3(0,0,0));
 
+        controls = new THREE.OrbitControls(camera, renderer.domElement);
         // Directional light to enhance shadow.
         let defaultLight = new THREE.DirectionalLight(0xffffff);
         defaultLight.position.set(0, 1000, 0);
