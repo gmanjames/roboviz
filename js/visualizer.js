@@ -131,8 +131,8 @@ const Visualizer = (fps) =>
             start  = data.start,
             stop   = data.stop;
 
-		let texture = new THREE.ImageUtils.loadTexture("assets/images/matrix.png");
-		
+        let texture = new THREE.ImageUtils.loadTexture("assets/images/matrix.png");
+
         for (let group of data.groups) {
             let comp = new THREE.Group(), // composite group to which we add objects
                 geometry,
@@ -160,8 +160,8 @@ const Visualizer = (fps) =>
                     geometry = new THREE.SphereBufferGeometry(obj.diameter, 32, 32);
                     material = new THREE.MeshLambertMaterial( { color: parseInt(obj.color), map: texture, overdraw: 0.5 } );
                 }
-				
-				material.transparent = true;
+
+                material.transparent = true;
                 let mesh = new THREE.Mesh(geometry, material);
                 comp.add(mesh);
             }
@@ -405,66 +405,66 @@ const Visualizer = (fps) =>
     const setSpeed = function(speedVal) {
         playbackSpeed = speedVal;
     }
-	
-	/*
-	* param modelName - String of the model name to have it's color changed
-	* param color - String of the color to be changed in Hexadecimal
-	*
-	* Change the color of a specific model
-	*/
-	const changeColor = function(modelName, color) {
-		let singleModel = models[0]["model"]["children"];
-		for(let i =0;i < singleModel.length; i++){
-			if(singleModel[i].name==modelName){
-				singleModel[i]["children"][0].material.color.setHex(color);
-			}	
-		}
-	}
-	
-	/*
-	* param modelName - String of the model name to have it's color changed
-	* param texture - String of the texture to be applied
-	*
-	* Change the texture of a specific model
-	*/
-	const changeTexture = function(modelName, texturePath) {
-		console.log(models);
-		let loader = new THREE.TextureLoader();
-		let texture = loader.load( 'assets/images/matrix.png', function ( texture ) {
-			console.log("loaded");
-			texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
-			texture.offset.set( 0.0, 1.0 );
-			texture.repeat.set( 4, 4 );
-			
-			let singleModel = models[0]["model"]["children"];
-			for(let i =0;i < singleModel.length; i++){
-				if(singleModel[i].name==modelName){
-					console.log(singleModel[i]);
-					singleModel[i]["children"][0].material.map = texture;
-					singleModel[i]["children"][0].material.map.needsUpdate = true;
-					singleModel[i]["children"][0].geometry.buffersNeedUpdate = true;
-					singleModel[i]["children"][0].geometry.uvsNeedUpdate = true;
-				}	
-			}
-			texture.needsUpdate = true;
-		} );
-		render();
-	}
-	
-	/*
-	* param modelName - String of the model name to have it's transparency changed
-	* param transparency - Floating point number between 0 and 1 that scales the opacity
-	* 
-	* Change the transparency of the model
-	*/
-	const changeTransparency = function(modelName, transparency) {
-		let singleModel = models[0]["model"]["children"];
-		for(let i =0;i < singleModel.length; i++){
-			if(singleModel[i].name==modelName){
-				singleModel[i]["children"][0].material.opacity = transparency;
-			}	
-		}
-	}
+
+    /*
+     * param modelName - String of the model name to have it's color changed
+     * param color - String of the color to be changed in Hexadecimal
+     *
+     * Change the color of a specific model
+     */
+    const changeColor = function(modelName, color) {
+        let singleModel = models[0]["model"]["children"];
+        for(let i =0;i < singleModel.length; i++){
+            if(singleModel[i].name==modelName){
+            singleModel[i]["children"][0].material.color.setHex(color);
+            }
+        }
+    }
+
+    /*
+     * param modelName - String of the model name to have it's color changed
+     * param texture - String of the texture to be applied
+     *
+     * Change the texture of a specific model
+     */
+    const changeTexture = function(modelName, texturePath) {
+        console.log(models);
+        let loader = new THREE.TextureLoader();
+        let texture = loader.load( 'assets/images/matrix.png', function ( texture ) {
+            console.log("loaded");
+            texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
+            texture.offset.set( 0.0, 1.0 );
+            texture.repeat.set( 4, 4 );
+
+            let singleModel = models[0]["model"]["children"];
+            for(let i =0;i < singleModel.length; i++){
+                if(singleModel[i].name==modelName){
+                    console.log(singleModel[i]);
+                    singleModel[i]["children"][0].material.map = texture;
+                    singleModel[i]["children"][0].material.map.needsUpdate = true;
+                    singleModel[i]["children"][0].geometry.buffersNeedUpdate = true;
+                    singleModel[i]["children"][0].geometry.uvsNeedUpdate = true;
+                }
+            }
+            texture.needsUpdate = true;
+        } );
+        render();
+    }
+
+    /*
+     * param modelName - String of the model name to have it's transparency changed
+     * param transparency - Floating point number between 0 and 1 that scales the opacity
+     *
+     * Change the transparency of the model
+     */
+    const changeTransparency = function(modelName, transparency) {
+        let singleModel = models[0]["model"]["children"];
+        for(let i =0;i < singleModel.length; i++){
+            if(singleModel[i].name==modelName){
+                singleModel[i]["children"][0].material.opacity = transparency;
+            }
+        }
+    }
 
 
     // Constructed application object
@@ -474,8 +474,8 @@ const Visualizer = (fps) =>
         pause,
         setTime,
         setSpeed,
-		changeColor,
-		changeTexture,
-		changeTransparency
+        changeColor,
+        changeTexture,
+        changeTransparency
     }
 };
