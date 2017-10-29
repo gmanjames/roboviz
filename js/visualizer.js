@@ -177,8 +177,8 @@ const Visualizer = (fps) =>
                 model.add(comp);
             }
 
-            scene.add(model);
-            animation = {model, step, start, stop, frames};
+          scene.add(model);
+          animation = {model, step, start, stop, frames};
     }
 
 
