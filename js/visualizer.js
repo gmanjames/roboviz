@@ -26,6 +26,11 @@ const Visualizer = (fps) =>
     const dropZone = document.getElementById('dropZone');
 
     /*
+     * Texture Loader for loading new textures.
+     */
+    const textureLoader = new THREE.TextureLoader();
+
+    /*
      * Desired time interval between frames.
      */
     const interval = 1000 / fps;
@@ -59,6 +64,11 @@ const Visualizer = (fps) =>
      * Global list to hold all currently loaded animations.
      */
     let animation;
+
+    /*
+     * Currently loaded texture.
+     */
+    let texture;
 
 
     ////////////////////////////////////////////////////
@@ -131,46 +141,44 @@ const Visualizer = (fps) =>
             start  = data.start,
             stop   = data.stop;
 
-        let texture = new THREE.ImageUtils.loadTexture("assets/images/matrix.png");
+            for (let group of data.groups) {
+                let comp = new THREE.Group(), // composite group to which we add objects
+                    geometry,
+                    material;
 
-        for (let group of data.groups) {
-            let comp = new THREE.Group(), // composite group to which we add objects
-                geometry,
-                material;
+                comp.name = group.name;
 
-            comp.name = group.name;
+                for (let obj of group.objs) {
+                    if (obj.type === "box") {
+                        geometry = new THREE.BoxBufferGeometry(obj.scale[0], obj.scale[1], obj.scale[2]);
+                        material = new THREE.MeshLambertMaterial( { color: parseInt(obj.color), overdraw: 0.5 } );
+                    }
+                    else if (obj.type === "cylinder") {
+                        geometry = new THREE.CylinderBufferGeometry(obj.scale[0], obj.scale[1], obj.scale[2], 32, 32);
+                        material = new THREE.MeshLambertMaterial( { color: parseInt(obj.color), overdraw: 0.5 } );
+                    }
+                    else if (obj.type === "ellipsoid") {
+                        geometry = new THREE.SphereBufferGeometry(obj.scale[0] * 0.5, 32, 32);
+                        material = new THREE.MeshLambertMaterial( { color: parseInt(obj.color), overdraw: 0.5 } );
+                        let matrix = new THREE.Matrix4();
+                        matrix.makeScale(1.0, obj.scale[1] / obj.scale[0], obj.scale[2] / obj.scale[0]);
+                        geometry.applyMatrix(matrix);
+                    }
+                    else if (obj.type === "sphere") {
+                        geometry = new THREE.SphereBufferGeometry(obj.diameter, 32, 32);
+                        material = new THREE.MeshLambertMaterial( { color: parseInt(obj.color),  overdraw: 0.5 } );
+                    }
 
-            for (let obj of group.objs) {
-                if (obj.type === "box") {
-                    geometry = new THREE.BoxBufferGeometry(obj.scale[0], obj.scale[1], obj.scale[2]);
-                    material = new THREE.MeshLambertMaterial( { color: parseInt(obj.color), map: texture, overdraw: 0.5 } );
-                }
-                else if (obj.type === "cylinder") {
-                    geometry = new THREE.CylinderBufferGeometry(obj.scale[0], obj.scale[1], obj.scale[2], 32, 32);
-                    material = new THREE.MeshLambertMaterial( { color: parseInt(obj.color), map: texture, overdraw: 0.5 } );
-                }
-                else if (obj.type === "ellipsoid") {
-                    geometry = new THREE.SphereBufferGeometry(obj.scale[0] * 0.5, 32, 32);
-                    material = new THREE.MeshLambertMaterial( { color: parseInt(obj.color), map: texture, overdraw: 0.5 } );
-                    let matrix = new THREE.Matrix4();
-                    matrix.makeScale(1.0, obj.scale[1] / obj.scale[0], obj.scale[2] / obj.scale[0]);
-                    geometry.applyMatrix(matrix);
-                }
-                else if (obj.type === "sphere") {
-                    geometry = new THREE.SphereBufferGeometry(obj.diameter, 32, 32);
-                    material = new THREE.MeshLambertMaterial( { color: parseInt(obj.color), map: texture, overdraw: 0.5 } );
+                    material.transparent = true;
+                    let mesh = new THREE.Mesh(geometry, material);
+                    comp.add(mesh);
                 }
 
-                material.transparent = true;
-                let mesh = new THREE.Mesh(geometry, material);
-                comp.add(mesh);
+                model.add(comp);
             }
 
-            model.add(comp);
-        }
-
-        scene.add(model);
-        animation = {model, step, start, stop, frames};
+            scene.add(model);
+            animation = {model, step, start, stop, frames};
     }
 
 
@@ -406,50 +414,52 @@ const Visualizer = (fps) =>
         playbackSpeed = speedVal;
     }
 
+
     /*
      * param modelName - String of the model name to have it's color changed
      * param color - String of the color to be changed in Hexadecimal
      *
-     * Change the color of a specific model
+     * Creates a new material in order to apply the new color
      */
     const changeColor = function(modelName, color) {
-        let singleModel = models[0]["model"]["children"];
-        for(let i =0;i < singleModel.length; i++){
-            if(singleModel[i].name==modelName){
-            singleModel[i]["children"][0].material.color.setHex(color);
+        for (const group of animation.model.children) {
+            if(group.name==modelName) {
+                const oldTransparency = group.children[0].material.opacity;
+                let newMaterial = new THREE.MeshLambertMaterial( { color: color, overdraw: 0.5 } );
+                group.children[0].material = newMaterial;
+                group.children[0].material.transparent = true;
+                group.children[0].material.opacity = oldTransparency;
             }
         }
     }
+
 
     /*
      * param modelName - String of the model name to have it's color changed
      * param texture - String of the texture to be applied
      *
-     * Change the texture of a specific model
+     * Creates a new material in order to apply the new texture using a path to the texture
      */
     const changeTexture = function(modelName, texturePath) {
-        console.log(models);
-        let loader = new THREE.TextureLoader();
-        let texture = loader.load( 'assets/images/matrix.png', function ( texture ) {
-            console.log("loaded");
-            texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
-            texture.offset.set( 0.0, 1.0 );
-            texture.repeat.set( 4, 4 );
-
-            let singleModel = models[0]["model"]["children"];
-            for(let i =0;i < singleModel.length; i++){
-                if(singleModel[i].name==modelName){
-                    console.log(singleModel[i]);
-                    singleModel[i]["children"][0].material.map = texture;
-                    singleModel[i]["children"][0].material.map.needsUpdate = true;
-                    singleModel[i]["children"][0].geometry.buffersNeedUpdate = true;
-                    singleModel[i]["children"][0].geometry.uvsNeedUpdate = true;
+        texture = textureLoader.load(texturePath, function( newTexture ) {
+            let newMaterial = new THREE.MeshLambertMaterial( { map: newTexture, overdraw: 0.5 } );
+            for (const group of animation.model.children) {
+                if(group.name==modelName) {
+                    const oldTransparency = group.children[0].material.opacity;
+                    group.children[0].material = newMaterial;
+                    group.children[0].material.transparent = true;
+                    group.children[0].material.opacity = oldTransparency;
                 }
             }
-            texture.needsUpdate = true;
-        } );
-        render();
+        },
+        function (xhr) {
+          console.log( (xhr.loaded / xhr.total * 100) + '% loaded' );
+        },
+        function (error) {
+          console.log( 'An error happened' );
+        });
     }
+
 
     /*
      * param modelName - String of the model name to have it's transparency changed
@@ -458,10 +468,9 @@ const Visualizer = (fps) =>
      * Change the transparency of the model
      */
     const changeTransparency = function(modelName, transparency) {
-        let singleModel = models[0]["model"]["children"];
-        for(let i =0;i < singleModel.length; i++){
-            if(singleModel[i].name==modelName){
-                singleModel[i]["children"][0].material.opacity = transparency;
+        for (const group of animation.model.children) {
+            if(group.name==modelName) {
+                group.children[0].material.opacity = transparency;
             }
         }
     }
