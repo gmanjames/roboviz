@@ -83,6 +83,21 @@ body * {
  * Playback Controls
  */
 
+#speedControls {
+    /*border: 1px solid red;*/
+}
+
+#speedOutput {
+    position: relative;
+    display: inline-block;
+    /*border: 1px solid blue;*/
+    /*text-align: center;*/
+    height: 20px;
+    width: 30px;
+    left: -86px;
+    bottom: -15px;
+}
+
  .playback-controls {
      position: absolute;
      bottom: 0;
