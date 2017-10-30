@@ -95,7 +95,6 @@ const Controls = (modelCtrls, playbackCtrls) =>
      * ...
      */
     function updateControls(modelInfo) {
-        console.log(playbackTime);
         playbackTime.min  = modelInfo.start;
         playbackTime.max  = modelInfo.stop;
         playbackTime.step = modelInfo.step;

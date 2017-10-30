@@ -237,7 +237,6 @@ const Visualizer = (fps) =>
         }
 
         let frame = Math.round((currentTime % animation.stop) / animation.step);
-        console.log(currentTime);
 
         for (const group of animation.model.children) {
             group.position.set(animation.frames[frame][group.name].position[0],
@@ -299,15 +298,6 @@ const Visualizer = (fps) =>
 
 
     /*
-     * animationData:
-     *
-     * ...
-     */
-    const animationData = function() {
-
-    }
-
-    /*
      * play:
      *
      * Begin or resume the animation
@@ -328,7 +318,7 @@ const Visualizer = (fps) =>
 
 
     /*
-     * setTime():
+     * setTime:
      *
      * param timeVal - The position in the animation to play from
      *
@@ -340,7 +330,7 @@ const Visualizer = (fps) =>
 
 
     /*
-     * setSpeed(speedVal):
+     * setSpeed:
      *
      * param speedVal - Multiplier for playback speed
      *
@@ -352,6 +342,8 @@ const Visualizer = (fps) =>
 
 
     /*
+     * changeColor:
+     *
      * param modelName - String of the model name to have it's color changed
      * param color - String of the color to be changed in Hexadecimal
      *
@@ -371,6 +363,8 @@ const Visualizer = (fps) =>
 
 
     /*
+     * changeTexture:
+     *
      * param modelName - String of the model name to have it's color changed
      * param texture - String of the texture to be applied
      *
@@ -398,6 +392,8 @@ const Visualizer = (fps) =>
 
 
     /*
+     * changeTransparency:
+     *
      * param modelName - String of the model name to have it's transparency changed
      * param transparency - Floating point number between 0 and 1 that scales the opacity
      *
@@ -419,7 +415,7 @@ const Visualizer = (fps) =>
         play,
         pause,
         setSpeed,
-        setTime
+        setTime,
         changeColor,
         changeTexture,
         changeTransparency
