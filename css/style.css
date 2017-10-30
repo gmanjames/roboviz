@@ -32,6 +32,7 @@ body {
     margin: 0;
     font-size: 16px;
     overflow: hidden;
+    font-family: sans-serif;
 }
 
 body * {
@@ -55,8 +56,8 @@ body * {
     height: 100%;
     position: absolute;
     left: 0;
-    padding: 32px 32px 64px 16px;
-    border: 1px solid black;
+    padding: 32px 64px 64px 16px;
+    border-right: 1px solid black;
 }
 
 .model-controls[data-state="expanded"] {
@@ -78,6 +79,66 @@ body * {
     padding: 16px 0;
     text-align: center;
 }
+
+select[for="model-group"] {
+    margin-bottom: 8px;
+}
+
+.control {
+    padding: 8px;
+    border-radius: 3px;
+    border: 1px solid hsl(0, 0%, 70%);
+    margin-bottom: 24px;
+}
+
+.control > h4 {
+    margin-top: 0;
+}
+
+.colors {
+    margin-bottom: 24px;
+}
+
+.colors a {
+    text-decoration: none;
+    color: hsl(0, 0%, 70%);
+    margin-right: 16px;
+    vertical-align: middle;
+    transition: color 0.2s ease-out;
+}
+
+.colors a:hover {
+    color: hsl(0, 0%, 0%);
+}
+
+.colors a:after {
+    content: "";
+    margin-left: 8px;
+    display: inline-block;
+    width: 24px;
+    height: 24px;
+}
+
+.colors a[data-color="0xff0000"]:after {
+    background-color: #ff0000;
+    border: 1px solid black;
+}
+
+.colors a[data-color="0x0000ff"]:after {
+    background-color: #0000ff;
+    border: 1px solid black;
+}
+
+.colors a[data-color="0x00ff00"]:after {
+    background-color: #00ff00;
+    border: 1px solid black;
+}
+
+.colors a[data-color="0xffff00"]:after {
+    background-color: #ffff00;
+    border: 1px solid black;
+}
+
 
 /*
  * Playback Controls
@@ -102,7 +163,7 @@ body * {
      position: absolute;
      bottom: 0;
      width: 100%;
-     border: 1px solid black;
+     border-top: 1px solid black;
      padding: 16px 0;
      text-align: center;
  }
@@ -118,9 +179,34 @@ body * {
 }
 
 .playback-controls > button[data-toggle="play"]:after {
-    content: "PLAY";
+    content: "PAUSE";
  }
 
  .playback-controls > button[data-toggle="pause"]:after {
-     content: "PAUSE";
+     content: "PLAY";
+ }
+
+ .range-with-label {
+     display: inline-block;
+ }
+
+ .range-with-label .value {
+     margin: 0 auto;
+     margin-bottom: 8px;
+     width: 48px;
+     height: 32px;
+     border: 1px solid hsl(0, 0%, 80%);
+     border-radius: 3px;
+     vertical-align: middle;
+ }
+
+.range-with-label label {
+    min-width: 16px;
+}
+ .range-with-label .right-label {
+     float: right;
+ }
+
+ .range-with-label .left-label {
+     float: left;
  }

@@ -6,28 +6,32 @@
         <link type="text/css" rel="stylesheet" href="css/style.css" />
     </head>
     <body id='dropZone'>
-        <div id="model1Ctrls" class='model-controls' data-state="collapsed">
-            <span class="toggle" for="model-controls">0</span>
-            <h4 class="model-title">FISH</h4>
-            <select id="model1GroupName">
+        <div id="modelCtrls" class='model-controls' data-state="expanded">
+            <span class="toggle" for="model-controls">&#9776</span>
+            <h3 class="model-title">Select a model and group</h4>
+            <select for="model" id="modelName">
+                <option value="1">group name</option>
+                <option value="2">group name</option>
+            </select>
+            <select for="model-group" id="groupName">
                 <option value="1">group name</option>
                 <option value="2">group name</option>
                 <option value="3">group name</option>
             </select>
-            <div class="control-color">
-                <h5>colors:</h5>
+            <div class="control control-color">
+                <h4>colors:</h4>
                 <div class="colors">
                     <!-- TOOD: consider a slider for hue, sat., val., etc. -->
-                    <a href="#" data-color="red">red</a>
-                    <a href="#" data-color="blue">blue</a>
-                    <a href="#" data-color="green">green</a>
-                    <a href="#" data-color="yellow">yellow</a>
-                    <label for="hex">hex:</label>
-                    <input id="model1HexVal" name="hex" type="text" />
+                    <a href="#" data-color="0xff0000">red</a>
+                    <a href="#" data-color="0x0000ff">blue</a>
+                    <a href="#" data-color="0x00ff00">green</a>
+                    <a href="#" data-color="0xffff00">yellow</a>
                 </div>
+                <label for="hex">hex:</label>
+                <input id="model1HexVal" name="hex" type="text" />
             </div>
-            <div class="control-texture">
-                <h5>textures:</h5>
+            <div class="control control-texture">
+                <h4>textures:</h4>
                 <div class="textures">
                     <a href="#" data-texture="/images/texture1.png"></a>
                     <a href="#" data-texture="/images/texture2.png"></a>
@@ -35,132 +39,46 @@
                 </div>
             </div>
             <div class="control-transparency">
-                <input type="range" list="model1Transparency">
-                <datalist id="model1Transparency">
-                    <option value="0">
-                    <option value="10">
-                    <option value="20">
-                    <option value="30">
-                    <option value="40">
-                    <option value="50">
-                    <option value="60">
-                    <option value="70">
-                    <option value="80">
-                    <option value="90">
-                    <option value="100">
-                </datalist>
+                <h4>transparency:</h4>
+                <input type="range" list="modelTransparency" min="0" max="1" step="0.1">
             </div>
         </div>
 
         <div class='logfile-controls'>
         </div>
 
-        <div class='playback-controls'>
-            <span id='speedControls'>
-                <input type="range" step=".5" min="-5" max="5"
-                list="model1Speed" id="speedRange" value="1">
-                <datalist id="model1Speed">
-                    <option value="-5">
-                    <!-- <option value="-4.5"> -->
-                    <option value="-4">
-                    <!-- <option value="-3.5"> -->
-                    <option value="-3">
-                    <!-- <option value="-2.5"> -->
-                    <option value="-2">
-                    <!-- <option value="-1.5"> -->
-                    <option value="-1">
-                    <!-- <option value="-.5"> -->
-                    <option value="0">
-                    <!-- <option value=".5"> -->
-                    <option value="1">
-                    <!-- <option value="1.5"> -->
-                    <option value="2">
-                    <!-- <option value="2.5"> -->
-                    <option value="3">
-                    <!-- <option value="3.5"> -->
-                    <option value="4">
-                    <!-- <option value="4.5"> -->
-                    <option value="5">
-                </datalist>
-            </span>
-            <span id="speedOutput"></span>
-            <button id="model1PlayPause" data-toggle="play"></button>
-            <input type="range" list="model1Time">
-            <datalist id="model1Time">
-                <option value="0">
-                <option value="10">
-                <option value="20">
-                <option value="30">
-                <option value="40">
-                <option value="50">
-                <option value="60">
-                <option value="70">
-                <option value="80">
-                <option value="90">
-                <option value="100">
-            </datalist>
+        <div id="playbackCtrls" class='playback-controls'>
+            <div class="range-with-label">
+                <div id="modelSpeedVal" class="value"></div>
+                <input id="modelSpeed" type="range" min="-4" max="4" step="0.25">
+                <label class="right-label">-4</label>
+                <label class="left-label">4</label>
+            </div>
+            <button id="playPauseBtn" data-toggle="play"></button>
+            <div class="range-with-label">
+                <div id="modelTimeVal" class="value"></div>
+                <input id="modelTime" type="range">
+                <label class="right-label">--</label>
+                <label class="left-label">--</label>
+            </div>
         </div>
 
         <!-- js -->
         <script src="vendor/three.js"></script>
         <script src="data/models.js"></script>
         <script src="js/OrbitControls.js"></script>
+        <script src="js/controls.js"></script>
         <script src="js/visualizer.js"></script>
         <script>
-            const fps = 60,
-                  visualizer = Visualizer(fps),
-                  modelCtrls = document.getElementById('model1Ctrls'),
-                  toggle = document.querySelector(".toggle[for='model-controls']"),
-                  playPauseBtn = document.getElementById('model1PlayPause');
 
-            // Initialize the application
-            visualizer.init();
 
-            //
-            // Speed Contols
-            //
+            const playbackCtrls = document.getElementById('playbackCtrls');
+            const modelCtrls = document.getElementById('modelCtrls');
+            const controls = Controls(modelCtrls, playbackCtrls);
 
-            let speed = document.getElementById('speedRange'),
-            speedInput = document.getElementById('speedOutput');
+            controls.init();
 
-            //Initialize output of current speed
-            speedInput.innerHTML = speed.value;
-            visualizer.setSpeed(speed.value);
 
-            //Update output of current speed
-            speed.addEventListener("input", function() {
-                let curSpeed = speed.value;
-                speedInput.innerHTML = curSpeed;
-                visualizer.setSpeed(curSpeed);
-            }, false);
-
-            //
-            // Set up some event listeners for testing
-            //
-
-            // Model controls menu
-            toggle.addEventListener('click', (evt) => {
-                const state = modelCtrls.dataset.state;
-                if (state === "collapsed") {
-                    modelCtrls.dataset.state = "expanded";
-                }
-                else {
-                    modelCtrls.dataset.state = "collapsed";
-                }
-            });
-
-            // Play/pause button
-            playPauseBtn.addEventListener('click', (evt) => {
-                const state = evt.target.dataset.toggle;
-                if (state === "play") {
-                    visualizer.pause();
-                    evt.target.dataset.toggle = "pause";
-                }
-                else {
-                    visualizer.play();
-                    evt.target.dataset.toggle = "play";
-                }
-            });
 
 
         </script>
