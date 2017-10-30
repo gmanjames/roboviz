@@ -144,3 +144,28 @@ select[for="model-group"] {
  .playback-controls > button[data-toggle="pause"]:after {
      content: "PLAY";
  }
+
+ .range-with-label {
+     display: inline-block;
+ }
+
+ .range-with-label .value {
+     margin: 0 auto;
+     margin-bottom: 8px;
+     width: 48px;
+     height: 32px;
+     border: 1px solid hsl(0, 0%, 80%);
+     border-radius: 3px;
+     vertical-align: middle;
+ }
+
+.range-with-label label {
+    min-width: 16px;
+}
+ .range-with-label .right-label {
+     float: right;
+ }
+
+ .range-with-label .left-label {
+     float: left;
+ }
