@@ -21,6 +21,16 @@ const Visualizer = (fps) =>
     const renderer = new THREE.WebGLRenderer({antialias: true, alpha: true});
 
     /*
+     * The area inside of which a log-file can be dropped to be uploaded.
+     */
+    const dropZone = document.getElementById('dropZone');
+
+    /*
+     * Texture Loader for loading new textures.
+     */
+    const textureLoader = new THREE.TextureLoader();
+
+    /*
      * Desired time interval between frames.
      */
     const interval = 1000 / fps;
@@ -55,6 +65,11 @@ const Visualizer = (fps) =>
      */
     let animation;
 
+    /*
+     * Currently loaded texture.
+     */
+    let texture;
+
 
     ////////////////////////////////////////////////////
     //              Application Logic                 //
@@ -86,8 +101,6 @@ const Visualizer = (fps) =>
         // Enter animation loop.
         animationLoop();
 
-
-
         // Add event listener necessary for canvas resize.
         window.addEventListener('resize', (evt) => {
             const width  = evt.target.innerWidth,
@@ -112,40 +125,41 @@ const Visualizer = (fps) =>
             start  = data.start,
             stop   = data.stop;
 
-        for (let group of data.groups) {
-            let comp = new THREE.Group(), // composite group to which we add objects
-                geometry,
-                material;
+            for (let group of data.groups) {
+                let comp = new THREE.Group(), // composite group to which we add objects
+                    geometry,
+                    material;
 
-            comp.name = group.name;
+                comp.name = group.name;
 
-            for (let obj of group.objs) {
-                if (obj.type === "box") {
-                    geometry = new THREE.BoxBufferGeometry(obj.scale[0], obj.scale[1], obj.scale[2]);
-                    material = new THREE.MeshLambertMaterial( { color: parseInt(obj.color), overdraw: 0.5 } );
-                }
-                else if (obj.type === "cylinder") {
-                    geometry = new THREE.CylinderBufferGeometry(obj.scale[0], obj.scale[1], obj.scale[2], 32, 32);
-                    material = new THREE.MeshLambertMaterial( { color: parseInt(obj.color), overdraw: 0.5 } );
-                }
-                else if (obj.type === "ellipsoid") {
-                    geometry = new THREE.SphereBufferGeometry(obj.scale[0] * 0.5, 32, 32);
-                    material = new THREE.MeshLambertMaterial( { color: parseInt(obj.color), overdraw: 0.5 } );
-                    let matrix = new THREE.Matrix4();
-                    matrix.makeScale(1.0, obj.scale[1] / obj.scale[0], obj.scale[2] / obj.scale[0]);
-                    geometry.applyMatrix(matrix);
-                }
-                else if (obj.type === "sphere") {
-                    geometry = new THREE.SphereBufferGeometry(obj.diameter, 32, 32);
-                    material = new THREE.MeshLambertMaterial( { color: parseInt(obj.color), overdraw: 0.5 } );
+                for (let obj of group.objs) {
+                    if (obj.type === "box") {
+                        geometry = new THREE.BoxBufferGeometry(obj.scale[0], obj.scale[1], obj.scale[2]);
+                        material = new THREE.MeshLambertMaterial( { color: parseInt(obj.color), overdraw: 0.5 } );
+                    }
+                    else if (obj.type === "cylinder") {
+                        geometry = new THREE.CylinderBufferGeometry(obj.scale[0], obj.scale[1], obj.scale[2], 32, 32);
+                        material = new THREE.MeshLambertMaterial( { color: parseInt(obj.color), overdraw: 0.5 } );
+                    }
+                    else if (obj.type === "ellipsoid") {
+                        geometry = new THREE.SphereBufferGeometry(obj.scale[0] * 0.5, 32, 32);
+                        material = new THREE.MeshLambertMaterial( { color: parseInt(obj.color), overdraw: 0.5 } );
+                        let matrix = new THREE.Matrix4();
+                        matrix.makeScale(1.0, obj.scale[1] / obj.scale[0], obj.scale[2] / obj.scale[0]);
+                        geometry.applyMatrix(matrix);
+                    }
+                    else if (obj.type === "sphere") {
+                        geometry = new THREE.SphereBufferGeometry(obj.diameter, 32, 32);
+                        material = new THREE.MeshLambertMaterial( { color: parseInt(obj.color),  overdraw: 0.5 } );
+                    }
+
+                    material.transparent = true;
+                    let mesh = new THREE.Mesh(geometry, material);
+                    comp.add(mesh);
                 }
 
-                let mesh = new THREE.Mesh(geometry, material);
-                comp.add(mesh);
+                model.add(comp);
             }
-
-            model.add(comp);
-        }
 
         scene.add(model);
         animation = {model, step, start, stop, frames};
@@ -337,14 +351,77 @@ const Visualizer = (fps) =>
     };
 
 
+    /*
+     * param modelName - String of the model name to have it's color changed
+     * param color - String of the color to be changed in Hexadecimal
+     *
+     * Creates a new material in order to apply the new color
+     */
+    const changeColor = function(modelName, color) {
+        for (const group of animation.model.children) {
+            if(group.name==modelName) {
+                const oldTransparency = group.children[0].material.opacity;
+                let newMaterial = new THREE.MeshLambertMaterial( { color: color, overdraw: 0.5 } );
+                group.children[0].material = newMaterial;
+                group.children[0].material.transparent = true;
+                group.children[0].material.opacity = oldTransparency;
+            }
+        }
+    }
+
+
+    /*
+     * param modelName - String of the model name to have it's color changed
+     * param texture - String of the texture to be applied
+     *
+     * Creates a new material in order to apply the new texture using a path to the texture
+     */
+    const changeTexture = function(modelName, texturePath) {
+        texture = textureLoader.load(texturePath, function( newTexture ) {
+            let newMaterial = new THREE.MeshLambertMaterial( { map: newTexture, overdraw: 0.5 } );
+            for (const group of animation.model.children) {
+                if(group.name==modelName) {
+                    const oldTransparency = group.children[0].material.opacity;
+                    group.children[0].material = newMaterial;
+                    group.children[0].material.transparent = true;
+                    group.children[0].material.opacity = oldTransparency;
+                }
+            }
+        },
+        function (xhr) {
+          console.log( (xhr.loaded / xhr.total * 100) + '% loaded' );
+        },
+        function (error) {
+          console.log( 'An error happened' );
+        });
+    }
+
+
+    /*
+     * param modelName - String of the model name to have it's transparency changed
+     * param transparency - Floating point number between 0 and 1 that scales the opacity
+     *
+     * Change the transparency of the model
+     */
+    const changeTransparency = function(modelName, transparency) {
+        for (const group of animation.model.children) {
+            if(group.name==modelName) {
+                group.children[0].material.opacity = transparency;
+            }
+        }
+    }
+
+
     // Constructed application object
     return {
         init,
         loadAnimation,
-        animationData,
-        pause,
         play,
+        pause,
         setSpeed,
         setTime
+        changeColor,
+        changeTexture,
+        changeTransparency
     };
 };
