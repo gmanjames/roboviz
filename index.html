@@ -33,14 +33,18 @@
             <div class="control control-texture">
                 <h4>textures:</h4>
                 <div class="textures">
-                    <a href="#" data-texture="/images/texture1.png"></a>
-                    <a href="#" data-texture="/images/texture2.png"></a>
-                    <a href="#" data-texture="/images/texture3.png"></a>
+                    <a href="#" data-texture="bricks">bricks<span class="sample"></span></a>
+                    <a href="#" data-texture="gray">gray<span class="sample"></span></a>
+                    <a href="#" data-texture="matrix">matrix<span class="sample"></span></a>
                 </div>
             </div>
             <div class="control-transparency">
                 <h4>transparency:</h4>
-                <input type="range" list="modelTransparency" min="0" max="1" step="0.1">
+                <div class="range-with-label">
+                    <input type="range" value="1" list="modelTransparency" min="0" max="1" step="0.1">
+                    <label class="right-label">1</label>
+                    <label class="left-label">0</label>
+                </div>
             </div>
         </div>
 
@@ -51,15 +55,15 @@
             <div class="range-with-label">
                 <div id="modelSpeedVal" class="value"></div>
                 <input id="modelSpeed" type="range" min="-4" max="4" step="0.25">
-                <label class="right-label">-4</label>
-                <label class="left-label">4</label>
+                <label class="right-label">4</label>
+                <label class="left-label">-4</label>
             </div>
             <button id="playPauseBtn" data-toggle="play"></button>
             <div class="range-with-label">
                 <div id="modelTimeVal" class="value"></div>
                 <input id="modelTime" type="range">
-                <label class="right-label">--</label>
-                <label class="left-label">--</label>
+                <label for="modelTime" class="right-label">--</label>
+                <label for="modelTime" class="left-label">--</label>
             </div>
         </div>
 
@@ -71,14 +75,24 @@
         <script src="js/visualizer.js"></script>
         <script>
 
+            // To start the application, we need to set up the controls.
+            // The 'Controls' function takes as arguments the areas containing
+            // the various inputs.
 
-            const playbackCtrls = document.getElementById('playbackCtrls');
-            const modelCtrls = document.getElementById('modelCtrls');
-            const controls = Controls(modelCtrls, playbackCtrls);
+            let playbackCtrls, modelCtrls, controls;
 
+            // Playback: play/pause, speed and time.
+            playbackCtrls = document.getElementById('playbackCtrls');
+
+            // Model controls: color and texture options, transparency.
+            modelCtrls = document.getElementById('modelCtrls');
+
+            // Initialize the controls by adding event listeners etc.
+            controls = Controls(modelCtrls, playbackCtrls);
             controls.init();
 
-
+            // Add to the global space
+            window['controls'] = controls;
 
 
         </script>
