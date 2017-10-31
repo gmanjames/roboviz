@@ -41,6 +41,11 @@ const Visualizer = (fps) =>
     const clock    = new THREE.Clock();
 
     /*
+     *
+     */
+    const controls = new THREE.OrbitControls(camera, renderer.domElement);
+
+    /*
      * Toggle between animation playing and paused states.
      */
     let isPlaying = true;
@@ -50,17 +55,12 @@ const Visualizer = (fps) =>
      */
     let playbackSpeed = 1;
 
-     /*
-      * Current time of the animation.
-      */
+    /*
+     * Current time of the animation.
+     */
     let currentTime = 0;
 
     /*
-     *
-     */
-    let controls;
-
-     /*
      * Global list to hold all currently loaded animations.
      */
     let animation;
@@ -88,7 +88,6 @@ const Visualizer = (fps) =>
         camera.position.set(600, 600, 1000);
         camera.lookAt(new THREE.Vector3(0,0,0));
 
-        controls = new THREE.OrbitControls(camera, renderer.domElement);
         // Directional light to enhance shadow.
         let defaultLight = new THREE.DirectionalLight(0xffffff);
         defaultLight.position.set(0, 1000, 0);
@@ -102,17 +101,6 @@ const Visualizer = (fps) =>
         // Enter animation loop.
         animationLoop();
 
-        // Check url for logfile referenece, or test model number.
-        const searchParams = new URLSearchParams(window.location.search);
-        if (searchParams.has('logref')) {
-            initLoading();
-            setTimeout(loadRefAnimation(searchParams.get('logref')), 2000);
-        }
-        else if (searchParams.has('test')) {
-            initLoading();
-            setTimeout(loadTestAnimation(parseInt(searchParams.get('test'))), 0);
-        }
-
         // Add event listener necessary for canvas resize.
         window.addEventListener('resize', (evt) => {
             const width  = evt.target.innerWidth,
@@ -121,10 +109,6 @@ const Visualizer = (fps) =>
             camera.aspect = width / height;
             camera.updateProjectionMatrix();
         });
-
-         // Setup the dnd listeners.
-         dropZone.addEventListener('dragover', handleDragOver, false);
-         dropZone.addEventListener('drop', handleFileSelect, false);
     };
 
 
@@ -177,8 +161,8 @@ const Visualizer = (fps) =>
                 model.add(comp);
             }
 
-            scene.add(model);
-            animation = {model, step, start, stop, frames};
+        scene.add(model);
+        animation = {model, step, start, stop, frames};
     }
 
 
@@ -223,99 +207,6 @@ const Visualizer = (fps) =>
 
 
     /*
-     * loadDroppedAnimation(urlRef):
-     *
-     * param file - dragged and dropped log-file
-     *
-     * Returns a promise that resolves to a model being loaded from file data
-     * converted to json.
-     */
-    function loadDroppedAnimation(file) {
-        let loaded;
-        return new Promise((resolve, reject) => {
-            let reader = new FileReader();
-            reader.readAsText(file, "UTF-8");
-
-            // On load resolve
-            reader.addEventListener('load', resolve);
-
-            // On progress, update progress bar
-            reader.addEventListener('progress', evt => {
-                console.log(evt.loaded / evt.total);
-            });
-        });
-    }
-
-
-    /*
-     * loadRefAnimation(urlRef):
-     *
-     * param urlRef - location of the logfile
-     *
-     * Returns a function that executes fetch of the GlobalFetch mixin from
-     * Fetch API. Method 'fetch' returns a promises that resolves to the
-     * successful aqcuisition of the resource, in this case, the json file.
-     */
-    function loadRefAnimation(urlRef) {
-        return () => {
-            fetch(urlRef).then((res) => res.json()).then((data) => {
-                createModel(data);
-            });
-        }
-    }
-
-
-    /*
-     * loadTestAnimation(animation):
-     *
-     * param animation - index for test model array.
-     *
-     * Returns a function that creates a model from the data held in the test
-     * model array at the specified index.
-     */
-    function loadTestAnimation(animation) {
-        return () => {
-            createModel(testModels[animation]);
-        }
-    }
-
-
-    /*
-     * handleFileSelect(evt):
-     *
-     * param evt - Javascript event
-     *
-     * Callback function for the Javascript 'drop' event used to handle a file
-     * being dropped within the area of the visualizer.
-     */
-    function handleFileSelect(evt) {
-        evt.preventDefault();
-
-        initLoading();
-
-        let files = evt.dataTransfer.files; // FileList object.
-        loadDroppedAnimation(files[0]).then((evt) => {
-            return JSON.parse(evt.target.result);
-        }).then((dat) => {
-            createModel(dat);
-        });
-    }
-
-
-    /*
-     * handleDragOver(evt):
-     *
-     * param evt - Javascript event
-     *
-     * ...
-     */
-    function handleDragOver(evt) {
-        evt.preventDefault();
-        evt.dataTransfer.dropEffect = 'copy'; // Explicitly show this is a copy.
-    }
-
-
-    /*
      * update():
      *
      * ...
@@ -340,6 +231,10 @@ const Visualizer = (fps) =>
      * ...
      */
     function updateModel() {
+
+        if (currentTime < 0) {
+            currentTime = animation.stop;
+        }
 
         let frame = Math.round((currentTime % animation.stop) / animation.step);
 
@@ -371,8 +266,39 @@ const Visualizer = (fps) =>
     //              Visualizer Methods                //
     ////////////////////////////////////////////////////
 
-    /**
-     * play():
+    /*
+     * loadAnimation:
+     *
+     * param dat - Data for a new animation.
+     *
+     * ...
+     */
+    const loadAnimation = function(dat) {
+        createModel(dat);
+
+        // Return information about the animation loaded
+        let start = animation.start,
+            stop  = animation.stop,
+            step  = animation.step,
+            name  = animation.model.name,
+            groups = [];
+
+        for (const group of animation.model.children) {
+            groups.push(group.name);
+        }
+
+        return {
+            start,
+            stop,
+            step,
+            name,
+            groups
+        };
+    };
+
+
+    /*
+     * play:
      *
      * Begin or resume the animation
      */
@@ -382,7 +308,7 @@ const Visualizer = (fps) =>
 
 
     /*
-     * pause():
+     * pause:
      *
      * Halt the animation at current position
      */
@@ -392,7 +318,7 @@ const Visualizer = (fps) =>
 
 
     /*
-     * setTime():
+     * setTime:
      *
      * param timeVal - The position in the animation to play from
      *
@@ -404,7 +330,7 @@ const Visualizer = (fps) =>
 
 
     /*
-     * setSpeed(speedVal):
+     * setSpeed:
      *
      * param speedVal - Multiplier for playback speed
      *
@@ -412,10 +338,12 @@ const Visualizer = (fps) =>
      */
     const setSpeed = function(speedVal) {
         playbackSpeed = speedVal;
-    }
+    };
 
 
     /*
+     * changeColor:
+     *
      * param modelName - String of the model name to have it's color changed
      * param color - String of the color to be changed in Hexadecimal
      *
@@ -435,6 +363,8 @@ const Visualizer = (fps) =>
 
 
     /*
+     * changeTexture:
+     *
      * param modelName - String of the model name to have it's color changed
      * param texture - String of the texture to be applied
      *
@@ -462,6 +392,8 @@ const Visualizer = (fps) =>
 
 
     /*
+     * changeTransparency:
+     *
      * param modelName - String of the model name to have it's transparency changed
      * param transparency - Floating point number between 0 and 1 that scales the opacity
      *
@@ -479,12 +411,13 @@ const Visualizer = (fps) =>
     // Constructed application object
     return {
         init,
+        loadAnimation,
         play,
         pause,
-        setTime,
         setSpeed,
+        setTime,
         changeColor,
         changeTexture,
         changeTransparency
-    }
+    };
 };
