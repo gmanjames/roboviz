@@ -2,11 +2,20 @@
  * style rules for roboviz
  */
 
+html {
+    height: 100%;
+    min-height: 100%;
+    width: 100%;
+}
+
 body {
     margin: 0;
     font-size: 16px;
     overflow: hidden;
     font-family: sans-serif;
+    height: 100%;
+    min-height: 100%;
+    width: 100%;
 }
 
 body * {
@@ -69,6 +78,43 @@ select[for="model-group"] {
     margin-top: 0;
 }
 
+.textures {
+    margin-bottom: 24px;
+}
+
+.textures a {
+    text-decoration: none;
+    color: hsl(0, 0%, 70%);
+    margin-right: 16px;
+    vertical-align: middle;
+    transition: color 0.2s ease-out;
+}
+
+.textures a:hover {
+    color: hsl(0, 0%, 0%);
+}
+
+.textures a .sample {
+    margin-left: 8px;
+    display: inline-block;
+    width: 27px;
+    height: 27px;
+    background-size: cover;
+    border: 1px solid black;
+}
+
+.textures a[data-texture="bricks"] .sample {
+    background-image: url("../assets/images/bricks.png");
+}
+
+.textures a[data-texture="gray"] .sample {
+    background-image: url("../assets/images/gray.png");
+}
+
+.textures a[data-texture="matrix"] .sample {
+    background-image: url("../assets/images/matrix.png");
+}
+
 .colors {
     margin-bottom: 24px;
 }
@@ -122,7 +168,6 @@ select[for="model-group"] {
      position: absolute;
      bottom: 0;
      width: 100%;
-     border-top: 1px solid black;
      padding: 16px 0;
      text-align: center;
  }
@@ -156,6 +201,7 @@ select[for="model-group"] {
      height: 32px;
      border: 1px solid hsl(0, 0%, 80%);
      border-radius: 3px;
+     text-align: left;
      vertical-align: middle;
  }
 

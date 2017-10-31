@@ -1,32 +1,38 @@
+'use strict';
+
 /**
  * controls.js:
  */
 const Controls = (modelCtrls, playbackCtrls) =>
 {
     /*
-     *
+     * The area onto which a log-file may be dragged and uploaded.
      */
-    const dropZone        = document.getElementById('dropZone');
+    const dropZone = document.getElementById('dropZone');
 
     /*
-     *
+     * Select element used to choose a particular animation if multiple are
+     * loaded.
      */
-    const modelSelect     = modelCtrls.querySelector('#modelName')
+    const modelSelect = modelCtrls.querySelector('#modelName')
 
     /*
-     *
+     * The name of a single group that is a component of the current model
+     * selected.
      */
-    const groupSelect     = modelCtrls.querySelector('#groupName');
+    const groupSelect = modelCtrls.querySelector('#groupName');
 
     /*
-     *
+     * Elements containing hexidecimal information for selecting a color for
+     * the current model group selected.
      */
-    const colorControls   = modelCtrls.querySelectorAll('.colors > a');
+    const colorControls = modelCtrls.querySelectorAll('.colors > a');
 
     /*
-     *
+     * Range type input element for controlling the opacity of the current
+     * model group selected.
      */
-    const transparency    = modelCtrls.querySelector('.control-transparency input[type="range"]');
+    const transparency = modelCtrls.querySelector('.control-transparency input[type="range"]');
 
     /*
      *
@@ -36,17 +42,17 @@ const Controls = (modelCtrls, playbackCtrls) =>
     /*
      * Button for pausing and playing
      */
-    const playPauseBtn    = playbackCtrls.querySelector('#playPauseBtn');
+    const playPauseBtn = playbackCtrls.querySelector('#playPauseBtn');
 
     /*
      *
      */
-    const playbackSpeed   = playbackCtrls.querySelector('#modelSpeed');
+    const playbackSpeed = playbackCtrls.querySelector('#modelSpeed');
 
     /*
      *
      */
-    const playbackTime    = playbackCtrls.querySelector('#modelTime');
+    const playbackTime = playbackCtrls.querySelector('#modelTime');
 
     /*
      *
@@ -56,12 +62,22 @@ const Controls = (modelCtrls, playbackCtrls) =>
     /*
      *
      */
-    const playbackSdVal   = playbackCtrls.querySelector('#modelSpeedVal');
+    const rightTimeLabel = playbackCtrls.querySelector(".right-label[for='modelTime']");
+
+    /*
+     *
+     */
+    const leftTimeLabel = playbackCtrls.querySelector(".left-label[for='modelTime']");
+
+    /*
+     *
+     */
+    const playbackSdVal = playbackCtrls.querySelector('#modelSpeedVal');
 
     /*
      * List to contain visualizer objects
      */
-    const visualizers      = [];
+    const visualizers      = {};
 
     /*
      *
@@ -90,14 +106,56 @@ const Controls = (modelCtrls, playbackCtrls) =>
 
 
     /*
+     * notify:
+     *
+     * param time - the current time of the active animation.
+     *
+     * When the visualizer updates, the controls need to be notified of the
+     * updated time value in order to update control element's values.
+     */
+    const notify = function(time) {
+        time = time.toPrecision(3);
+        playbackTime.value = time;
+        playbackTimeVal.innerHTML = time;
+    };
+
+
+    /*
      * updateControls:
+     *
+     * param modelInfo - The animation information for the currently active
+     * visualizer.
      *
      * ...
      */
     function updateControls(modelInfo) {
+
+        // Model controls
+        groupSelect.innerHTML = '';
+        for (let group of modelInfo.groups) {
+            let option = document.createElement('option');
+            option.value = group;
+            option.appendChild(document.createTextNode(group));
+            groupSelect.appendChild(option);
+        }
+
+        modelSelect.innerHTML = '';
+
+        let modelNumber = 0;
+        for (let vis in visualizers) {
+            modelNumber++;
+            let option = document.createElement('option');
+            option.value = 'model-' + modelNumber;
+            option.appendChild(document.createTextNode('model-' + modelNumber));
+            modelSelect.appendChild(option);
+        }
+
+        // Playback controls
         playbackTime.min  = modelInfo.start;
         playbackTime.max  = modelInfo.stop;
         playbackTime.step = modelInfo.step;
+        rightTimeLabel.innerHTML = modelInfo.stop;
+        leftTimeLabel.innerHTML  = modelInfo.start;
     }
 
 
@@ -125,11 +183,11 @@ const Controls = (modelCtrls, playbackCtrls) =>
             textureControls[i].addEventListener('click', handleTexture);
         }
 
-        transparency.addEventListener('change', handleTransparency);
+        transparency.addEventListener('input', handleTransparency);
 
         // Playback controls
         playPauseBtn.addEventListener('click', handlePlayPause);
-        playbackSpeed.addEventListener('change', handleSpeed);
+        playbackSpeed.addEventListener('input', handleSpeed);
         playbackTime.addEventListener('input', handleTime);
     }
 
@@ -148,6 +206,7 @@ const Controls = (modelCtrls, playbackCtrls) =>
      */
     function handleDrop(evt) {
 
+        evt.stopPropagation();
         evt.preventDefault();
 
         let files = evt.dataTransfer.files; // FileList object.
@@ -159,7 +218,8 @@ const Controls = (modelCtrls, playbackCtrls) =>
                 activeVisualizer.init();
             }
 
-            updateControls(activeVisualizer.loadAnimation(dat));
+            visualizers[activeVisualizer] = activeVisualizer.loadAnimation(dat);
+            updateControls(visualizers[activeVisualizer]);
         });
     }
 
@@ -219,26 +279,28 @@ const Controls = (modelCtrls, playbackCtrls) =>
 
 
     /*
-     * handleColor
+     * handleColor:
      *
      * param evt - Javascript evt
      *
      * ...
      */
     function handleColor(evt) {
-        console.log(evt.target.dataset.color);
+        let groupName = groupSelect.value;
+        activeVisualizer.changeColor(groupName, parseInt(evt.target.dataset.color));
     }
 
 
     /*
-     * handleTexture
+     * handleTexture:
      *
      * param evt - Javascript evt
      *
      * ...
      */
     function handleTexture(evt) {
-        console.log(evt.target.value);
+        let groupName = groupSelect.value;
+        activeVisualizer.changeTexture(groupName, './assets/images/' + evt.target.dataset.texture + '.png');
     }
 
 
@@ -250,7 +312,8 @@ const Controls = (modelCtrls, playbackCtrls) =>
      * ...
      */
     function handleTransparency(evt) {
-        console.log(evt.target.value);
+        let groupName = groupSelect.value;
+        activeVisualizer.changeTransparency(groupName, parseFloat(evt.target.value));
     }
 
 
@@ -259,7 +322,8 @@ const Controls = (modelCtrls, playbackCtrls) =>
      *
      * param evt - Javascript event
      *
-     * ...
+     * Event handeler for pausing or playing the animation determined by the
+     * current state of the play/pause button.
      */
     function handlePlayPause(evt) {
         const state = evt.target.dataset.toggle;
@@ -310,6 +374,7 @@ const Controls = (modelCtrls, playbackCtrls) =>
         playbackTimeVal.innerHTML = timeVal;
     }
 
+
     ////////////////////////////////////////////////////
     //               Log-file Handeling               //
     ////////////////////////////////////////////////////
@@ -356,7 +421,8 @@ const Controls = (modelCtrls, playbackCtrls) =>
                     activeVisualizer.init();
                 }
 
-                updateControls(activeVisualizer.loadAnimation(data));
+                visualizers[activeVisualizer] = activeVisualizer.loadAnimation(data);
+                updateControls(visualizers[activeVisualizer]);
             });
         }
     }
@@ -376,12 +442,14 @@ const Controls = (modelCtrls, playbackCtrls) =>
             activeVisualizer.init();
         }
 
-        updateControls(activeVisualizer.loadAnimation(testModels[animation]));
+        visualizers[activeVisualizer] = activeVisualizer.loadAnimation(testModels[animation]);
+        updateControls(visualizers[activeVisualizer]);
     }
 
 
     // Constructed Controls object
     return {
-        init
+        init,
+        notify
     };
 };
