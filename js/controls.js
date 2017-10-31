@@ -1,3 +1,5 @@
+'use strict';
+
 /**
  * controls.js:
  */
@@ -371,6 +373,7 @@ const Controls = (modelCtrls, playbackCtrls) =>
     function notifyOfTime(timeVal) {
         playbackTimeVal.innerHTML = timeVal;
     }
+
 
     ////////////////////////////////////////////////////
     //               Log-file Handeling               //

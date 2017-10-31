@@ -113,7 +113,9 @@ const Visualizer = (fps) =>
 
 
     /*
-     * createModel():
+     * createModel:
+     *
+     * param data - JSON data for model parsed from file.
      *
      * Extract model information from JSON data.
      */
@@ -167,7 +169,7 @@ const Visualizer = (fps) =>
 
 
     /*
-     * animationLoop():
+     * animationLoop:
      *
      * Game loop implementation for updating logical coordinates of models and
      * rendering the scene.
@@ -194,7 +196,7 @@ const Visualizer = (fps) =>
 
 
     /*
-     * initLoading():
+     * initLoading:
      *
      * Called to begin loading animation. After the data is retrieved from the
      * log-file the the loading animation initialized by this function should
@@ -227,7 +229,7 @@ const Visualizer = (fps) =>
 
 
     /*
-     * updateModel():
+     * updateModel:
      *
      * ...
      */
@@ -256,7 +258,7 @@ const Visualizer = (fps) =>
 
 
     /*
-     * render():
+     * render:
      *
      * ...
      */
