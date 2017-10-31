@@ -298,7 +298,6 @@ const Controls = (modelCtrls, playbackCtrls) =>
      */
     function handleTexture(evt) {
         let groupName = groupSelect.value;
-        console.log(evt.target);
         activeVisualizer.changeTexture(groupName, './assets/images/' + evt.target.dataset.texture + '.png');
     }
 
