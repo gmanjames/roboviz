@@ -8,12 +8,12 @@ const Visualizer = (fps) =>
     /*
      * Three.js scene to render.
      */
-    const scene    = new THREE.Scene();
+    const scene = new THREE.Scene();
 
     /*
      * Simple perspective camera with aspect ratio, near and far clipping planes.
      */
-    const camera   = new THREE.PerspectiveCamera( 45, window.innerWidth / window.innerHeight, 0.1, 4000);
+    const camera = new THREE.PerspectiveCamera( 45, window.innerWidth / window.innerHeight, 0.1, 4000);
 
     /*
      * The visualizer that also holds the camera element.
@@ -26,6 +26,11 @@ const Visualizer = (fps) =>
     const dropZone = document.getElementById('dropZone');
 
     /*
+     * Texture Loader for loading new textures.
+     */
+    const textureLoader = new THREE.TextureLoader();
+
+    /*
      * Desired time interval between frames.
      */
     const interval = 1000 / fps;
@@ -33,7 +38,12 @@ const Visualizer = (fps) =>
     /*
      * Clock used for tracking application time.
      */
-    const clock    = new THREE.Clock();
+    const clock = new THREE.Clock();
+
+    /*
+     *
+     */
+    const controls = new THREE.OrbitControls(camera, renderer.domElement);
 
     /*
      * Toggle between animation playing and paused states.
@@ -45,20 +55,20 @@ const Visualizer = (fps) =>
      */
     let playbackSpeed = 1;
 
-     /*
-      * Current time of the animation.
-      */
+    /*
+     * Current time of the animation.
+     */
     let currentTime = 0;
 
     /*
-     *
-     */
-    let controls;
-
-     /*
      * Global list to hold all currently loaded animations.
      */
     let animation;
+
+    /*
+     * Currently loaded texture.
+     */
+    let texture;
 
 
     ////////////////////////////////////////////////////
@@ -78,7 +88,6 @@ const Visualizer = (fps) =>
         camera.position.set(600, 600, 1000);
         camera.lookAt(new THREE.Vector3(0,0,0));
 
-        controls = new THREE.OrbitControls(camera, renderer.domElement);
         // Directional light to enhance shadow.
         let defaultLight = new THREE.DirectionalLight(0xffffff);
         defaultLight.position.set(0, 1000, 0);
@@ -92,17 +101,6 @@ const Visualizer = (fps) =>
         // Enter animation loop.
         animationLoop();
 
-        // Check url for logfile referenece, or test model number.
-        const searchParams = new URLSearchParams(window.location.search);
-        if (searchParams.has('logref')) {
-            initLoading();
-            setTimeout(loadRefAnimation(searchParams.get('logref')), 2000);
-        }
-        else if (searchParams.has('test')) {
-            initLoading();
-            setTimeout(loadTestAnimation(parseInt(searchParams.get('test'))), 0);
-        }
-
         // Add event listener necessary for canvas resize.
         window.addEventListener('resize', (evt) => {
             const width  = evt.target.innerWidth,
@@ -111,15 +109,13 @@ const Visualizer = (fps) =>
             camera.aspect = width / height;
             camera.updateProjectionMatrix();
         });
-
-         // Setup the dnd listeners.
-         dropZone.addEventListener('dragover', handleDragOver, false);
-         dropZone.addEventListener('drop', handleFileSelect, false);
     };
 
 
     /*
-     * createModel():
+     * createModel:
+     *
+     * param data - JSON data for model parsed from file.
      *
      * Extract model information from JSON data.
      */
@@ -131,43 +127,41 @@ const Visualizer = (fps) =>
             start  = data.start,
             stop   = data.stop;
 
-        let texture = new THREE.ImageUtils.loadTexture("assets/images/matrix.png");
+            for (let group of data.groups) {
+                let comp = new THREE.Group(), // composite group to which we add objects
+                    geometry,
+                    material;
 
-        for (let group of data.groups) {
-            let comp = new THREE.Group(), // composite group to which we add objects
-                geometry,
-                material;
+                comp.name = group.name;
 
-            comp.name = group.name;
+                for (let obj of group.objs) {
+                    if (obj.type === "box") {
+                        geometry = new THREE.BoxBufferGeometry(obj.scale[0], obj.scale[1], obj.scale[2]);
+                        material = new THREE.MeshLambertMaterial( { color: parseInt(obj.color), overdraw: 0.5 } );
+                    }
+                    else if (obj.type === "cylinder") {
+                        geometry = new THREE.CylinderBufferGeometry(obj.scale[0], obj.scale[1], obj.scale[2], 32, 32);
+                        material = new THREE.MeshLambertMaterial( { color: parseInt(obj.color), overdraw: 0.5 } );
+                    }
+                    else if (obj.type === "ellipsoid") {
+                        geometry = new THREE.SphereBufferGeometry(obj.scale[0] * 0.5, 32, 32);
+                        material = new THREE.MeshLambertMaterial( { color: parseInt(obj.color), overdraw: 0.5 } );
+                        let matrix = new THREE.Matrix4();
+                        matrix.makeScale(1.0, obj.scale[1] / obj.scale[0], obj.scale[2] / obj.scale[0]);
+                        geometry.applyMatrix(matrix);
+                    }
+                    else if (obj.type === "sphere") {
+                        geometry = new THREE.SphereBufferGeometry(obj.diameter, 32, 32);
+                        material = new THREE.MeshLambertMaterial( { color: parseInt(obj.color),  overdraw: 0.5 } );
+                    }
 
-            for (let obj of group.objs) {
-                if (obj.type === "box") {
-                    geometry = new THREE.BoxBufferGeometry(obj.scale[0], obj.scale[1], obj.scale[2]);
-                    material = new THREE.MeshLambertMaterial( { color: parseInt(obj.color), map: texture, overdraw: 0.5 } );
-                }
-                else if (obj.type === "cylinder") {
-                    geometry = new THREE.CylinderBufferGeometry(obj.scale[0], obj.scale[1], obj.scale[2], 32, 32);
-                    material = new THREE.MeshLambertMaterial( { color: parseInt(obj.color), map: texture, overdraw: 0.5 } );
-                }
-                else if (obj.type === "ellipsoid") {
-                    geometry = new THREE.SphereBufferGeometry(obj.scale[0] * 0.5, 32, 32);
-                    material = new THREE.MeshLambertMaterial( { color: parseInt(obj.color), map: texture, overdraw: 0.5 } );
-                    let matrix = new THREE.Matrix4();
-                    matrix.makeScale(1.0, obj.scale[1] / obj.scale[0], obj.scale[2] / obj.scale[0]);
-                    geometry.applyMatrix(matrix);
-                }
-                else if (obj.type === "sphere") {
-                    geometry = new THREE.SphereBufferGeometry(obj.diameter, 32, 32);
-                    material = new THREE.MeshLambertMaterial( { color: parseInt(obj.color), map: texture, overdraw: 0.5 } );
+                    material.transparent = true;
+                    let mesh = new THREE.Mesh(geometry, material);
+                    comp.add(mesh);
                 }
 
-                material.transparent = true;
-                let mesh = new THREE.Mesh(geometry, material);
-                comp.add(mesh);
+                model.add(comp);
             }
-
-            model.add(comp);
-        }
 
         scene.add(model);
         animation = {model, step, start, stop, frames};
@@ -175,7 +169,7 @@ const Visualizer = (fps) =>
 
 
     /*
-     * animationLoop():
+     * animationLoop:
      *
      * Game loop implementation for updating logical coordinates of models and
      * rendering the scene.
@@ -202,7 +196,7 @@ const Visualizer = (fps) =>
 
 
     /*
-     * initLoading():
+     * initLoading:
      *
      * Called to begin loading animation. After the data is retrieved from the
      * log-file the the loading animation initialized by this function should
@@ -215,102 +209,10 @@ const Visualizer = (fps) =>
 
 
     /*
-     * loadDroppedAnimation(urlRef):
+     * update:
      *
-     * param file - dragged and dropped log-file
-     *
-     * Returns a promise that resolves to a model being loaded from file data
-     * converted to json.
-     */
-    function loadDroppedAnimation(file) {
-        let loaded;
-        return new Promise((resolve, reject) => {
-            let reader = new FileReader();
-            reader.readAsText(file, "UTF-8");
-
-            // On load resolve
-            reader.addEventListener('load', resolve);
-
-            // On progress, update progress bar
-            reader.addEventListener('progress', evt => {
-                console.log(evt.loaded / evt.total);
-            });
-        });
-    }
-
-
-    /*
-     * loadRefAnimation(urlRef):
-     *
-     * param urlRef - location of the logfile
-     *
-     * Returns a function that executes fetch of the GlobalFetch mixin from
-     * Fetch API. Method 'fetch' returns a promises that resolves to the
-     * successful aqcuisition of the resource, in this case, the json file.
-     */
-    function loadRefAnimation(urlRef) {
-        return () => {
-            fetch(urlRef).then((res) => res.json()).then((data) => {
-                createModel(data);
-            });
-        }
-    }
-
-
-    /*
-     * loadTestAnimation(animation):
-     *
-     * param animation - index for test model array.
-     *
-     * Returns a function that creates a model from the data held in the test
-     * model array at the specified index.
-     */
-    function loadTestAnimation(animation) {
-        return () => {
-            createModel(testModels[animation]);
-        }
-    }
-
-
-    /*
-     * handleFileSelect(evt):
-     *
-     * param evt - Javascript event
-     *
-     * Callback function for the Javascript 'drop' event used to handle a file
-     * being dropped within the area of the visualizer.
-     */
-    function handleFileSelect(evt) {
-        evt.preventDefault();
-
-        initLoading();
-
-        let files = evt.dataTransfer.files; // FileList object.
-        loadDroppedAnimation(files[0]).then((evt) => {
-            return JSON.parse(evt.target.result);
-        }).then((dat) => {
-            createModel(dat);
-        });
-    }
-
-
-    /*
-     * handleDragOver(evt):
-     *
-     * param evt - Javascript event
-     *
-     * ...
-     */
-    function handleDragOver(evt) {
-        evt.preventDefault();
-        evt.dataTransfer.dropEffect = 'copy'; // Explicitly show this is a copy.
-    }
-
-
-    /*
-     * update():
-     *
-     * ...
+     * Progress the time of the animation that will be used to calculate the
+     * current frame. Notify the controls of the change in time.
      */
     function update() {
 
@@ -327,13 +229,19 @@ const Visualizer = (fps) =>
 
 
     /*
-     * updateModel():
+     * updateModel:
      *
      * ...
      */
     function updateModel() {
 
+        if (currentTime < 0) {
+            currentTime = animation.stop;
+        }
+
         let frame = Math.round((currentTime % animation.stop) / animation.step);
+
+        window.controls.notify(frame * animation.step);
 
         for (const group of animation.model.children) {
             group.position.set(animation.frames[frame][group.name].position[0],
@@ -350,7 +258,7 @@ const Visualizer = (fps) =>
 
 
     /*
-     * render():
+     * render:
      *
      * ...
      */
@@ -363,8 +271,39 @@ const Visualizer = (fps) =>
     //              Visualizer Methods                //
     ////////////////////////////////////////////////////
 
-    /**
-     * play():
+    /*
+     * loadAnimation:
+     *
+     * param dat - Data for a new animation.
+     *
+     * ...
+     */
+    const loadAnimation = function(dat) {
+        createModel(dat);
+
+        // Return information about the animation loaded
+        let start = animation.start,
+            stop  = animation.stop,
+            step  = animation.step,
+            name  = animation.model.name,
+            groups = [];
+
+        for (const group of animation.model.children) {
+            groups.push(group.name);
+        }
+
+        return {
+            start,
+            stop,
+            step,
+            name,
+            groups
+        };
+    };
+
+
+    /*
+     * play:
      *
      * Begin or resume the animation
      */
@@ -374,7 +313,7 @@ const Visualizer = (fps) =>
 
 
     /*
-     * pause():
+     * pause:
      *
      * Halt the animation at current position
      */
@@ -384,7 +323,7 @@ const Visualizer = (fps) =>
 
 
     /*
-     * setTime():
+     * setTime:
      *
      * param timeVal - The position in the animation to play from
      *
@@ -396,7 +335,7 @@ const Visualizer = (fps) =>
 
 
     /*
-     * setSpeed(speedVal):
+     * setSpeed:
      *
      * param speedVal - Multiplier for playback speed
      *
@@ -404,64 +343,71 @@ const Visualizer = (fps) =>
      */
     const setSpeed = function(speedVal) {
         playbackSpeed = speedVal;
-    }
+    };
+
 
     /*
+     * changeColor:
+     *
      * param modelName - String of the model name to have it's color changed
      * param color - String of the color to be changed in Hexadecimal
      *
-     * Change the color of a specific model
+     * Creates a new material in order to apply the new color
      */
-    const changeColor = function(modelName, color) {
-        let singleModel = models[0]["model"]["children"];
-        for(let i =0;i < singleModel.length; i++){
-            if(singleModel[i].name==modelName){
-            singleModel[i]["children"][0].material.color.setHex(color);
+    const changeColor = function(groupName, color) {
+        for (const group of animation.model.children) {
+            if (group.name == groupName) {
+                const oldTransparency = group.children[0].material.opacity;
+                let newMaterial = new THREE.MeshLambertMaterial( { color: color, overdraw: 0.5 } );
+                group.children[0].material = newMaterial;
+                group.children[0].material.transparent = true;
+                group.children[0].material.opacity = oldTransparency;
             }
         }
     }
 
+
     /*
+     * changeTexture:
+     *
      * param modelName - String of the model name to have it's color changed
      * param texture - String of the texture to be applied
      *
-     * Change the texture of a specific model
+     * Creates a new material in order to apply the new texture using a path to the texture
      */
     const changeTexture = function(modelName, texturePath) {
-        console.log(models);
-        let loader = new THREE.TextureLoader();
-        let texture = loader.load( 'assets/images/matrix.png', function ( texture ) {
-            console.log("loaded");
-            texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
-            texture.offset.set( 0.0, 1.0 );
-            texture.repeat.set( 4, 4 );
-
-            let singleModel = models[0]["model"]["children"];
-            for(let i =0;i < singleModel.length; i++){
-                if(singleModel[i].name==modelName){
-                    console.log(singleModel[i]);
-                    singleModel[i]["children"][0].material.map = texture;
-                    singleModel[i]["children"][0].material.map.needsUpdate = true;
-                    singleModel[i]["children"][0].geometry.buffersNeedUpdate = true;
-                    singleModel[i]["children"][0].geometry.uvsNeedUpdate = true;
+        texture = textureLoader.load(texturePath, function( newTexture ) {
+            let newMaterial = new THREE.MeshLambertMaterial( { map: newTexture, overdraw: 0.5 } );
+            for (const group of animation.model.children) {
+                if(group.name==modelName) {
+                    const oldTransparency = group.children[0].material.opacity;
+                    group.children[0].material = newMaterial;
+                    group.children[0].material.transparent = true;
+                    group.children[0].material.opacity = oldTransparency;
                 }
             }
-            texture.needsUpdate = true;
-        } );
-        render();
+        },
+        function (xhr) {
+          console.log( (xhr.loaded / xhr.total * 100) + '% loaded' );
+        },
+        function (error) {
+          console.log( 'An error happened' );
+        });
     }
 
+
     /*
+     * changeTransparency:
+     *
      * param modelName - String of the model name to have it's transparency changed
      * param transparency - Floating point number between 0 and 1 that scales the opacity
      *
      * Change the transparency of the model
      */
     const changeTransparency = function(modelName, transparency) {
-        let singleModel = models[0]["model"]["children"];
-        for(let i =0;i < singleModel.length; i++){
-            if(singleModel[i].name==modelName){
-                singleModel[i]["children"][0].material.opacity = transparency;
+        for (const group of animation.model.children) {
+            if(group.name==modelName) {
+                group.children[0].material.opacity = transparency;
             }
         }
     }
@@ -470,12 +416,13 @@ const Visualizer = (fps) =>
     // Constructed application object
     return {
         init,
+        loadAnimation,
         play,
         pause,
-        setTime,
         setSpeed,
+        setTime,
         changeColor,
         changeTexture,
         changeTransparency
-    }
+    };
 };
