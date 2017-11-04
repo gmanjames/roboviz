@@ -2,19 +2,99 @@
 <html lang="en">
     <head>
         <title>RoboViz</title>
-        <meta name="Content-Type" content="text/heml; charset=UTF-8" />
+        <meta name="Content-Type" content="text/html; charset=UTF-8" />
         <link type="text/css" rel="stylesheet" href="css/style.css" />
     </head>
-    <body id='drop_zone'>
+    <body id='dropZone'>
+        <div id="modelCtrls" class='model-controls' data-state="expanded">
+            <span class="toggle" for="model-controls">&#9776</span>
+            <h3 class="model-title">Select a model and group</h4>
+            <select for="model" id="modelName">
+                <option value="1">group name</option>
+                <option value="2">group name</option>
+            </select>
+            <select for="model-group" id="groupName">
+                <option value="1">group name</option>
+                <option value="2">group name</option>
+                <option value="3">group name</option>
+            </select>
+            <div class="control control-color">
+                <h4>colors:</h4>
+                <div class="colors">
+                    <!-- TOOD: consider a slider for hue, sat., val., etc. -->
+                    <a href="#" data-color="0xff0000">red</a>
+                    <a href="#" data-color="0x0000ff">blue</a>
+                    <a href="#" data-color="0x00ff00">green</a>
+                    <a href="#" data-color="0xffff00">yellow</a>
+                </div>
+                <label for="hex">hex:</label>
+                <input id="model1HexVal" name="hex" type="text" />
+            </div>
+            <div class="control control-texture">
+                <h4>textures:</h4>
+                <div class="textures">
+                    <a href="#" data-texture="bricks">bricks<span class="sample"></span></a>
+                    <a href="#" data-texture="gray">gray<span class="sample"></span></a>
+                    <a href="#" data-texture="matrix">matrix<span class="sample"></span></a>
+                </div>
+            </div>
+            <div class="control-transparency">
+                <h4>transparency:</h4>
+                <div class="range-with-label">
+                    <input type="range" value="1" list="modelTransparency" min="0" max="1" step="0.1">
+                    <label class="right-label">1</label>
+                    <label class="left-label">0</label>
+                </div>
+            </div>
+        </div>
+
+        <div class="logfile-controls">
+        </div>
+
+        <div id="playbackCtrls" class='playback-controls'>
+            <div class="range-with-label">
+                <div id="modelSpeedVal" class="value"></div>
+                <input id="modelSpeed" type="range" min="-4" max="4" step="0.25">
+                <label class="right-label">4</label>
+                <label class="left-label">-4</label>
+            </div>
+            <button id="playPauseBtn" data-toggle="play"></button>
+            <div class="range-with-label">
+                <div id="modelTimeVal" class="value"></div>
+                <input id="modelTime" type="range">
+                <label for="modelTime" class="right-label">--</label>
+                <label for="modelTime" class="left-label">--</label>
+            </div>
+        </div>
+
         <!-- js -->
         <script src="vendor/three.js"></script>
         <script src="data/models.js"></script>
-        <script src="js/app.js"></script>
+        <script src="js/OrbitControls.js"></script>
+        <script src="js/controls.js"></script>
+        <script src="js/visualizer.js"></script>
         <script>
-            // Initialize the application
-            const fps = 30,
-                  roboviz = App(fps);
-            roboviz.init();
+
+            // To start the application, we need to set up the controls.
+            // The 'Controls' function takes as arguments the areas containing
+            // the various inputs.
+
+            let playbackCtrls, modelCtrls, controls;
+
+            // Playback: play/pause, speed and time.
+            playbackCtrls = document.getElementById('playbackCtrls');
+
+            // Model controls: color and texture options, transparency.
+            modelCtrls = document.getElementById('modelCtrls');
+
+            // Initialize the controls by adding event listeners etc.
+            controls = Controls(modelCtrls, playbackCtrls);
+            controls.init();
+
+            // Add to the global space
+            window['controls'] = controls;
+
+
         </script>
     </body>
 </html>

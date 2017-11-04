@@ -2,14 +2,28 @@
  * style rules for roboviz
  */
 
+html {
+    height: 100%;
+    min-height: 100%;
+    width: 100%;
+}
+
 body {
     margin: 0;
     font-size: 16px;
     overflow: hidden;
+    font-family: sans-serif;
+    height: 100%;
+    min-height: 100%;
+    width: 100%;
+}
+
+body * {
+    box-sizing: border-box;
 }
 
 /*
- * Modules
+ * Model Controls
  */
 
 .toolbar {
@@ -19,3 +33,185 @@ body {
     background-color: white;
     min-height: 3rem;
 }
+
+.model-controls {
+    width: 464px;
+    height: 100%;
+    position: absolute;
+    left: 0;
+    padding: 32px 64px 64px 16px;
+    border-right: 1px solid black;
+}
+
+.model-controls[data-state="expanded"] {
+    margin-left: 0;
+    transition: margin-left 0.3s ease-out;
+}
+
+.model-controls[data-state="collapsed"] {
+    margin-left: -400px;
+    transition: margin-left 0.3s ease-out;
+}
+
+.toggle[for="model-controls"] {
+    position: absolute;
+    top: 0;
+    right: 0;
+    cursor: pointer;
+    width: 64px;
+    padding: 16px 0;
+    text-align: center;
+}
+
+select[for="model-group"] {
+    margin-bottom: 8px;
+}
+
+.control {
+    padding: 8px;
+    border-radius: 3px;
+    border: 1px solid hsl(0, 0%, 70%);
+    margin-bottom: 24px;
+}
+
+.control > h4 {
+    margin-top: 0;
+}
+
+.textures {
+    margin-bottom: 24px;
+}
+
+.textures a {
+    text-decoration: none;
+    color: hsl(0, 0%, 70%);
+    margin-right: 16px;
+    vertical-align: middle;
+    transition: color 0.2s ease-out;
+}
+
+.textures a:hover {
+    color: hsl(0, 0%, 0%);
+}
+
+.textures a .sample {
+    margin-left: 8px;
+    display: inline-block;
+    width: 27px;
+    height: 27px;
+    background-size: cover;
+    border: 1px solid black;
+}
+
+.textures a[data-texture="bricks"] .sample {
+    background-image: url("../assets/images/bricks.png");
+}
+
+.textures a[data-texture="gray"] .sample {
+    background-image: url("../assets/images/gray.png");
+}
+
+.textures a[data-texture="matrix"] .sample {
+    background-image: url("../assets/images/matrix.png");
+}
+
+.colors {
+    margin-bottom: 24px;
+}
+
+.colors a {
+    text-decoration: none;
+    color: hsl(0, 0%, 70%);
+    margin-right: 16px;
+    vertical-align: middle;
+    transition: color 0.2s ease-out;
+}
+
+.colors a:hover {
+    color: hsl(0, 0%, 0%);
+}
+
+.colors a:after {
+    content: "";
+    margin-left: 8px;
+    display: inline-block;
+    width: 24px;
+    height: 24px;
+}
+
+.colors a[data-color="0xff0000"]:after {
+    background-color: #ff0000;
+    border: 1px solid black;
+}
+
+.colors a[data-color="0x0000ff"]:after {
+    background-color: #0000ff;
+    border: 1px solid black;
+}
+
+.colors a[data-color="0x00ff00"]:after {
+    background-color: #00ff00;
+    border: 1px solid black;
+}
+
+.colors a[data-color="0xffff00"]:after {
+    background-color: #ffff00;
+    border: 1px solid black;
+}
+
+
+/*
+ * Playback Controls
+ */
+
+ .playback-controls {
+     position: absolute;
+     bottom: 0;
+     width: 100%;
+     padding: 16px 0;
+     text-align: center;
+ }
+
+.playback-controls > button {
+    border: none;
+    padding: 0;
+    padding: 8px 16px;
+    margin: 0 32px;
+    border-radius: 3px;
+    cursor: pointer;
+    border: 1px solid black;
+}
+
+.playback-controls > button[data-toggle="play"]:after {
+    content: "PAUSE";
+ }
+
+ .playback-controls > button[data-toggle="pause"]:after {
+     content: "PLAY";
+ }
+
+ .range-with-label {
+     display: inline-block;
+ }
+
+ .range-with-label .value {
+     margin: 0 auto;
+     margin-bottom: 8px;
+     width: 48px;
+     height: 32px;
+     border: 1px solid hsl(0, 0%, 80%);
+     border-radius: 3px;
+     text-align: left;
+     vertical-align: middle;
+ }
+
+.range-with-label label {
+    min-width: 16px;
+}
+ .range-with-label .right-label {
+     float: right;
+ }
+
+ .range-with-label .left-label {
+     float: left;
+ }
