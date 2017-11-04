@@ -41,7 +41,7 @@ const Visualizer = (fps) =>
     const clock = new THREE.Clock();
 
     /*
-     * Helper class for viewing the scene from multiple perspectives
+     * Pan, zoom, and orbit camera controls.
      */
     const controls = new THREE.OrbitControls(camera, renderer.domElement);
 
@@ -98,6 +98,42 @@ const Visualizer = (fps) =>
         let ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
         scene.add(ambientLight);
 
+		// Scene background.
+		renderer.gammaInput = true;
+		renderer.gammaOutput = true;
+		renderer.setClearColor(0x001a0d, 1.0);
+		renderer.shadowMapEnabled = true;
+
+		// Grid floor and fog to add perspective for model movement.
+		scene.fog = new THREE.Fog(0x001a0d, 1500, 4500);
+		var grid = new THREE.GridHelper(10000, 100, 0x001a0d, 0x006633);
+		scene.add(grid);
+
+
+		// Ground plane geometry matching grid size.
+        var groundGeometry = new THREE.PlaneGeometry(10000, 10000, 1, 1);
+
+		// Transparent and not-shiny ground plane material.
+        var groundMaterial = new THREE.MeshLambertMaterial({
+			color: 0x4dffa6,
+			transparent: true,
+			opacity: 0.6,
+			side: THREE.DoubleSide,
+			emissive: 0x4dffa6,
+			// Helps solve z-plane clipping by off setting the ground plane from the grid.
+			polygonOffset: true,
+			polygonOffsetFactor: 1.0,
+			polygonOffsetUnits: 4.0
+		});
+
+		// Create ground plane and rotate into horizontal position.
+        var ground = new THREE.Mesh(groundGeometry, groundMaterial);
+        ground.receiveShadow = true;
+        ground.rotation.x = -0.5 * Math.PI;
+
+        // Add the ground plane to the scene.
+        scene.add(ground);
+
         // Enter animation loop.
         animationLoop();
 
@@ -105,7 +141,6 @@ const Visualizer = (fps) =>
         window.addEventListener('resize', (evt) => {
             const width  = renderer.domElement.clientWidth,
                   height = renderer.domElement.clientHeight;
-            console.log(`${width}, ${height}`);
             renderer.setSize(width, height);
             camera.aspect = width / height;
             camera.updateProjectionMatrix();
