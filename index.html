@@ -39,80 +39,22 @@
                 </div>
             </div>
             <div class="control-transparency">
-<<<<<<< HEAD
-                <input type="range" list="model1Transparency">
-                <datalist id="model1Transparency">
-                    <option value="0">
-                    <option value="10">
-                    <option value="20">
-                    <option value="30">
-                    <option value="40">
-                    <option value="50">
-                    <option value="60">
-                    <option value="70">
-                    <option value="80">
-                    <option value="90">
-                    <option value="100">
-                </datalist>
-=======
                 <h4>transparency:</h4>
                 <div class="range-with-label">
                     <input type="range" value="1" list="modelTransparency" min="0" max="1" step="0.1">
                     <label class="right-label">1</label>
                     <label class="left-label">0</label>
                 </div>
->>>>>>> master
+=======
+                <h4>transparency:</h4>
+                <input type="range" list="modelTransparency" min="0" max="1" step="0.1">
+>>>>>>> 24ffc3a9a070cd65cf66168500539b377c1005e6
             </div>
         </div>
 
         <div class='logfile-controls'>
         </div>
 
-<<<<<<< HEAD
-        <div class='playback-controls'>
-            <span id='speedControls'>
-                <input type="range" step=".5" min="-5" max="5"
-                list="model1Speed" id="speedRange" value="1">
-                <datalist id="model1Speed">
-                    <option value="-5">
-                    <!-- <option value="-4.5"> -->
-                    <option value="-4">
-                    <!-- <option value="-3.5"> -->
-                    <option value="-3">
-                    <!-- <option value="-2.5"> -->
-                    <option value="-2">
-                    <!-- <option value="-1.5"> -->
-                    <option value="-1">
-                    <!-- <option value="-.5"> -->
-                    <option value="0">
-                    <!-- <option value=".5"> -->
-                    <option value="1">
-                    <!-- <option value="1.5"> -->
-                    <option value="2">
-                    <!-- <option value="2.5"> -->
-                    <option value="3">
-                    <!-- <option value="3.5"> -->
-                    <option value="4">
-                    <!-- <option value="4.5"> -->
-                    <option value="5">
-                </datalist>
-            </span>
-            <span id="speedOutput"></span>
-            <button id="model1PlayPause" data-toggle="play"></button>
-            <input type="range" list="model1Time">
-            <datalist id="model1Time">
-                <option value="0">
-                <option value="10">
-                <option value="20">
-                <option value="30">
-                <option value="40">
-                <option value="50">
-                <option value="60">
-                <option value="70">
-                <option value="80">
-                <option value="90">
-                <option value="100">
-            </datalist>
 =======
         <div id="playbackCtrls" class='playback-controls'>
             <div class="range-with-label">
@@ -128,7 +70,6 @@
                 <label for="modelTime" class="right-label">--</label>
                 <label for="modelTime" class="left-label">--</label>
             </div>
->>>>>>> master
         </div>
 
         <!-- js -->
@@ -145,28 +86,13 @@
 
             let playbackCtrls, modelCtrls, controls;
 
-<<<<<<< HEAD
-            //
-            // Speed Contols
-            //
-
-            let speed = document.getElementById('speedRange'),
-            speedInput = document.getElementById('speedOutput');
-
-            //Initialize output of current speed
-            speedInput.innerHTML = speed.value;
-            visualizer.setSpeed(speed.value);
-
-            //Update output of current speed
-            speed.addEventListener("input", function() {
-                let curSpeed = speed.value;
-                speedInput.innerHTML = curSpeed;
-                visualizer.setSpeed(curSpeed);
-            }, false);
-=======
             // Playback: play/pause, speed and time.
             playbackCtrls = document.getElementById('playbackCtrls');
->>>>>>> master
+=======
+            const playbackCtrls = document.getElementById('playbackCtrls');
+            const modelCtrls = document.getElementById('modelCtrls');
+            const controls = Controls(modelCtrls, playbackCtrls);
+>>>>>>> 24ffc3a9a070cd65cf66168500539b377c1005e6
 
             // Model controls: color and texture options, transparency.
             modelCtrls = document.getElementById('modelCtrls');
