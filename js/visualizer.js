@@ -394,7 +394,7 @@ const Visualizer = (fps) =>
         function (error) {
           console.log( 'An error happened' );
         });
-    }
+    };
 
 
     /*
@@ -411,7 +411,20 @@ const Visualizer = (fps) =>
                 group.children[0].material.opacity = transparency;
             }
         }
-    }
+    };
+
+
+    /*
+     * resize:
+     *
+     * param width - New width of the visualizer
+     * param height - New height for the visualizer
+     *
+     * ...
+     */
+    const resize = function(width, height) {
+
+    };
 
 
     // Constructed application object
@@ -424,6 +437,7 @@ const Visualizer = (fps) =>
         setTime,
         changeColor,
         changeTexture,
-        changeTransparency
+        changeTransparency,
+        resize
     };
 };
