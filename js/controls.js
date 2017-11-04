@@ -3,84 +3,90 @@
 /**
  * controls.js:
  */
-const Controls = (modelCtrls, playbackCtrls) =>
+const Controls = () =>
 {
     /*
-     * The area onto which a log-file may be dragged and uploaded.
+     * Maximum number of visualizations to display
      */
-    const dropZone = document.getElementById('dropZone');
-
-    /*
-     * Select element used to choose a particular animation if multiple are
-     * loaded.
-     */
-    const modelSelect = modelCtrls.querySelector('#modelName')
-
-    /*
-     * The name of a single group that is a component of the current model
-     * selected.
-     */
-    const groupSelect = modelCtrls.querySelector('#groupName');
-
-    /*
-     * Elements containing hexidecimal information for selecting a color for
-     * the current model group selected.
-     */
-    const colorControls = modelCtrls.querySelectorAll('.colors > a');
-
-    /*
-     * Range type input element for controlling the opacity of the current
-     * model group selected.
-     */
-    const transparency = modelCtrls.querySelector('.control-transparency input[type="range"]');
+    const MAX_VISUALIZERS = 2;
 
     /*
      *
      */
-    const textureControls = modelCtrls.querySelectorAll('.textures > a');
+    const windowOne = document.getElementById('windowOne');
+
+    /*
+     *
+     */
+    const windowTwo = document.getElementById('windowTwo');
+
+    /*
+     * Name of the currently selected model
+     */
+    const modelSelect = document.getElementById('modelName')
+
+    /*
+     * Name of the currently selected model group
+     */
+    const groupSelect = document.getElementById('groupName');
+
+    /*
+     * Controls for changing the color of the currently selected model group
+     */
+    const colorControls = document.querySelectorAll('.colors > a');
+
+    /*
+     * Control for the opacity of the currently selected model group
+     */
+    const transparency = document.getElementById('transparencyCtrl');
+
+    /*
+     * Controls for changing the texture of the currently selected model group
+     */
+    const textureControls = document.querySelectorAll('.textures > a');
 
     /*
      * Button for pausing and playing
      */
-    const playPauseBtn = playbackCtrls.querySelector('#playPauseBtn');
+    const playPauseBtn = document.getElementById('playPauseBtn');
 
     /*
-     *
+     * Control for adjusting the speed of the animation
      */
-    const playbackSpeed = playbackCtrls.querySelector('#modelSpeed');
+    const playbackSpeed = document.getElementById('modelSpeed');
 
     /*
-     *
+     * Control for setting the current position in time of the animation
      */
-    const playbackTime = playbackCtrls.querySelector('#modelTime');
+    const playbackTime = document.getElementById('modelTime');
 
     /*
-     *
+     * Visual display of the animation's position in time
      */
-    const playbackTimeVal = playbackCtrls.querySelector('#modelTimeVal');
+    const playbackTimeVal = document.getElementById('modelTimeVal');
 
     /*
-     *
+     * Label for the total duration of the animation
      */
-    const rightTimeLabel = playbackCtrls.querySelector(".right-label[for='modelTime']");
+    const rightTimeLabel = document.querySelector(".right-label[for='modelTime']");
 
     /*
-     *
+     * Label for the start time of the animation
      */
-    const leftTimeLabel = playbackCtrls.querySelector(".left-label[for='modelTime']");
+    const leftTimeLabel = document.querySelector(".left-label[for='modelTime']");
 
     /*
-     *
+     * Visual display of the speed the animation is playing at
      */
-    const playbackSdVal = playbackCtrls.querySelector('#modelSpeedVal');
+    const playbackSdVal = document.getElementById('modelSpeedVal');
 
     /*
-     * List to contain visualizer objects
+     * Object to contain loaded visualizers and associated info
      */
-    const visualizers      = {};
+    const visualizers = {};
 
     /*
-     *
+     * The visualizer for which the control options currently apply
      */
     let activeVisualizer;
 
@@ -88,11 +94,11 @@ const Controls = (modelCtrls, playbackCtrls) =>
     /*
      * init:
      *
-     * ...
+     * Init method called to hookup graphical components with visualizer
+     * functions.
      */
     const init = function() {
 
-        // Check url for logfile referenece, or test model number.
         const searchParams = new URLSearchParams(window.location.search);
         if (searchParams.has('logref')) {
             loadRefAnimation(searchParams.get('logref'));
@@ -114,7 +120,14 @@ const Controls = (modelCtrls, playbackCtrls) =>
      * updated time value in order to update control element's values.
      */
     const notify = function(time) {
-        time = time.toPrecision(3);
+
+        if (time < 1 && time >= 0) {
+            time = time.toPrecision(2);
+        }
+        else {
+            time = time.toPrecision(3);
+        }
+
         playbackTime.value = time;
         playbackTimeVal.innerHTML = time;
     };
@@ -126,7 +139,8 @@ const Controls = (modelCtrls, playbackCtrls) =>
      * param modelInfo - The animation information for the currently active
      * visualizer.
      *
-     * ...
+     * Function to update the various controls options with the information
+     * associated with the currently active visualizer.
      */
     function updateControls(modelInfo) {
 
@@ -166,9 +180,14 @@ const Controls = (modelCtrls, playbackCtrls) =>
      */
     function addEventListeners() {
 
+        // Update size of visualizers
+        window.addEventListener('resize', handleWindowResize);
+
         // Drop zone event listeners
-        dropZone.addEventListener('drop', handleDrop, false);
-        dropZone.addEventListener('dragover', handleDragOver, false);
+        windowOne.addEventListener('drop', handleDrop, false);
+        windowOne.addEventListener('dragover', handleDragOver, false);
+        windowTwo.addEventListener('drop', handleDrop, false);
+        windowTwo.addEventListener('dragover', handleDragOver, false);
 
         // Model controls
         modelCtrls.querySelector('.toggle[for="model-controls"]').addEventListener('click', handleMenuToggle);
@@ -206,19 +225,23 @@ const Controls = (modelCtrls, playbackCtrls) =>
      */
     function handleDrop(evt) {
 
-        evt.stopPropagation();
         evt.preventDefault();
 
         let files = evt.dataTransfer.files; // FileList object.
         loadDroppedAnimation(files[0]).then((evt) => {
             return JSON.parse(evt.target.result);
         }).then((dat) => {
-            if (activeVisualizer === undefined) {
-                activeVisualizer = Visualizer(60);
-                activeVisualizer.init();
+
+            if (Object.keys(visualizers).length === MAX_VISUALIZERS) {
+                console.log("destroy one");
+                visualizers[activeVisualizer] = null;
+                delete visualizers[activeVisualizer];
             }
 
+            activeVisualizer = Visualizer(60);
+            activeVisualizer.init(evt.target);
             visualizers[activeVisualizer] = activeVisualizer.loadAnimation(dat);
+
             updateControls(visualizers[activeVisualizer]);
         });
     }
@@ -232,8 +255,17 @@ const Controls = (modelCtrls, playbackCtrls) =>
      * ...
      */
     function handleDragOver(evt) {
+
         evt.preventDefault();
-        evt.dataTransfer.dropEffect = 'copy'; // Explicitly show this is a copy.
+
+        evt.dataTransfer.dropEffect = 'copy';
+
+        if (Object.keys(visualizers).length === 1) {
+            windowOne.style.height = '100%';
+            windowOne.style.width  = '50%';
+            windowTwo.style.height = '100%';
+            windowTwo.style.width  = '50%';
+        }
     }
 
 
@@ -414,7 +446,9 @@ const Controls = (modelCtrls, playbackCtrls) =>
      * successful aqcuisition of the resource, in this case, the json file.
      */
     function loadRefAnimation(urlRef) {
+
         return () => {
+
             fetch(urlRef).then((res) => res.json()).then((data) => {
                 if (activeVisualizer === undefined) {
                     activeVisualizer = Visualizer(60);

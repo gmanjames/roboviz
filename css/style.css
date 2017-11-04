@@ -26,6 +26,28 @@ body * {
  * Model Controls
  */
 
+.window {
+    position: absolute;
+    border: 1px solid black;
+}
+
+.window-active {
+    width: 100%;
+    height: 100%;
+}
+
+.window-right {
+    right: 0;
+}
+
+.window-left {
+    left: 0;
+}
+
+.window:hover {
+    box-shadow: 0 0 3px #54b5ec inset;
+}
+
 .toolbar {
     position: absolute;
     top: 0;

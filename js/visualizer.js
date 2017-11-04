@@ -41,7 +41,7 @@ const Visualizer = (fps) =>
     const clock = new THREE.Clock();
 
     /*
-     *
+     * Helper class for viewing the scene from multiple perspectives
      */
     const controls = new THREE.OrbitControls(camera, renderer.domElement);
 
@@ -76,14 +76,14 @@ const Visualizer = (fps) =>
     ////////////////////////////////////////////////////
 
     /*
-     * init():
+     * init:
      *
      * Logic for setting up the initial Three.js scene, event listeners, etc.
      */
-    const init = function() {
-        renderer.setSize( window.innerWidth, window.innerHeight );
-        renderer.domElement.id = 'appCanvas';
-        document.body.appendChild( renderer.domElement );
+    const init = function(windowElem) {
+        console.log(windowElem.clientWidth);
+        renderer.setSize(windowElem.clientWidth, windowElem.clientHeight);
+        windowElem.appendChild(renderer.domElement);
 
         camera.position.set(600, 600, 1000);
         camera.lookAt(new THREE.Vector3(0,0,0));
@@ -103,8 +103,9 @@ const Visualizer = (fps) =>
 
         // Add event listener necessary for canvas resize.
         window.addEventListener('resize', (evt) => {
-            const width  = evt.target.innerWidth,
-                  height = evt.target.innerHeight;
+            const width  = renderer.domElement.clientWidth,
+                  height = renderer.domElement.clientHeight;
+            console.log(`${width}, ${height}`);
             renderer.setSize(width, height);
             camera.aspect = width / height;
             camera.updateProjectionMatrix();

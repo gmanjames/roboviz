@@ -6,7 +6,13 @@
         <link type="text/css" rel="stylesheet" href="css/style.css" />
     </head>
     <body id='dropZone'>
-        <div id="modelCtrls" class='model-controls' data-state="expanded">
+
+        <!-- window elements to append visualizers -->
+        <div id="windowOne" class="window window-right window-active"></div>
+        <div id="windowTwo" class="window window-left"></div>
+
+        <!-- controls related to model appearance -->
+        <div id="modelCtrls" class='model-controls' data-state="collapsed">
             <span class="toggle" for="model-controls">&#9776</span>
             <h3 class="model-title">Select a model and group</h4>
             <select for="model" id="modelName">
@@ -21,7 +27,6 @@
             <div class="control control-color">
                 <h4>colors:</h4>
                 <div class="colors">
-                    <!-- TOOD: consider a slider for hue, sat., val., etc. -->
                     <a href="#" data-color="0xff0000">red</a>
                     <a href="#" data-color="0x0000ff">blue</a>
                     <a href="#" data-color="0x00ff00">green</a>
@@ -41,16 +46,18 @@
             <div class="control-transparency">
                 <h4>transparency:</h4>
                 <div class="range-with-label">
-                    <input type="range" value="1" list="modelTransparency" min="0" max="1" step="0.1">
+                    <input id="transparencyCtrl" type="range" value="1" list="modelTransparency" min="0" max="1" step="0.1">
                     <label class="right-label">1</label>
                     <label class="left-label">0</label>
                 </div>
             </div>
         </div>
 
+        <!-- controls related to managing loaded animations -->
         <div class='logfile-controls'>
         </div>
 
+        <!-- controls related to controling the display features of the animation -->
         <div id="playbackCtrls" class='playback-controls'>
             <div class="range-with-label">
                 <div id="modelSpeedVal" class="value"></div>
