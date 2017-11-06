@@ -138,13 +138,13 @@ const Visualizer = (fps) =>
         animationLoop();
 
         // Add event listener necessary for canvas resize.
-        window.addEventListener('resize', (evt) => {
-            const width  = renderer.domElement.clientWidth,
-                  height = renderer.domElement.clientHeight;
-            renderer.setSize(width, height);
-            camera.aspect = width / height;
-            camera.updateProjectionMatrix();
-        });
+        // window.addEventListener('resize', (evt) => {
+        //     const width  = renderer.domElement.clientWidth,
+        //           height = renderer.domElement.clientHeight;
+        //     renderer.setSize(width, height);
+        //     camera.aspect = width / height;
+        //     camera.updateProjectionMatrix();
+        // });
     };
 
 

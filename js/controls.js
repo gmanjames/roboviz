@@ -216,6 +216,18 @@ const Controls = () =>
     ////////////////////////////////////////////////////
 
     /*
+     * handleWindowResize:
+     *
+     * param evt - Javascript event
+     *
+     * ...
+     */
+    function handleWindowResize(evt) {
+        let numActive = Object.keys(visualizers).length;
+        console.log(numActive);
+    }
+
+    /*
      * handleDrop:
      *
      * param evt - Javascript event
@@ -473,7 +485,7 @@ const Controls = () =>
     function loadTestAnimation(animation) {
         if (activeVisualizer === undefined) {
             activeVisualizer = Visualizer(60);
-            activeVisualizer.init();
+            activeVisualizer.init(windowOne);
         }
 
         visualizers[activeVisualizer] = activeVisualizer.loadAnimation(testModels[animation]);
