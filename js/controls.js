@@ -29,6 +29,11 @@ const Controls = (modelCtrls, playbackCtrls) =>
     const colorControls = modelCtrls.querySelectorAll('.colors > a');
 
     /*
+     * Input box for teh hexidecimal information if you wanted to specify it.
+     */
+    const colorInput = modelCtrls.querySelector('#model1HexVal');
+
+    /*
      * Range type input element for controlling the opacity of the current
      * model group selected.
      */
@@ -185,6 +190,14 @@ const Controls = (modelCtrls, playbackCtrls) =>
             colorControls[i].addEventListener('click', handleColor);
         }
 
+        colorInput.addEventListener('keypress', function (e) {
+            let key = e.which || e.keyCode;
+            if (key === 13) {
+                e.target.dataset.color = e.target.value;
+                handleColor(e);
+            }
+        });
+
         for (let i = 0; i < textureControls.length; i++) {
             textureControls[i].addEventListener('click', handleTexture);
         }
@@ -295,6 +308,7 @@ const Controls = (modelCtrls, playbackCtrls) =>
      */
     function handleColor(evt) {
         let groupName = groupSelect.value;
+        console.log(evt.target.dataset.color);
         activeVisualizer.changeColor(groupName, parseInt(evt.target.dataset.color));
     }
 
