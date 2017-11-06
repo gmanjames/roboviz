@@ -308,7 +308,6 @@ const Controls = (modelCtrls, playbackCtrls) =>
      */
     function handleColor(evt) {
         let groupName = groupSelect.value;
-        console.log(evt.target.dataset.color);
         activeVisualizer.changeColor(groupName, parseInt(evt.target.dataset.color));
     }
 
