@@ -6,7 +6,13 @@
         <link type="text/css" rel="stylesheet" href="css/style.css" />
     </head>
     <body id='dropZone'>
-        <div id="modelCtrls" class='model-controls' data-state="expanded">
+
+        <!-- window elements to append visualizers -->
+        <div id="window1" class="window"></div>
+        <div id="window2" class="window window-inactive"></div>
+
+        <!-- controls related to model appearance -->
+        <div id="modelCtrls" class='model-controls' data-state="collapsed">
             <span class="toggle" for="model-controls">&#9776</span>
             <h3 class="model-title">Select a model and group</h3>
             <select for="model" id="modelName">
@@ -41,16 +47,18 @@
             <div class="control-transparency">
                 <h4>Transparency:</h4>
                 <div class="range-with-label">
-                    <input type="range" value="1" list="modelTransparency" min="0" max="1" step="0.1">
+                    <input id="transparencyCtrl" type="range" value="1" list="modelTransparency" min="0" max="1" step="0.1">
                     <label class="right-label">1</label>
                     <label class="left-label">0</label>
                 </div>
             </div>
         </div>
 
+        <!-- controls related to managing loaded animations -->
         <div class='logfile-controls'>
         </div>
 
+        <!-- controls related to controling the display features of the animation -->
         <div id="playbackCtrls" class='playback-controls'>
             <div class="range-with-label">
                 <div id="modelSpeedVal" class="value"></div>

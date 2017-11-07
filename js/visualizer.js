@@ -41,7 +41,7 @@ const Visualizer = (fps) =>
     const clock = new THREE.Clock();
 
     /*
-     *
+     * Pan, zoom, and orbit camera controls.
      */
     const controls = new THREE.OrbitControls(camera, renderer.domElement);
 
@@ -76,14 +76,13 @@ const Visualizer = (fps) =>
     ////////////////////////////////////////////////////
 
     /*
-     * init():
+     * init:
      *
      * Logic for setting up the initial Three.js scene, event listeners, etc.
      */
-    const init = function() {
-        renderer.setSize( window.innerWidth, window.innerHeight );
-        renderer.domElement.id = 'appCanvas';
-        document.body.appendChild( renderer.domElement );
+    const init = function(windowElem) {
+        renderer.setSize(windowElem.clientWidth, windowElem.clientHeight);
+        windowElem.appendChild(renderer.domElement);
 
         camera.position.set(600, 600, 1000);
         camera.lookAt(new THREE.Vector3(0,0,0));
@@ -98,17 +97,44 @@ const Visualizer = (fps) =>
         let ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
         scene.add(ambientLight);
 
+		// Scene background.
+		renderer.gammaInput = true;
+		renderer.gammaOutput = true;
+		renderer.setClearColor(0x001a0d, 1.0);
+		renderer.shadowMapEnabled = true;
+
+		// Grid floor and fog to add perspective for model movement.
+		scene.fog = new THREE.Fog(0x001a0d, 1500, 4500);
+		var grid = new THREE.GridHelper(10000, 100, 0x001a0d, 0x006633);
+		scene.add(grid);
+
+
+		// Ground plane geometry matching grid size.
+        var groundGeometry = new THREE.PlaneGeometry(10000, 10000, 1, 1);
+
+		// Transparent and not-shiny ground plane material.
+        var groundMaterial = new THREE.MeshLambertMaterial({
+			color: 0x4dffa6,
+			transparent: true,
+			opacity: 0.6,
+			side: THREE.DoubleSide,
+			emissive: 0x4dffa6,
+			// Helps solve z-plane clipping by off setting the ground plane from the grid.
+			polygonOffset: true,
+			polygonOffsetFactor: 1.0,
+			polygonOffsetUnits: 4.0
+		});
+
+		// Create ground plane and rotate into horizontal position.
+        var ground = new THREE.Mesh(groundGeometry, groundMaterial);
+        ground.receiveShadow = true;
+        ground.rotation.x = -0.5 * Math.PI;
+
+        // Add the ground plane to the scene.
+        scene.add(ground);
+
         // Enter animation loop.
         animationLoop();
-
-        // Add event listener necessary for canvas resize.
-        window.addEventListener('resize', (evt) => {
-            const width  = evt.target.innerWidth,
-                  height = evt.target.innerHeight;
-            renderer.setSize(width, height);
-            camera.aspect = width / height;
-            camera.updateProjectionMatrix();
-        });
     };
 
 
@@ -303,24 +329,13 @@ const Visualizer = (fps) =>
 
 
     /*
-     * play:
+     * togglePlay:
      *
-     * Begin or resume the animation
+     * Pause or resume animation
      */
-    const play = function() {
-        isPlaying = true;
+    const togglePlay = function() {
+        isPlaying = !isPlaying;
     };
-
-
-    /*
-     * pause:
-     *
-     * Halt the animation at current position
-     */
-    const pause = function() {
-        isPlaying = false;
-    };
-
 
     /*
      * setTime:
@@ -405,7 +420,7 @@ const Visualizer = (fps) =>
         function (error) {
           console.log( 'The texture couldn\'t be loaded.' );
         });
-    }
+    };
 
 
     /*
@@ -422,20 +437,35 @@ const Visualizer = (fps) =>
                 group.children[0].material.opacity = transparency;
             }
         }
-    }
+    };
+
+
+    /*
+     * resize:
+     *
+     * param width - New width of the visualizer
+     * param height - New height for the visualizer
+     *
+     * ...
+     */
+    const resize = function(width, height) {
+        renderer.setSize(width, height);
+        camera.aspect = width / height;
+        camera.updateProjectionMatrix();
+    };
 
 
     // Constructed application object
     return {
         init,
         loadAnimation,
-        play,
-        pause,
-        resetCamera,        
+        togglePlay,
+        resetCamera,
         setSpeed,
         setTime,
         changeColor,
         changeTexture,
-        changeTransparency
+        changeTransparency,
+        resize
     };
 };
