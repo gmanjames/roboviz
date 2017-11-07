@@ -366,7 +366,6 @@ const Controls = () =>
      * current state of the play/pause button.
      */
     function handlePlayPause(evt) {
-        console.log(activeVisualizer);
         const state = evt.target.dataset.toggle;
         if (state === "play") {
             evt.target.dataset.toggle = "pause";
@@ -530,7 +529,6 @@ const Controls = () =>
             inactive.style.right = '0';
             inactive.style.width = '50%';
         }
-        //resizeVisualizers();
     }
 
 

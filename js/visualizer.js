@@ -81,7 +81,6 @@ const Visualizer = (fps) =>
      * Logic for setting up the initial Three.js scene, event listeners, etc.
      */
     const init = function(windowElem) {
-        console.log(controls);
         renderer.setSize(windowElem.clientWidth, windowElem.clientHeight);
         windowElem.appendChild(renderer.domElement);
 
