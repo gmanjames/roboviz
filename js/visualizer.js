@@ -472,7 +472,7 @@ const Visualizer = (fps) =>
         loadAnimation,
         play,
         pause,
-        resetCamera,        
+        resetCamera,
         setSpeed,
         setTime,
         changeColor,

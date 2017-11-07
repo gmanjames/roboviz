@@ -36,6 +36,9 @@ const Controls = () =>
     const colorControls = document.querySelectorAll('.colors > a');
 
     /*
+<<<<<<< HEAD
+     * Control for the opacity of the currently selected model group
+=======
      * Input box for teh hexidecimal information if you wanted to specify it.
      */
     const colorInput = modelCtrls.querySelector('#model1HexVal');
@@ -43,12 +46,17 @@ const Controls = () =>
     /*
      * Range type input element for controlling the opacity of the current
      * model group selected.
+>>>>>>> master
      */
     const transparency = document.getElementById('transparencyCtrl');
 
     /*
+<<<<<<< HEAD
+     * Controls for changing the texture of the currently selected model group
+=======
      * Elements containing url's to specific textures for selecting a texture
      * to be applied to the current model group selected.
+>>>>>>> master
      */
     const textureControls = document.querySelectorAll('.textures > a');
 
@@ -58,12 +66,16 @@ const Controls = () =>
     const playPauseBtn = document.getElementById('playPauseBtn');
 
     /*
+<<<<<<< HEAD
+     * Control for adjusting the speed of the animation
+=======
      * Button for reseting the camera
      */
     const resetBtn = playbackCtrls.querySelector('#resetBtn');
 
     /*
      *
+>>>>>>> master
      */
     const playbackSpeed = document.getElementById('modelSpeed');
 
