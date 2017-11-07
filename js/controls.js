@@ -39,7 +39,7 @@ const Controls = () =>
      * Control for the opacity of the currently selected model group
      * Input box for teh hexidecimal information if you wanted to specify it.
      */
-    const colorInput = modelCtrls.querySelector('#model1HexVal');
+    const colorInput = document.getElementById('model1HexVal');
 
     /*
      * Range type input element for controlling the opacity of the current
@@ -61,7 +61,7 @@ const Controls = () =>
     /*
      * Button for reseting the camera
      */
-    const resetBtn = playbackCtrls.querySelector('#resetBtn');
+    const resetBtn = document.getElementById('resetBtn');
 
     /*
      *
