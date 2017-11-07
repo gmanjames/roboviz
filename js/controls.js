@@ -495,7 +495,7 @@ const Controls = () =>
               newWindow = getWindow(id);
         activeVisualizer = instance;
         newWindow.innerHTML = '';
-        instance.init(getWindow(id));
+        instance.init(newWindow);
         visualizers[id] = Object.assign({id, instance}, instance.loadAnimation(dat));
         return id;
     }
@@ -526,6 +526,7 @@ const Controls = () =>
         else if (numWindows === 2) {
             active.style.left = '0';
             active.style.width = '50%';
+            inactive.classList.remove('window-inactive');
             inactive.style.right = '0';
             inactive.style.width = '50%';
         }
