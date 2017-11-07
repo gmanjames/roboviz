@@ -3,95 +3,103 @@
 /**
  * controls.js:
  */
-const Controls = (modelCtrls, playbackCtrls) =>
+const Controls = () =>
 {
     /*
-     * The area onto which a log-file may be dragged and uploaded.
+     * Maximum number of visualizations to display
+     */
+    const MAX_VISUALIZERS = 2;
+
+    /*
+     * Default frames per second to run animations
+     */
+    const DEFAULT_FPS = 60;
+
+    /*
+     *
      */
     const dropZone = document.getElementById('dropZone');
 
     /*
-     * Select element used to choose a particular animation if multiple are
-     * loaded.
+     * Name of the currently selected model
      */
-    const modelSelect = modelCtrls.querySelector('#modelName')
+    const modelSelect = document.getElementById('modelName')
 
     /*
-     * The name of a single group that is a component of the current model
-     * selected.
+     * Name of the currently selected model group
      */
-    const groupSelect = modelCtrls.querySelector('#groupName');
+    const groupSelect = document.getElementById('groupName');
 
     /*
-     * Elements containing hexidecimal information for selecting a color for
-     * the current model group selected.
+     * Controls for changing the color of the currently selected model group
      */
-    const colorControls = modelCtrls.querySelectorAll('.colors > a');
+    const colorControls = document.querySelectorAll('.colors > a');
 
     /*
+     * Control for the opacity of the currently selected model group
      * Input box for teh hexidecimal information if you wanted to specify it.
      */
-    const colorInput = modelCtrls.querySelector('#model1HexVal');
+    const colorInput = document.getElementById('model1HexVal');
 
     /*
      * Range type input element for controlling the opacity of the current
      * model group selected.
      */
-    const transparency = modelCtrls.querySelector('.control-transparency input[type="range"]');
+    const transparency = document.getElementById('transparencyCtrl');
 
     /*
      * Elements containing url's to specific textures for selecting a texture
      * to be applied to the current model group selected.
      */
-    const textureControls = modelCtrls.querySelectorAll('.textures > a');
+    const textureControls = document.querySelectorAll('.textures > a');
 
     /*
      * Button for pausing and playing
      */
-    const playPauseBtn = playbackCtrls.querySelector('#playPauseBtn');
+    const playPauseBtn = document.getElementById('playPauseBtn');
 
     /*
      * Button for reseting the camera
      */
-    const resetBtn = playbackCtrls.querySelector('#resetBtn');
+    const resetBtn = document.getElementById('resetBtn');
 
     /*
      *
      */
-    const playbackSpeed = playbackCtrls.querySelector('#modelSpeed');
+    const playbackSpeed = document.getElementById('modelSpeed');
 
     /*
-     *
+     * Control for setting the current position in time of the animation
      */
-    const playbackTime = playbackCtrls.querySelector('#modelTime');
+    const playbackTime = document.getElementById('modelTime');
 
     /*
-     *
+     * Visual display of the animation's position in time
      */
-    const playbackTimeVal = playbackCtrls.querySelector('#modelTimeVal');
+    const playbackTimeVal = document.getElementById('modelTimeVal');
 
     /*
-     *
+     * Label for the total duration of the animation
      */
-    const rightTimeLabel = playbackCtrls.querySelector(".right-label[for='modelTime']");
+    const rightTimeLabel = document.querySelector(".right-label[for='modelTime']");
 
     /*
-     *
+     * Label for the start time of the animation
      */
-    const leftTimeLabel = playbackCtrls.querySelector(".left-label[for='modelTime']");
+    const leftTimeLabel = document.querySelector(".left-label[for='modelTime']");
 
     /*
-     *
+     * Visual display of the speed the animation is playing at
      */
-    const playbackSdVal = playbackCtrls.querySelector('#modelSpeedVal');
+    const playbackSdVal = document.getElementById('modelSpeedVal');
 
     /*
-     * List to contain visualizer objects
+     * Object to contain loaded visualizers and associated info
      */
-    const visualizers      = {};
+    const visualizers = {};
 
     /*
-     *
+     * The visualizer for which the control options currently apply
      */
     let activeVisualizer;
 
@@ -99,11 +107,11 @@ const Controls = (modelCtrls, playbackCtrls) =>
     /*
      * init:
      *
-     * ...
+     * Init method called to hookup graphical components with visualizer
+     * functions.
      */
     const init = function() {
 
-        // Check url for logfile referenece, or test model number.
         const searchParams = new URLSearchParams(window.location.search);
         if (searchParams.has('logref')) {
             loadRefAnimation(searchParams.get('logref'));
@@ -125,7 +133,14 @@ const Controls = (modelCtrls, playbackCtrls) =>
      * updated time value in order to update control element's values.
      */
     const notify = function(time) {
-        time = time.toPrecision(3);
+
+        if (time < 1 && time >= 0) {
+            time = time.toPrecision(2);
+        }
+        else {
+            time = time.toPrecision(3);
+        }
+
         playbackTime.value = time;
         playbackTimeVal.innerHTML = time;
     };
@@ -137,7 +152,8 @@ const Controls = (modelCtrls, playbackCtrls) =>
      * param modelInfo - The animation information for the currently active
      * visualizer.
      *
-     * ...
+     * Function to update the various controls options with the information
+     * associated with the currently active visualizer.
      */
     function updateControls(modelInfo) {
 
@@ -156,7 +172,10 @@ const Controls = (modelCtrls, playbackCtrls) =>
         for (let vis in visualizers) {
             modelNumber++;
             let option = document.createElement('option');
-            option.value = 'model-' + modelNumber;
+            if (modelNumber === modelInfo.id) {
+                option.selected = 'selected';
+            }
+            option.value = modelNumber;
             option.appendChild(document.createTextNode('model-' + modelNumber));
             modelSelect.appendChild(option);
         }
@@ -177,6 +196,9 @@ const Controls = (modelCtrls, playbackCtrls) =>
      */
     function addEventListeners() {
 
+        // Update size of visualizers
+        window.addEventListener('resize', handleWindowResize);
+
         // Drop zone event listeners
         dropZone.addEventListener('drop', handleDrop, false);
         dropZone.addEventListener('dragover', handleDragOver, false);
@@ -184,7 +206,6 @@ const Controls = (modelCtrls, playbackCtrls) =>
         // Model controls
         modelCtrls.querySelector('.toggle[for="model-controls"]').addEventListener('click', handleMenuToggle);
         modelSelect.addEventListener('change', handleModelSelect);
-        groupSelect.addEventListener('change', handleGroupSelect);
 
         for (let i = 0; i < colorControls.length; i++) {
             colorControls[i].addEventListener('click', handleColor);
@@ -217,6 +238,17 @@ const Controls = (modelCtrls, playbackCtrls) =>
     ////////////////////////////////////////////////////
 
     /*
+     * handleWindowResize:
+     *
+     * param evt - Javascript event
+     *
+     * ...
+     */
+    function handleWindowResize(evt) {
+        resizeVisualizers();
+    }
+
+    /*
      * handleDrop:
      *
      * param evt - Javascript event
@@ -226,7 +258,6 @@ const Controls = (modelCtrls, playbackCtrls) =>
      */
     function handleDrop(evt) {
 
-        evt.stopPropagation();
         evt.preventDefault();
 
         document.getElementById('progress-holder').style.display = 'inline';
@@ -235,13 +266,9 @@ const Controls = (modelCtrls, playbackCtrls) =>
         loadDroppedAnimation(files[0]).then((evt) => {
             return JSON.parse(evt.target.result);
         }).then((dat) => {
-            if (activeVisualizer === undefined) {
-                activeVisualizer = Visualizer(60);
-                activeVisualizer.init();
-            }
-
-            visualizers[activeVisualizer] = activeVisualizer.loadAnimation(dat);
-            updateControls(visualizers[activeVisualizer]);
+            const id = loadNewVisualizer(dat);
+            resizeVisualizers();
+            updateControls(visualizers[id]);
         });
     }
 
@@ -255,7 +282,7 @@ const Controls = (modelCtrls, playbackCtrls) =>
      */
     function handleDragOver(evt) {
         evt.preventDefault();
-        evt.dataTransfer.dropEffect = 'copy'; // Explicitly show this is a copy.
+        evt.dataTransfer.dropEffect = 'copy';
     }
 
 
@@ -284,19 +311,9 @@ const Controls = (modelCtrls, playbackCtrls) =>
      * ...
      */
     function handleModelSelect(evt) {
-        console.log(evt.target.value);
-    }
-
-
-    /*
-     * handleGroupSelect
-     *
-     * param evt - Javascript evt
-     *
-     * ...
-     */
-    function handleGroupSelect(evt) {
-        console.log(evt.target.value);
+        const id = parseInt(evt.target.value);
+        updateControls(visualizers[id]);
+        activeVisualizer = visualizers[id].instance;
     }
 
 
@@ -353,12 +370,11 @@ const Controls = (modelCtrls, playbackCtrls) =>
     function handlePlayPause(evt) {
         const state = evt.target.dataset.toggle;
         if (state === "play") {
-            activeVisualizer.pause();
             evt.target.dataset.toggle = "pause";
         } else {
-            activeVisualizer.play();
             evt.target.dataset.toggle = "play";
         }
+        activeVisualizer.togglePlay();
     }
 
 
@@ -397,18 +413,6 @@ const Controls = (modelCtrls, playbackCtrls) =>
     function handleSpeed(evt) {
         activeVisualizer.setSpeed(parseFloat(evt.target.value));
         playbackSdVal.innerHTML = evt.target.value;
-    }
-
-
-    /*
-     * notifyOfTime:
-     *
-     * param timeVal - Current time value of the active visualizer.
-     *
-     * Accept time value from the visualizer neccessary to update controls.
-     */
-    function notifyOfTime(timeVal) {
-        playbackTimeVal.innerHTML = timeVal;
     }
 
 
@@ -460,17 +464,11 @@ const Controls = (modelCtrls, playbackCtrls) =>
      * successful aqcuisition of the resource, in this case, the json file.
      */
     function loadRefAnimation(urlRef) {
-        return () => {
-            fetch(urlRef).then((res) => res.json()).then((data) => {
-                if (activeVisualizer === undefined) {
-                    activeVisualizer = Visualizer(60);
-                    activeVisualizer.init();
-                }
-
-                visualizers[activeVisualizer] = activeVisualizer.loadAnimation(data);
-                updateControls(visualizers[activeVisualizer]);
-            });
-        }
+        fetch(urlRef).then((res) => res.json()).then((data) => {
+            const id = loadNewVisualizer(data);
+            resizeVisualizers();
+            updateControls(visualizers[id]);
+        });
     }
 
 
@@ -483,15 +481,75 @@ const Controls = (modelCtrls, playbackCtrls) =>
      * model array at the specified index.
      */
     function loadTestAnimation(animation) {
-        if (activeVisualizer === undefined) {
-            activeVisualizer = Visualizer(60);
-            activeVisualizer.init();
-        }
-
-        visualizers[activeVisualizer] = activeVisualizer.loadAnimation(testModels[animation]);
-        updateControls(visualizers[activeVisualizer]);
+        const id = loadNewVisualizer(testModels[animation]);
+        resizeVisualizers();
+        updateControls(visualizers[id]);
     }
 
+
+    function loadNewVisualizer(dat) {
+        const numVisualizers = Object.keys(visualizers).length;
+        let id;
+        if (numVisualizers === 0) {
+            id = 1;
+        }
+        else if (numVisualizers === 1) {
+            adjustWindows(2);
+            id = 2;
+        }
+        else if (numVisualizers === 2) {
+            id = getActive();
+        }
+
+        const instance  = Visualizer(DEFAULT_FPS),
+              newWindow = getWindow(id);
+        activeVisualizer = instance;
+        newWindow.innerHTML = '';
+        instance.init(newWindow);
+        visualizers[id] = Object.assign({id, instance}, instance.loadAnimation(dat));
+        return id;
+    }
+
+
+    function getActive() {
+        let num = modelSelect.value;
+        if (num === undefined) {
+            return 1;
+        }
+
+        return num;
+    }
+
+
+    function getWindow(num) {
+        return document.getElementById('window' + num);
+    }
+
+
+    function adjustWindows(numWindows) {
+        const inactive = getWindow(((getActive() + 1) % MAX_VISUALIZERS) + 1),
+              active   = getWindow(getActive());
+        if (numWindows === 1) {
+            inactive.classList.add('window-inactive');
+            active.style.width = '100%';
+        }
+        else if (numWindows === 2) {
+            active.style.left = '0';
+            active.style.width = '50%';
+            inactive.classList.remove('window-inactive');
+            inactive.style.right = '0';
+            inactive.style.width = '50%';
+        }
+    }
+
+
+    function resizeVisualizers() {
+        for (const vis of Object.keys(visualizers)) {
+            const width  = getWindow(visualizers[vis].id).clientWidth,
+                  height = getWindow(visualizers[vis].id).clientHeight;
+            visualizers[vis].instance.resize(width, height);
+        }
+    }
 
     // Constructed Controls object
     return {
