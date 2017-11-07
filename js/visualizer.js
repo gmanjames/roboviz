@@ -329,24 +329,13 @@ const Visualizer = (fps) =>
 
 
     /*
-     * play:
+     * togglePlay:
      *
-     * Begin or resume the animation
+     * Pause or resume animation
      */
-    const play = function() {
-        isPlaying = true;
+    const togglePlay = function() {
+        isPlaying = !isPlaying;
     };
-
-
-    /*
-     * pause:
-     *
-     * Halt the animation at current position
-     */
-    const pause = function() {
-        isPlaying = false;
-    };
-
 
     /*
      * setTime:
@@ -470,8 +459,7 @@ const Visualizer = (fps) =>
     return {
         init,
         loadAnimation,
-        play,
-        pause,
+        togglePlay,
         resetCamera,
         setSpeed,
         setTime,
