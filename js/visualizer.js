@@ -373,6 +373,18 @@ const Visualizer = (fps) =>
 
 
     /*
+     * resetCamera
+     *
+     * Reset the camera to the default values when the camera was created.
+     */
+    const resetCamera = function () {
+        camera.position.set(600, 600, 1000);
+        camera.lookAt(new THREE.Vector3(0, 0, 0));
+        camera.updateProjectionMatrix();
+    }
+
+
+    /*
      * changeColor:
      *
      * param modelName - String of the model name to have it's color changed
@@ -417,7 +429,7 @@ const Visualizer = (fps) =>
           console.log( (xhr.loaded / xhr.total * 100) + '% loaded' );
         },
         function (error) {
-          console.log( 'An error happened' );
+          console.log( 'The texture couldn\'t be loaded.' );
         });
     };
 
@@ -460,6 +472,7 @@ const Visualizer = (fps) =>
         loadAnimation,
         play,
         pause,
+        resetCamera,        
         setSpeed,
         setTime,
         changeColor,

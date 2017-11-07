@@ -36,12 +36,19 @@ const Controls = () =>
     const colorControls = document.querySelectorAll('.colors > a');
 
     /*
-     * Control for the opacity of the currently selected model group
+     * Input box for teh hexidecimal information if you wanted to specify it.
+     */
+    const colorInput = modelCtrls.querySelector('#model1HexVal');
+
+    /*
+     * Range type input element for controlling the opacity of the current
+     * model group selected.
      */
     const transparency = document.getElementById('transparencyCtrl');
 
     /*
-     * Controls for changing the texture of the currently selected model group
+     * Elements containing url's to specific textures for selecting a texture
+     * to be applied to the current model group selected.
      */
     const textureControls = document.querySelectorAll('.textures > a');
 
@@ -51,7 +58,12 @@ const Controls = () =>
     const playPauseBtn = document.getElementById('playPauseBtn');
 
     /*
-     * Control for adjusting the speed of the animation
+     * Button for reseting the camera
+     */
+    const resetBtn = playbackCtrls.querySelector('#resetBtn');
+
+    /*
+     *
      */
     const playbackSpeed = document.getElementById('modelSpeed');
 
@@ -198,6 +210,14 @@ const Controls = () =>
             colorControls[i].addEventListener('click', handleColor);
         }
 
+        colorInput.addEventListener('keypress', function (e) {
+            let key = e.which || e.keyCode;
+            if (key === 13) {
+                e.target.dataset.color = e.target.value;
+                handleColor(e);
+            }
+        });
+
         for (let i = 0; i < textureControls.length; i++) {
             textureControls[i].addEventListener('click', handleTexture);
         }
@@ -206,6 +226,7 @@ const Controls = () =>
 
         // Playback controls
         playPauseBtn.addEventListener('click', handlePlayPause);
+        resetBtn.addEventListener('click', handleResetCamera);
         playbackSpeed.addEventListener('input', handleSpeed);
         playbackTime.addEventListener('input', handleTime);
     }
@@ -298,7 +319,8 @@ const Controls = () =>
      *
      * param evt - Javascript evt
      *
-     * ...
+     * Takes the current model name and passes that to the changeColor function
+     * in addition to the current hex value.
      */
     function handleColor(evt) {
         let groupName = groupSelect.value;
@@ -311,7 +333,8 @@ const Controls = () =>
      *
      * param evt - Javascript evt
      *
-     * ...
+     * Takes the current model name and passes that to the changeTexture function
+     * in addition to the name of the image which has the rest of the url applied.
      */
     function handleTexture(evt) {
         let groupName = groupSelect.value;
@@ -324,7 +347,8 @@ const Controls = () =>
      *
      * param evt - Javascript event
      *
-     * ...
+     * Takes the current model name and passes that to the changeTransparency function
+     * in addition to the current transparency value.
      */
     function handleTransparency(evt) {
         let groupName = groupSelect.value;
@@ -350,6 +374,18 @@ const Controls = () =>
             activeVisualizer.play();
             evt.target.dataset.toggle = "play";
         }
+    }
+
+
+    /*
+     * handleResetCamera
+     *
+     * param evt - Javascript event
+     *
+     * Event handler for reseting the camera to the default perspective.
+     */
+    function handleResetCamera(evt) {
+        activeVisualizer.resetCamera();
     }
 
 
