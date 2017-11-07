@@ -8,12 +8,12 @@ const Visualizer = (fps) =>
     /*
      * Three.js scene to render.
      */
-    const scene    = new THREE.Scene();
+    const scene = new THREE.Scene();
 
     /*
      * Simple perspective camera with aspect ratio, near and far clipping planes.
      */
-    const camera   = new THREE.PerspectiveCamera( 45, window.innerWidth / window.innerHeight, 0.1, 4000);
+    const camera = new THREE.PerspectiveCamera( 45, window.innerWidth / window.innerHeight, 0.1, 4000);
 
     /*
      * The visualizer that also holds the camera element.
@@ -38,10 +38,10 @@ const Visualizer = (fps) =>
     /*
      * Clock used for tracking application time.
      */
-    const clock    = new THREE.Clock();
+    const clock = new THREE.Clock();
 
     /*
-     *
+     * Pan, zoom, and orbit camera controls.
      */
     const controls = new THREE.OrbitControls(camera, renderer.domElement);
 
@@ -76,14 +76,13 @@ const Visualizer = (fps) =>
     ////////////////////////////////////////////////////
 
     /*
-     * init():
+     * init:
      *
      * Logic for setting up the initial Three.js scene, event listeners, etc.
      */
-    const init = function() {
-        renderer.setSize( window.innerWidth, window.innerHeight );
-        renderer.domElement.id = 'appCanvas';
-        document.body.appendChild( renderer.domElement );
+    const init = function(windowElem) {
+        renderer.setSize(windowElem.clientWidth, windowElem.clientHeight);
+        windowElem.appendChild(renderer.domElement);
 
         camera.position.set(600, 600, 1000);
         camera.lookAt(new THREE.Vector3(0,0,0));
@@ -98,22 +97,51 @@ const Visualizer = (fps) =>
         let ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
         scene.add(ambientLight);
 
+		// Scene background.
+		renderer.gammaInput = true;
+		renderer.gammaOutput = true;
+		renderer.setClearColor(0x001a0d, 1.0);
+		renderer.shadowMapEnabled = true;
+
+		// Grid floor and fog to add perspective for model movement.
+		scene.fog = new THREE.Fog(0x001a0d, 1500, 4500);
+		var grid = new THREE.GridHelper(10000, 100, 0x001a0d, 0x006633);
+		scene.add(grid);
+
+
+		// Ground plane geometry matching grid size.
+        var groundGeometry = new THREE.PlaneGeometry(10000, 10000, 1, 1);
+
+		// Transparent and not-shiny ground plane material.
+        var groundMaterial = new THREE.MeshLambertMaterial({
+			color: 0x4dffa6,
+			transparent: true,
+			opacity: 0.6,
+			side: THREE.DoubleSide,
+			emissive: 0x4dffa6,
+			// Helps solve z-plane clipping by off setting the ground plane from the grid.
+			polygonOffset: true,
+			polygonOffsetFactor: 1.0,
+			polygonOffsetUnits: 4.0
+		});
+
+		// Create ground plane and rotate into horizontal position.
+        var ground = new THREE.Mesh(groundGeometry, groundMaterial);
+        ground.receiveShadow = true;
+        ground.rotation.x = -0.5 * Math.PI;
+
+        // Add the ground plane to the scene.
+        scene.add(ground);
+
         // Enter animation loop.
         animationLoop();
-
-        // Add event listener necessary for canvas resize.
-        window.addEventListener('resize', (evt) => {
-            const width  = evt.target.innerWidth,
-                  height = evt.target.innerHeight;
-            renderer.setSize(width, height);
-            camera.aspect = width / height;
-            camera.updateProjectionMatrix();
-        });
     };
 
 
     /*
-     * createModel():
+     * createModel:
+     *
+     * param data - JSON data for model parsed from file.
      *
      * Extract model information from JSON data.
      */
@@ -167,7 +195,7 @@ const Visualizer = (fps) =>
 
 
     /*
-     * animationLoop():
+     * animationLoop:
      *
      * Game loop implementation for updating logical coordinates of models and
      * rendering the scene.
@@ -194,7 +222,7 @@ const Visualizer = (fps) =>
 
 
     /*
-     * initLoading():
+     * initLoading:
      *
      * Called to begin loading animation. After the data is retrieved from the
      * log-file the the loading animation initialized by this function should
@@ -207,9 +235,10 @@ const Visualizer = (fps) =>
 
 
     /*
-     * update():
+     * update:
      *
-     * ...
+     * Progress the time of the animation that will be used to calculate the
+     * current frame. Notify the controls of the change in time.
      */
     function update() {
 
@@ -226,7 +255,7 @@ const Visualizer = (fps) =>
 
 
     /*
-     * updateModel():
+     * updateModel:
      *
      * ...
      */
@@ -237,6 +266,8 @@ const Visualizer = (fps) =>
         }
 
         let frame = Math.round((currentTime % animation.stop) / animation.step);
+
+        window.controls.notify(frame * animation.step);
 
         for (const group of animation.model.children) {
             group.position.set(animation.frames[frame][group.name].position[0],
@@ -253,7 +284,7 @@ const Visualizer = (fps) =>
 
 
     /*
-     * render():
+     * render:
      *
      * ...
      */
@@ -298,24 +329,13 @@ const Visualizer = (fps) =>
 
 
     /*
-     * play:
+     * togglePlay:
      *
-     * Begin or resume the animation
+     * Pause or resume animation
      */
-    const play = function() {
-        isPlaying = true;
+    const togglePlay = function() {
+        isPlaying = !isPlaying;
     };
-
-
-    /*
-     * pause:
-     *
-     * Halt the animation at current position
-     */
-    const pause = function() {
-        isPlaying = false;
-    };
-
 
     /*
      * setTime:
@@ -342,6 +362,18 @@ const Visualizer = (fps) =>
 
 
     /*
+     * resetCamera
+     *
+     * Reset the camera to the default values when the camera was created.
+     */
+    const resetCamera = function () {
+        camera.position.set(600, 600, 1000);
+        camera.lookAt(new THREE.Vector3(0, 0, 0));
+        camera.updateProjectionMatrix();
+    }
+
+
+    /*
      * changeColor:
      *
      * param modelName - String of the model name to have it's color changed
@@ -349,9 +381,9 @@ const Visualizer = (fps) =>
      *
      * Creates a new material in order to apply the new color
      */
-    const changeColor = function(modelName, color) {
+    const changeColor = function(groupName, color) {
         for (const group of animation.model.children) {
-            if(group.name==modelName) {
+            if (group.name == groupName) {
                 const oldTransparency = group.children[0].material.opacity;
                 let newMaterial = new THREE.MeshLambertMaterial( { color: color, overdraw: 0.5 } );
                 group.children[0].material = newMaterial;
@@ -386,9 +418,9 @@ const Visualizer = (fps) =>
           console.log( (xhr.loaded / xhr.total * 100) + '% loaded' );
         },
         function (error) {
-          console.log( 'An error happened' );
+          console.log( 'The texture couldn\'t be loaded.' );
         });
-    }
+    };
 
 
     /*
@@ -405,19 +437,35 @@ const Visualizer = (fps) =>
                 group.children[0].material.opacity = transparency;
             }
         }
-    }
+    };
+
+
+    /*
+     * resize:
+     *
+     * param width - New width of the visualizer
+     * param height - New height for the visualizer
+     *
+     * ...
+     */
+    const resize = function(width, height) {
+        renderer.setSize(width, height);
+        camera.aspect = width / height;
+        camera.updateProjectionMatrix();
+    };
 
 
     // Constructed application object
     return {
         init,
         loadAnimation,
-        play,
-        pause,
+        togglePlay,
+        resetCamera,
         setSpeed,
         setTime,
         changeColor,
         changeTexture,
-        changeTransparency
+        changeTransparency,
+        resize
     };
 };
