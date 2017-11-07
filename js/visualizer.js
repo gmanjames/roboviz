@@ -81,7 +81,6 @@ const Visualizer = (fps) =>
      * Logic for setting up the initial Three.js scene, event listeners, etc.
      */
     const init = function(windowElem) {
-        console.log(windowElem.clientWidth);
         renderer.setSize(windowElem.clientWidth, windowElem.clientHeight);
         windowElem.appendChild(renderer.domElement);
 
@@ -136,15 +135,6 @@ const Visualizer = (fps) =>
 
         // Enter animation loop.
         animationLoop();
-
-        // Add event listener necessary for canvas resize.
-        // window.addEventListener('resize', (evt) => {
-        //     const width  = renderer.domElement.clientWidth,
-        //           height = renderer.domElement.clientHeight;
-        //     renderer.setSize(width, height);
-        //     camera.aspect = width / height;
-        //     camera.updateProjectionMatrix();
-        // });
     };
 
 
@@ -458,7 +448,9 @@ const Visualizer = (fps) =>
      * ...
      */
     const resize = function(width, height) {
-
+        renderer.setSize(width, height);
+        camera.aspect = width / height;
+        camera.updateProjectionMatrix();
     };
 
 

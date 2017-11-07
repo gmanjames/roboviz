@@ -11,14 +11,14 @@ const Controls = () =>
     const MAX_VISUALIZERS = 2;
 
     /*
-     *
+     * Default frames per second to run animations
      */
-    const windowOne = document.getElementById('windowOne');
+    const DEFAULT_FPS = 60;
 
     /*
      *
      */
-    const windowTwo = document.getElementById('windowTwo');
+    const dropZone = document.getElementById('dropZone');
 
     /*
      * Name of the currently selected model
@@ -159,7 +159,10 @@ const Controls = () =>
         for (let vis in visualizers) {
             modelNumber++;
             let option = document.createElement('option');
-            option.value = 'model-' + modelNumber;
+            if (modelNumber === modelInfo.id) {
+                option.selected = 'selected';
+            }
+            option.value = modelNumber;
             option.appendChild(document.createTextNode('model-' + modelNumber));
             modelSelect.appendChild(option);
         }
@@ -184,15 +187,12 @@ const Controls = () =>
         window.addEventListener('resize', handleWindowResize);
 
         // Drop zone event listeners
-        windowOne.addEventListener('drop', handleDrop, false);
-        windowOne.addEventListener('dragover', handleDragOver, false);
-        windowTwo.addEventListener('drop', handleDrop, false);
-        windowTwo.addEventListener('dragover', handleDragOver, false);
+        dropZone.addEventListener('drop', handleDrop, false);
+        dropZone.addEventListener('dragover', handleDragOver, false);
 
         // Model controls
         modelCtrls.querySelector('.toggle[for="model-controls"]').addEventListener('click', handleMenuToggle);
         modelSelect.addEventListener('change', handleModelSelect);
-        groupSelect.addEventListener('change', handleGroupSelect);
 
         for (let i = 0; i < colorControls.length; i++) {
             colorControls[i].addEventListener('click', handleColor);
@@ -223,8 +223,7 @@ const Controls = () =>
      * ...
      */
     function handleWindowResize(evt) {
-        let numActive = Object.keys(visualizers).length;
-        console.log(numActive);
+        resizeVisualizers();
     }
 
     /*
@@ -243,18 +242,9 @@ const Controls = () =>
         loadDroppedAnimation(files[0]).then((evt) => {
             return JSON.parse(evt.target.result);
         }).then((dat) => {
-
-            if (Object.keys(visualizers).length === MAX_VISUALIZERS) {
-                console.log("destroy one");
-                visualizers[activeVisualizer] = null;
-                delete visualizers[activeVisualizer];
-            }
-
-            activeVisualizer = Visualizer(60);
-            activeVisualizer.init(evt.target);
-            visualizers[activeVisualizer] = activeVisualizer.loadAnimation(dat);
-
-            updateControls(visualizers[activeVisualizer]);
+            const id = loadNewVisualizer(dat);
+            resizeVisualizers();
+            updateControls(visualizers[id]);
         });
     }
 
@@ -267,17 +257,8 @@ const Controls = () =>
      * ...
      */
     function handleDragOver(evt) {
-
         evt.preventDefault();
-
         evt.dataTransfer.dropEffect = 'copy';
-
-        if (Object.keys(visualizers).length === 1) {
-            windowOne.style.height = '100%';
-            windowOne.style.width  = '50%';
-            windowTwo.style.height = '100%';
-            windowTwo.style.width  = '50%';
-        }
     }
 
 
@@ -306,19 +287,9 @@ const Controls = () =>
      * ...
      */
     function handleModelSelect(evt) {
-        console.log(evt.target.value);
-    }
-
-
-    /*
-     * handleGroupSelect
-     *
-     * param evt - Javascript evt
-     *
-     * ...
-     */
-    function handleGroupSelect(evt) {
-        console.log(evt.target.value);
+        const id = parseInt(evt.target.value);
+        updateControls(visualizers[id]);
+        activeVisualizer = visualizers[id].instance;
     }
 
 
@@ -370,6 +341,7 @@ const Controls = () =>
      * current state of the play/pause button.
      */
     function handlePlayPause(evt) {
+        console.log(activeVisualizer);
         const state = evt.target.dataset.toggle;
         if (state === "play") {
             activeVisualizer.pause();
@@ -404,18 +376,6 @@ const Controls = () =>
     function handleSpeed(evt) {
         activeVisualizer.setSpeed(parseFloat(evt.target.value));
         playbackSdVal.innerHTML = evt.target.value;
-    }
-
-
-    /*
-     * notifyOfTime:
-     *
-     * param timeVal - Current time value of the active visualizer.
-     *
-     * Accept time value from the visualizer neccessary to update controls.
-     */
-    function notifyOfTime(timeVal) {
-        playbackTimeVal.innerHTML = timeVal;
     }
 
 
@@ -458,19 +418,11 @@ const Controls = () =>
      * successful aqcuisition of the resource, in this case, the json file.
      */
     function loadRefAnimation(urlRef) {
-
-        return () => {
-
-            fetch(urlRef).then((res) => res.json()).then((data) => {
-                if (activeVisualizer === undefined) {
-                    activeVisualizer = Visualizer(60);
-                    activeVisualizer.init();
-                }
-
-                visualizers[activeVisualizer] = activeVisualizer.loadAnimation(data);
-                updateControls(visualizers[activeVisualizer]);
-            });
-        }
+        fetch(urlRef).then((res) => res.json()).then((data) => {
+            const id = loadNewVisualizer(data);
+            resizeVisualizers();
+            updateControls(visualizers[id]);
+        });
     }
 
 
@@ -483,15 +435,75 @@ const Controls = () =>
      * model array at the specified index.
      */
     function loadTestAnimation(animation) {
-        if (activeVisualizer === undefined) {
-            activeVisualizer = Visualizer(60);
-            activeVisualizer.init(windowOne);
-        }
-
-        visualizers[activeVisualizer] = activeVisualizer.loadAnimation(testModels[animation]);
-        updateControls(visualizers[activeVisualizer]);
+        const id = loadNewVisualizer(testModels[animation]);
+        resizeVisualizers();
+        updateControls(visualizers[id]);
     }
 
+
+    function loadNewVisualizer(dat) {
+        const numVisualizers = Object.keys(visualizers).length;
+        let id;
+        if (numVisualizers === 0) {
+            id = 1;
+        }
+        else if (numVisualizers === 1) {
+            adjustWindows(2);
+            id = 2;
+        }
+        else if (numVisualizers === 2) {
+            id = getActive();
+        }
+
+        const instance  = Visualizer(DEFAULT_FPS),
+              newWindow = getWindow(id);
+        activeVisualizer = instance;
+        newWindow.innerHTML = '';
+        instance.init(getWindow(id));
+        visualizers[id] = Object.assign({id, instance}, instance.loadAnimation(dat));
+        return id;
+    }
+
+
+    function getActive() {
+        let num = modelSelect.value;
+        if (num === undefined) {
+            return 1;
+        }
+
+        return num;
+    }
+
+
+    function getWindow(num) {
+        return document.getElementById('window' + num);
+    }
+
+
+    function adjustWindows(numWindows) {
+        const inactive = getWindow(((getActive() + 1) % MAX_VISUALIZERS) + 1),
+              active   = getWindow(getActive());
+        if (numWindows === 1) {
+            inactive.classList.add('window-inactive');
+            active.style.width = '100%';
+        }
+        else if (numWindows === 2) {
+            active.style.left = '0';
+            active.style.width = '50%';
+            inactive.style.right = '0';
+            inactive.style.width = '50%';
+        }
+        //resizeVisualizers();
+    }
+
+
+    function resizeVisualizers() {
+        for (const vis of Object.keys(visualizers)) {
+            const width  = getWindow(visualizers[vis].id).clientWidth,
+                  height = getWindow(visualizers[vis].id).clientHeight;
+            visualizers[vis].instance.resize(width, height);
+        }
+    }
 
     // Constructed Controls object
     return {
