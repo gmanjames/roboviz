@@ -16,7 +16,8 @@ const Controls = () =>
     const DEFAULT_FPS = 60;
 
     /*
-     *
+     * Area that is used to capture any file that will dropped onto the
+     * screen for use as a new log file.
      */
     const dropZone = document.getElementById('dropZone');
 
@@ -51,7 +52,7 @@ const Controls = () =>
      * Elements containing url's to specific textures for selecting a texture
      * to be applied to the current model group selected.
      */
-    const textureControls = document.querySelectorAll('.textures > a');
+    let textureControls = document.querySelectorAll('.textures > a');
 
     /*
      * Button for pausing and playing
@@ -186,6 +187,20 @@ const Controls = () =>
         playbackTime.step = modelInfo.step;
         rightTimeLabel.innerHTML = modelInfo.stop;
         leftTimeLabel.innerHTML  = modelInfo.start;
+    }
+
+
+    /*
+     * updateTextures
+     *
+     * ...
+     */
+    function updateTextures() {
+        textureControls = document.querySelectorAll('.textures > a');
+        console.log(textureControls);
+        for (let i = 0; i < textureControls.length; i++) {
+            textureControls[i].addEventListener('click', handleTexture);
+        }
     }
 
 
@@ -543,6 +558,7 @@ const Controls = () =>
     // Constructed Controls object
     return {
         init,
-        notify
+        notify,
+        updateTextures
     };
 };

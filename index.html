@@ -38,11 +38,24 @@
             </div>
             <div class="control control-texture">
                 <h4>Textures:</h4>
-                <div class="textures">
+                <div class="textures" id="textures">
                     <a href="#" data-texture="bricks">bricks<span class="sample"></span></a>
-                    <a href="#" data-texture="gray">gray<span class="sample"></span></a>
+                    <a href="#" data-texture="cloth">cloth<span class="sample"></span></a>
+                    <a href="#" data-texture="concrete">concrete<span class="sample"></span></a>
+                    <br />
+                    <a href="#" data-texture="desert">desert<span class="sample"></span></a>
+                    <a href="#" data-texture="grass">grass<span class="sample"></span></a>
+                    <a href="#" data-texture="lace">lace<span class="sample"></span></a>
+                    <br />
+                    <a href="#" data-texture="marble">marble<span class="sample"></span></a>
                     <a href="#" data-texture="matrix">matrix<span class="sample"></span></a>
+                    <a href="#" data-texture="metal">metal<span class="sample"></span></a>
+                    <br />
+                    <a href="#" data-texture="steel">steel<span class="sample"></span></a>
+                    <a href="#" data-texture="stone">stone<span class="sample"></span></a>
+                    <a href="#" data-texture="wood">wood<span class="sample"></span></a>
                 </div>
+                <input type="file" id="file-texture" multiple />
             </div>
             <div class="control-transparency">
                 <h4>Transparency:</h4>
@@ -103,7 +116,31 @@
             // Add to the global space
             window['controls'] = controls;
 
+            // Upload a new texture file
+            let textureFile = document.getElementById("file-texture");
+            textureFile.addEventListener("change", function (e) {
+                let files = textureFile.files;
+                let reader = new FileReader;
+                for (let i = 0; i < files.length; i++) {
+                    //console.log("Filename: " + files[i].name);
+                    //console.log("Type: " + files[i].type);
+                    //console.log("Size: " + files[i].size + " bytes");
+                    reader.readAsDataURL(files[i]);
+                    reader.onload = addImg;
+                }
+            }, false);
 
+            function addImg(imgsrc) {
+                let a = document.createElement('a');
+                a.href = "#";
+                a.innerHTML = "dirt";
+                let newSpan = document.createElement('span');
+                newSpan.className = "sample";
+                newSpan.style.backgroundImage = "url("+imgsrc.target.result+")";
+                a.appendChild(newSpan);
+                document.getElementById("textures").appendChild(a);
+                controls.updateTextures();
+            }
         </script>
     </body>
 </html>
