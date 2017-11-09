@@ -8,12 +8,12 @@ const Visualizer = (fps) =>
     /*
      * Three.js scene to render.
      */
-    const scene    = new THREE.Scene();
+    const scene = new THREE.Scene();
 
     /*
      * Simple perspective camera with aspect ratio, near and far clipping planes.
      */
-    const camera   = new THREE.PerspectiveCamera( 45, window.innerWidth / window.innerHeight, 0.1, 4000);
+    const camera = new THREE.PerspectiveCamera( 45, window.innerWidth / window.innerHeight, 0.1, 4000);
 
     /*
      * The visualizer that also holds the camera element.
@@ -38,7 +38,7 @@ const Visualizer = (fps) =>
     /*
      * Clock used for tracking application time.
      */
-    const clock    = new THREE.Clock();
+    const clock = new THREE.Clock();
 
     /*
      *
@@ -113,7 +113,9 @@ const Visualizer = (fps) =>
 
 
     /*
-     * createModel():
+     * createModel:
+     *
+     * param data - JSON data for model parsed from file.
      *
      * Extract model information from JSON data.
      */
@@ -167,7 +169,7 @@ const Visualizer = (fps) =>
 
 
     /*
-     * animationLoop():
+     * animationLoop:
      *
      * Game loop implementation for updating logical coordinates of models and
      * rendering the scene.
@@ -194,7 +196,7 @@ const Visualizer = (fps) =>
 
 
     /*
-     * initLoading():
+     * initLoading:
      *
      * Called to begin loading animation. After the data is retrieved from the
      * log-file the the loading animation initialized by this function should
@@ -207,9 +209,10 @@ const Visualizer = (fps) =>
 
 
     /*
-     * update():
+     * update:
      *
-     * ...
+     * Progress the time of the animation that will be used to calculate the
+     * current frame. Notify the controls of the change in time.
      */
     function update() {
 
@@ -226,7 +229,7 @@ const Visualizer = (fps) =>
 
 
     /*
-     * updateModel():
+     * updateModel:
      *
      * ...
      */
@@ -237,6 +240,8 @@ const Visualizer = (fps) =>
         }
 
         let frame = Math.round((currentTime % animation.stop) / animation.step);
+
+        window.controls.notify(frame * animation.step);
 
         for (const group of animation.model.children) {
             group.position.set(animation.frames[frame][group.name].position[0],
@@ -253,7 +258,7 @@ const Visualizer = (fps) =>
 
 
     /*
-     * render():
+     * render:
      *
      * ...
      */
@@ -349,9 +354,9 @@ const Visualizer = (fps) =>
      *
      * Creates a new material in order to apply the new color
      */
-    const changeColor = function(modelName, color) {
+    const changeColor = function(groupName, color) {
         for (const group of animation.model.children) {
-            if(group.name==modelName) {
+            if (group.name == groupName) {
                 const oldTransparency = group.children[0].material.opacity;
                 let newMaterial = new THREE.MeshLambertMaterial( { color: color, overdraw: 0.5 } );
                 group.children[0].material = newMaterial;
