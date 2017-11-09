@@ -390,13 +390,18 @@ const Controls = () =>
      * current state of the play/pause button.
      */
     function handlePlayPause(evt) {
-        const state = evt.target.dataset.toggle;
+
+        const state = getState('playing');
+
+        visualizers[getActive()].state.playing = !visualizers[getActive()].state.playing;
+        activeVisualizer.togglePlay();
+
         if (state === "play") {
             evt.target.dataset.toggle = "pause";
         } else {
             evt.target.dataset.toggle = "play";
         }
-        activeVisualizer.togglePlay();
+
     }
 
 
@@ -511,13 +516,13 @@ const Controls = () =>
     function loadNewVisualizer(dat) {
 
         // Fetch currently active window and connect visualizer instance
-        const winId = getActive();
-        const win   = getWindow(winId);
-        activeVisualizer.init(win);
+        const active = getNumberActive();
+        const newWin = getWindow(active);
+        activeVisualizer.init(newWin);
 
         // Load animation represented by data and store assoc info
         const animation = activeVisualizer.loadAnimation(dat);
-        visualizers[winId].animation = animation;
+        visualizers[active].animation = animation;
 
         // Set up state for visualizer
         const state = {
@@ -529,57 +534,69 @@ const Controls = () =>
         // Replace state
         visualizers[winId].state = state;
 
-
-        const numVisualizers = Object.keys(visualizers).length;
-        let id;
-        if (numVisualizers === 0) {
-            id = 1;
-        }
-        else if (numVisualizers === 1) {
-            adjustWindows(2);
-            id = 2;
-        }
-        else if (numVisualizers === 2) {
-            id = getActive();
-        }
-
-        const instance  = Visualizer(DEFAULT_FPS),
-              newWindow = getWindow(id);
-        activeVisualizer = instance;
-        newWindow.innerHTML = '';
-        instance.init(newWindow);
-        visualizers[id] = Object.assign({id, instance}, instance.loadAnimation(dat));
-        return id;
+        // Resize windows accordingly
+        adjustWindows();
     }
 
 
-    function getActive() {
-        let num = 0;
+    function getNumberActive() {
+        let active = 0;
         for (let id of Object.keys(visualizers)) {
             if (visualizers[id].state.active)
-                num = num + 1;
+                active += 1;
         }
 
-        // If two active,
-        return ((num + 1) % 2) + 1;
+        return active;
     }
 
 
-    function getWindow(num) {
-        return document.getElementById('window' + num);
+    function getCurrentActive() {
+        return parseInt(modelSelect.value);
     }
 
 
-    function adjustWindows(numWindows) {
-        const inactive = getWindow(((getActive() + 1) % MAX_VISUALIZERS) + 1),
-              active   = getWindow(getActive());
-        if (numWindows === 1) {
-            inactive.classList.add('window-inactive');
+    function getWindow(active) {
+        let winId;
+        switch(active) {
+            case 0:
+                winId = 1;
+                break;
+            case 1:
+                winId = 2;
+                break;
+            default:
+                winId = getCurrentActive();
+        }
+
+        return document.getElementById('window' + winId);
+    }
+
+
+    function getState(state) {
+        return visualizers[getCurrentActive()].state[state];
+    }
+
+
+    function adjustWindows() {
+
+        const numActive = getNumberActive();
+        const inactive = document.getElementById('window' + (getCurrentActive + 1) % 2 + 1);
+        const active   = document.getElementById('window' + getCurrentActive());
+
+        if (numActive === 1) {
+
+            // Adjust active to full screen and hide inactive
             active.style.width = '100%';
+            inactive.innerHTML = '';
+            inactive.classList.add('window-inactive');
         }
-        else if (numWindows === 2) {
-            active.style.left = '0';
+        else if (numActive === 2) {
+
+            // Assign each window half of the total width of the screen
+            // TODO: implement responsive checking here
+            active.style.left  = '0';
             active.style.width = '50%';
+
             inactive.classList.remove('window-inactive');
             inactive.style.right = '0';
             inactive.style.width = '50%';
