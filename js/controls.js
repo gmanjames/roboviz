@@ -275,6 +275,8 @@ const Controls = () =>
 
         evt.preventDefault();
 
+        document.getElementById('progress-holder').style.display = 'inline';
+
         let files = evt.dataTransfer.files; // FileList object.
         loadDroppedAnimation(files[0]).then((evt) => {
             return JSON.parse(evt.target.result);
@@ -453,6 +455,15 @@ const Controls = () =>
             // On progress, update progress bar
             reader.addEventListener('progress', evt => {
                 console.log(evt.loaded / evt.total);
+
+                if ((evt.loaded / evt.total) == 1) { // hide progress bar once loaded
+                  document.getElementById('progress-holder').style.display = 'none';
+                }
+
+                var amtLoaded = (evt.loaded / evt.total) * 100;
+                var theWidth = amtLoaded.toString();
+                theWidth = theWidth + '%';
+                document.getElementById('progress-bar').style.width = theWidth; // update progress bar
             });
         });
     }
