@@ -112,6 +112,28 @@ const Controls = () =>
      */
     const init = function() {
 
+        // Initialize visualizers without animation
+
+        // Visualizer for first window
+        visualizers['1'] = {
+            instance: Visualizer(DEFAULT_FPS);
+            state: {
+                active: false;
+            }
+        };
+
+        // Visualizer for the second window
+        visualizers['2'] = {
+            instance: Visualizer(DEFAULT_FPS),
+            state: {
+                active: false;
+            }
+        };
+
+        // Set default active visualizers
+        activeVisualizer = visualizers['1'];
+
+        // Search URL parameters as source of data
         const searchParams = new URLSearchParams(window.location.search);
         if (searchParams.has('logref')) {
             loadRefAnimation(searchParams.get('logref'));
@@ -481,13 +503,33 @@ const Controls = () =>
      * model array at the specified index.
      */
     function loadTestAnimation(animation) {
-        const id = loadNewVisualizer(testModels[animation]);
-        resizeVisualizers();
-        updateControls(visualizers[id]);
+        const data = testModels[animation];
+        loadNewVisualizer(data);
     }
 
 
     function loadNewVisualizer(dat) {
+
+        // Fetch currently active window and connect visualizer instance
+        const winId = getActive();
+        const win   = getWindow(winId);
+        activeVisualizer.init(win);
+
+        // Load animation represented by data and store assoc info
+        const animation = activeVisualizer.loadAnimation(dat);
+        visualizers[winId].animation = animation;
+
+        // Set up state for visualizer
+        const state = {
+            active: true,
+            lastTime: 0,
+            playing: true
+        }
+
+        // Replace state
+        visualizers[winId].state = state;
+
+
         const numVisualizers = Object.keys(visualizers).length;
         let id;
         if (numVisualizers === 0) {
@@ -512,12 +554,14 @@ const Controls = () =>
 
 
     function getActive() {
-        let num = modelSelect.value;
-        if (num === undefined) {
-            return 1;
+        let num = 0;
+        for (let id of Object.keys(visualizers)) {
+            if (visualizers[id].state.active)
+                num = num + 1;
         }
 
-        return num;
+        // If two active,
+        return ((num + 1) % 2) + 1;
     }
 
 
