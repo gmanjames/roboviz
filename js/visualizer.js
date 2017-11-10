@@ -135,6 +135,8 @@ const Visualizer = (fps) =>
 
         // Enter animation loop.
         animationLoop();
+
+        console.log(window.controls);
     };
 
 

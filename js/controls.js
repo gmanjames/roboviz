@@ -116,25 +116,20 @@ const Controls = () =>
 
         // Visualizer for first window
         visualizers['1'] = {
-            instance: Visualizer(DEFAULT_FPS);
-            state: {
-                active: false;
-            }
+            state: { active: false }
         };
 
         // Visualizer for the second window
         visualizers['2'] = {
-            instance: Visualizer(DEFAULT_FPS),
-            state: {
-                active: false;
-            }
+            state: { active: false }
         };
 
         // Set default active visualizers
-        activeVisualizer = visualizers['1'];
+        activeVisualizer = visualizers['1'].instance;
 
         // Search URL parameters as source of data
         const searchParams = new URLSearchParams(window.location.search);
+
         if (searchParams.has('logref')) {
             loadRefAnimation(searchParams.get('logref'));
         }
@@ -288,9 +283,8 @@ const Controls = () =>
         loadDroppedAnimation(files[0]).then((evt) => {
             return JSON.parse(evt.target.result);
         }).then((dat) => {
-            const id = loadNewVisualizer(dat);
-            resizeVisualizers();
-            updateControls(visualizers[id]);
+            loadNewVisualizer(dat);
+            updateControls();
         });
     }
 
@@ -334,8 +328,8 @@ const Controls = () =>
      */
     function handleModelSelect(evt) {
         const id = parseInt(evt.target.value);
-        updateControls(visualizers[id]);
         activeVisualizer = visualizers[id].instance;
+        updateControls();
     }
 
 
@@ -393,15 +387,14 @@ const Controls = () =>
 
         const state = getState('playing');
 
-        visualizers[getActive()].state.playing = !visualizers[getActive()].state.playing;
+        visualizers[getCurrentActive()].state.playing = !state;
         activeVisualizer.togglePlay();
 
-        if (state === "play") {
+        if (state) {
             evt.target.dataset.toggle = "pause";
         } else {
             evt.target.dataset.toggle = "play";
         }
-
     }
 
 
@@ -472,8 +465,8 @@ const Controls = () =>
                   document.getElementById('progress-holder').style.display = 'none';
                 }
 
-                var amtLoaded = (evt.loaded / evt.total) * 100;
-                var theWidth = amtLoaded.toString();
+                let amtLoaded = (evt.loaded / evt.total) * 100;
+                let theWidth = amtLoaded.toString();
                 theWidth = theWidth + '%';
                 document.getElementById('progress-bar').style.width = theWidth; // update progress bar
             });
@@ -492,9 +485,8 @@ const Controls = () =>
      */
     function loadRefAnimation(urlRef) {
         fetch(urlRef).then((res) => res.json()).then((data) => {
-            const id = loadNewVisualizer(data);
-            resizeVisualizers();
-            updateControls(visualizers[id]);
+            loadNewVisualizer(data);
+            updateControls();
         });
     }
 
@@ -508,8 +500,8 @@ const Controls = () =>
      * model array at the specified index.
      */
     function loadTestAnimation(animation) {
-        const data = testModels[animation];
-        loadNewVisualizer(data);
+        loadNewVisualizer(testModels[animation]);
+        updateControls();
     }
 
 
@@ -517,12 +509,19 @@ const Controls = () =>
 
         // Fetch currently active window and connect visualizer instance
         const active = getNumberActive();
-        const newWin = getWindow(active);
-        activeVisualizer.init(newWin);
+        const [id, winw] = getWindow(active);
+
+        // Clear the window for the new visualization
+        winw.innerHTML = '';
+
+        // Create new visualizer instance
+        activeVisualizer = Visualizer(DEFAULT_FPS);
+        visualizers[id].instance = activeVisualizer;
+        activeVisualizer.init(winw);
 
         // Load animation represented by data and store assoc info
         const animation = activeVisualizer.loadAnimation(dat);
-        visualizers[active].animation = animation;
+        visualizers[id].animation = animation;
 
         // Set up state for visualizer
         const state = {
@@ -532,10 +531,11 @@ const Controls = () =>
         }
 
         // Replace state
-        visualizers[winId].state = state;
+        visualizers[id].state = state;
 
         // Resize windows accordingly
         adjustWindows();
+        resizeVisualizers();
     }
 
 
@@ -568,7 +568,7 @@ const Controls = () =>
                 winId = getCurrentActive();
         }
 
-        return document.getElementById('window' + winId);
+        return [winId, document.getElementById('window' + winId)];
     }
 
 
@@ -580,7 +580,7 @@ const Controls = () =>
     function adjustWindows() {
 
         const numActive = getNumberActive();
-        const inactive = document.getElementById('window' + (getCurrentActive + 1) % 2 + 1);
+        const inactive = document.getElementById('window' + (((getCurrentActive() + 2) % 2) + 1));
         const active   = document.getElementById('window' + getCurrentActive());
 
         if (numActive === 1) {
@@ -606,11 +606,13 @@ const Controls = () =>
 
     function resizeVisualizers() {
         for (const vis of Object.keys(visualizers)) {
-            const width  = getWindow(visualizers[vis].id).clientWidth,
-                  height = getWindow(visualizers[vis].id).clientHeight;
-            visualizers[vis].instance.resize(width, height);
+            if (visualizers[vis].instance !== undefined) {
+                visualizers[vis].instance.resize(document.getElementById('window' + vis).clientWidth,
+                                                 document.getElementById('window' + vis).clientHeight);
+            }
         }
     }
+
 
     // Constructed Controls object
     return {
