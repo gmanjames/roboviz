@@ -54,6 +54,11 @@ const Controls = () =>
     const textureControls = document.querySelectorAll('.textures > a');
 
     /*
+     * Button for removing animation
+     */
+    const rmModelBtn = document.getElementById('rmModelBtn');
+
+    /*
      * Button for pausing and playing
      */
     const playPauseBtn = document.getElementById('playPauseBtn');
@@ -172,37 +177,57 @@ const Controls = () =>
      * Function to update the various controls options with the information
      * associated with the currently active visualizer.
      */
-    function updateControls(modelInfo) {
+    function updateControls() {
 
-        // Model controls
+        const active    = getCurrentActive();
+        const modelInfo = visualizers[active];
+
+        // Group components for model
         groupSelect.innerHTML = '';
-        for (let group of modelInfo.groups) {
+
+        for (let group of modelInfo.animation.groups) {
             let option = document.createElement('option');
             option.value = group;
             option.appendChild(document.createTextNode(group));
             groupSelect.appendChild(option);
         }
 
+        // Available models
         modelSelect.innerHTML = '';
 
-        let modelNumber = 0;
-        for (let vis in visualizers) {
-            modelNumber++;
-            let option = document.createElement('option');
-            if (modelNumber === modelInfo.id) {
-                option.selected = 'selected';
-            }
-            option.value = modelNumber;
-            option.appendChild(document.createTextNode('model-' + modelNumber));
-            modelSelect.appendChild(option);
+        const modelOneOpt = document.createElement('option');
+        const modelTwoOpt = document.createElement('option');
+
+        modelOneOpt.appendChild(document.createTextNode('model 1'));
+        modelTwoOpt.appendChild(document.createTextNode('model 2'));
+        modelOneOpt.value = '1';
+        modelTwoOpt.value = '2';
+
+        if (active === 1) {
+            modelOneOpt.selected = 'selected';
+        }
+        else {
+            modelTwoOpt.selected = 'selected';
         }
 
+        if (!visualizers[1].state.active) {
+            modelOneOpt.disabled = 'disabled';
+        }
+
+        if (!visualizers[2].state.active) {
+            modelTwoOpt.disabled = 'disabled';
+        }
+
+
+        modelSelect.appendChild(modelOneOpt);
+        modelSelect.appendChild(modelTwoOpt);
+
         // Playback controls
-        playbackTime.min  = modelInfo.start;
-        playbackTime.max  = modelInfo.stop;
-        playbackTime.step = modelInfo.step;
-        rightTimeLabel.innerHTML = modelInfo.stop;
-        leftTimeLabel.innerHTML  = modelInfo.start;
+        playbackTime.min  = modelInfo.animation.start;
+        playbackTime.max  = modelInfo.animation.stop;
+        playbackTime.step = modelInfo.animation.step;
+        rightTimeLabel.innerHTML = modelInfo.animation.stop;
+        leftTimeLabel.innerHTML  = modelInfo.animation.start;
     }
 
 
@@ -241,6 +266,8 @@ const Controls = () =>
         }
 
         transparency.addEventListener('input', handleTransparency);
+
+        rmModelBtn.addEventListener('click', handleRmModel);
 
         // Playback controls
         playPauseBtn.addEventListener('click', handlePlayPause);
@@ -376,6 +403,34 @@ const Controls = () =>
 
 
     /*
+     * handleRmModel:
+     *
+     * param evt - Javascript event
+     *
+     * Remove the currently active animation.
+     */
+    function handleRmModel(evt) {
+
+        const active = getCurrentActive();
+
+        visualizers[active] = {
+            state: { active: false }
+        };
+
+        if (active === 1) {
+            activeVisualizer = visualizers[2].instance;
+        }
+        else {
+            activeVisualizer = visualizers[1].instance;
+        }
+
+        adjustWindows();
+        resizeVisualizers();
+        updateControls();
+    }
+
+
+    /*
      * handlePlayPause
      *
      * param evt - Javascript event
@@ -459,7 +514,6 @@ const Controls = () =>
 
             // On progress, update progress bar
             reader.addEventListener('progress', evt => {
-                console.log(evt.loaded / evt.total);
 
                 if ((evt.loaded / evt.total) == 1) { // hide progress bar once loaded
                   document.getElementById('progress-holder').style.display = 'none';
@@ -546,11 +600,23 @@ const Controls = () =>
                 active += 1;
         }
 
+        console.log(active);
         return active;
     }
 
 
     function getCurrentActive() {
+
+        if (visualizers[1].instance !== undefined
+            && visualizers[1].instance === activeVisualizer) {
+            return 1;
+        }
+
+        if (visualizers[2].instance !== undefined
+            && visualizers[2].instance === activeVisualizer) {
+            return 2;
+        }
+
         return parseInt(modelSelect.value);
     }
 
@@ -596,8 +662,8 @@ const Controls = () =>
             // TODO: implement responsive checking here
             active.style.left  = '0';
             active.style.width = '50%';
+            active.classList.remove('window-inactive');
 
-            inactive.classList.remove('window-inactive');
             inactive.style.right = '0';
             inactive.style.width = '50%';
         }
