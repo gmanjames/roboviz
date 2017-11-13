@@ -26,6 +26,18 @@ body * {
  * Model Controls
  */
 
+.window {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    border: 1px solid black;
+}
+
+.window-inactive {
+    width: 0;
+    height: 0;
+}
+
 .toolbar {
     position: absolute;
     top: 0;
@@ -230,3 +242,30 @@ select[for="model-group"] {
  .range-with-label .left-label {
      float: left;
  }
+
+ /*
+  * Progress Bar
+  */
+
+  #progress-holder {
+    height: 10px;
+    width: 70vw;
+    margin: auto;
+    background: #cecece;
+    padding: 0;
+    overflow: hidden;
+    border-radius: 3px;
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    display: none;
+  }
+
+  #progress-bar {
+    background: #848484;
+    width: 0%;
+    z-index: 1;
+    padding: 0;
+    height: 100%;
+  }
