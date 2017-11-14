@@ -39,7 +39,7 @@ const Controls = () =>
      * Control for the opacity of the currently selected model group
      * Input box for teh hexidecimal information if you wanted to specify it.
      */
-    const colorInput = document.getElementById('model1HexVal');
+    const colorInput = document.getElementById('colorWell');
 
     /*
      * Range type input element for controlling the opacity of the current
@@ -211,12 +211,9 @@ const Controls = () =>
             colorControls[i].addEventListener('click', handleColor);
         }
 
-        colorInput.addEventListener('keypress', function (e) {
-            let key = e.which || e.keyCode;
-            if (key === 13) {
+        colorInput.addEventListener('change', function (e) {
                 e.target.dataset.color = e.target.value;
                 handleColor(e);
-            }
         });
 
         for (let i = 0; i < textureControls.length; i++) {
@@ -327,7 +324,8 @@ const Controls = () =>
      */
     function handleColor(evt) {
         let groupName = groupSelect.value;
-        activeVisualizer.changeColor(groupName, parseInt(evt.target.dataset.color));
+
+        activeVisualizer.changeColor(groupName, evt.target.value);
     }
 
 

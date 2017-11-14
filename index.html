@@ -13,7 +13,7 @@
 
         <!-- controls related to model appearance -->
         <div id="modelCtrls" class='model-controls' data-state="collapsed">
-            <span class="toggle" for="model-controls">&#9776</span>
+            <span class="toggle" for="model-controls">0</span>
             <h3 class="model-title">Select a model and group</h3>
             <select for="model" id="modelName">
                 <option value="1">group name</option>
@@ -25,16 +25,11 @@
                 <option value="3">group name</option>
             </select>
             <div class="control control-color">
-                <h4>Colors:</h4>
                 <div class="colors">
                     <!-- TOOD: consider a slider for hue, sat., val., etc. -->
-                    <a href="#" data-color="0xff0000">Red</a>
-                    <a href="#" data-color="0x0000ff">Blue</a>
-                    <a href="#" data-color="0x00ff00">Green</a>
-                    <a href="#" data-color="0xffff00">Yellow</a>
+                    <label for="colorWell">Color:</label>
+                    <input type="color" value="#ff0000" id="colorWell"></input>
                 </div>
-                <label for="hex">Hex:</label>
-                <input id="model1HexVal" name="hex" type="text" data-color="" placeholder="0xf0f0f0"/>
             </div>
             <div class="control control-texture">
                 <h4>Textures:</h4>
