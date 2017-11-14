@@ -13,13 +13,13 @@
 
         <!-- controls related to model appearance -->
         <div id="modelCtrls" class='model-controls' data-state="collapsed">
-            <span class="toggle" for="model-controls">0</span>
+            <span class="toggle" for="model-controls">&#9776;</span>
             <h3 class="model-title">Select a model and group</h3>
-            <select for="model" id="modelName">
+            <select class="styled-select rounded" for="model" id="modelName">
                 <option value="1">group name</option>
                 <option value="2">group name</option>
             </select>
-            <select for="model-group" id="groupName">
+            <select class="styled-select rounded" for="model-group" id="groupName">
                 <option value="1">group name</option>
                 <option value="2">group name</option>
                 <option value="3">group name</option>
@@ -65,14 +65,14 @@
                 <label class="right-label">4</label>
                 <label class="left-label">-4</label>
             </div>
-            <button id="playPauseBtn" data-toggle="play"></button>
+            <button class="raise" id="playPauseBtn" data-toggle="play"></button>
             <div class="range-with-label">
                 <div id="modelTimeVal" class="value"></div>
                 <input id="modelTime" type="range">
                 <label for="modelTime" class="right-label">--</label>
                 <label for="modelTime" class="left-label">--</label>
             </div>
-            <button id="resetBtn">Reset Camera</button>
+            <button class="raise" id="resetBtn">Reset Camera</button>
         </div>
 
         <!-- js -->
