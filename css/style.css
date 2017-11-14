@@ -46,13 +46,48 @@ body * {
     min-height: 3rem;
 }
 
+.model-title {
+    color: #DFDFDB;
+    text-align: center;
+    font: Helvetica, Sans-Serif;
+    text-transform: uppercase;
+    margin-top: -10px;
+}
+
+.styled-select {
+    background: url(http://i62.tinypic.com/15xvbd5.png) no-repeat 96% 0;
+    /*overflow: hidden;
+    //background-color: black;
+    -webkit-border-radius: 20px;*/
+    overflow:hidden;
+    width:350px;
+    -moz-border-radius: 9px 9px 9px 9px;
+    -webkit-border-radius: 9px 9px 9px 9px;
+    border-radius: 9px 9px 9px 9px;
+    box-shadow: 1px 1px 11px #330033;
+    //background: #58B14C url("http://i62.tinypic.com/15xvbd5.png") no-repeat scroll 319px center;
+}
+
+.styled-select select {
+    background: transparent;
+    border: none;
+    color: #fff;
+}
+
+.raise:hover {
+  box-shadow: 0 12px 16px 0 rgba(0,0,0,0.24), 0 17px 50px 0 rgba(0,0,0,0.19);
+  transform: translateY(-0.25em);
+}
+
 .model-controls {
     width: 464px;
     height: 100%;
     position: absolute;
     left: 0;
+    background-color: rgba(0, 0, 0, .15);
     padding: 32px 64px 64px 16px;
-    border-right: 1px solid black;
+    color: white;
+    //border-right: 4px solid rgba(198, 111, 30, .35);
 }
 
 .model-controls[data-state="expanded"] {
@@ -200,13 +235,14 @@ select[for="model-group"] {
  }
 
 .playback-controls > button {
-    border: none;
+    background-color: rgba(0, 0, 0, .15);
+    color: black;
+    border:none; /* Green */
     padding: 0;
     padding: 8px 16px;
     margin: 0 32px;
-    border-radius: 3px;
+    border-radius: 0px;
     cursor: pointer;
-    border: 1px solid black;
 }
 
 .playback-controls > button[data-toggle="play"]:after {
