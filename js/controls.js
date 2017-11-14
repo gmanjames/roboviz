@@ -261,6 +261,7 @@ const Controls = () =>
         evt.preventDefault();
 
         document.getElementById('progress-holder').style.display = 'inline';
+        document.getElementById('splash-screen').style.display = 'none';
 
         let files = evt.dataTransfer.files; // FileList object.
         loadDroppedAnimation(files[0]).then((evt) => {

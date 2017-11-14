@@ -254,3 +254,72 @@ select[for="model-group"] {
     padding: 0;
     height: 100%;
   }
+
+  /*
+   * Splash Screen
+   */
+
+   #splash-screen {
+     background-color: #ddd;
+     font-family: 'Barlow', arial, sans-serif;
+     height: 100%;
+     width: 100%;
+     overflow: hidden;
+     position: relative;
+   }
+
+   #splash-screen > p {
+     box-shadow: 10px;
+   }
+
+   #the-head {
+     color: #333;
+     text-align: center;
+   }
+
+   #splash-head {
+     font-size: 100pt;
+     font-weight: 100;
+     letter-spacing: 10px;
+     margin: 20px;
+   }
+
+   #description {
+     font-size: 20pt;
+   }
+
+   #option-container {
+    margin-top: 60px;
+   }
+
+   .option {
+     width: 33%;
+     border-right: solid;
+     border-width: thin;
+     padding: 20px;
+     display: inline-block;
+     font-size: 20px;
+   }
+
+   #last-option {
+     border-right: none;
+   }
+
+   @media (max-width: 960px) {
+
+     #splash-head {
+       font-size: 20vw;
+       font-weight: 100;
+       letter-spacing: 10px;
+       margin: 20px;
+     }
+
+     #option-container {
+      margin-top: 5vw;
+     }
+
+     .option {
+       border-right: none;
+       display: inline;
+     }
+   }

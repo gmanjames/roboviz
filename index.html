@@ -3,7 +3,9 @@
     <head>
         <title>RoboViz</title>
         <meta name="Content-Type" content="text/html; charset=UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
         <link type="text/css" rel="stylesheet" href="css/style.css" />
+        <link href="https://fonts.googleapis.com/css?family=Barlow" rel="stylesheet">
     </head>
     <body id='dropZone'>
 
@@ -78,6 +80,25 @@
                 <label for="modelTime" class="left-label">--</label>
             </div>
             <button id="resetBtn">Reset Camera</button>
+        </div>
+
+          <!-- splash screen -->
+        <div id="splash-screen">
+          <div id="the-head">
+            <p id="splash-head">ASIMove</p>
+            <p id="description">To get started try one of the following</p>
+          <div id="option-container">
+            <div class="option">
+              <p>Drag a file onto the screen</p>
+            </div>
+            <div class="option">
+              <p>Specify log file using URL query</p>
+            </div>
+            <div class="option" id="last-option">
+              <p>Type the file path location into your URL</p>
+            </div>
+          </div>
+          <div>
         </div>
 
         <!-- js -->
