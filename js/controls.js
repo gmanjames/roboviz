@@ -37,12 +37,6 @@ const Controls = () =>
     const colorControls = document.querySelectorAll('.colors > a');
 
     /*
-     * Control for the opacity of the currently selected model group
-     * Input box for teh hexidecimal information if you wanted to specify it.
-     */
-    const colorInput = document.getElementById('model1HexVal');
-
-    /*
      * Range type input element for controlling the opacity of the current
      * model group selected.
      */
@@ -53,6 +47,11 @@ const Controls = () =>
      * to be applied to the current model group selected.
      */
     let textureControls = document.querySelectorAll('.textures > a');
+
+    /*
+     * Button to add a new texture temporarily to the list of textures
+     */
+    const textureBtn = document.getElementById('file-texture');
 
     /*
      * Button for pausing and playing
@@ -191,20 +190,6 @@ const Controls = () =>
 
 
     /*
-     * updateTextures
-     *
-     * ...
-     */
-    function updateTextures() {
-        textureControls = document.querySelectorAll('.textures > a');
-        console.log(textureControls);
-        for (let i = 0; i < textureControls.length; i++) {
-            textureControls[i].addEventListener('click', handleTexture);
-        }
-    }
-
-
-    /*
      * addEventListeners:
      *
      * ...
@@ -226,17 +211,11 @@ const Controls = () =>
             colorControls[i].addEventListener('click', handleColor);
         }
 
-        colorInput.addEventListener('keypress', function (e) {
-            let key = e.which || e.keyCode;
-            if (key === 13) {
-                e.target.dataset.color = e.target.value;
-                handleColor(e);
-            }
-        });
-
         for (let i = 0; i < textureControls.length; i++) {
             textureControls[i].addEventListener('click', handleTexture);
         }
+
+        textureBtn.addEventListener('change', handleNewTexture);  
 
         transparency.addEventListener('input', handleTransparency);
 
@@ -355,6 +334,44 @@ const Controls = () =>
     function handleTexture(evt) {
         let groupName = groupSelect.value;
         activeVisualizer.changeTexture(groupName, './assets/images/' + evt.target.dataset.texture + '.png');
+    }
+
+
+    /*
+     * handleNewTexture:
+     *
+     * param evt - Javascript evt
+     *
+     * Loads the selected texture and adds it to the list of textures.
+     */
+    function handleNewTexture(evt) {
+        let file = textureBtn.files;
+        let reader = new FileReader;
+        let fileName = file[0].name;
+
+        reader.readAsDataURL(file[0]);
+        reader.onload = addImg;
+        
+        function addImg(imgsrc) {
+            fileName = fileName.replace(/\.[^/.]+$/, ""); //Remove extension
+
+            let a = document.createElement('a');
+            a.href = "#";
+            a.setAttribute("data-texture", fileName);
+            a.innerHTML = fileName;
+
+            let newSpan = document.createElement('span');
+            newSpan.className = "sample";
+            newSpan.style.backgroundImage = "url(" + imgsrc.target.result + ")";
+
+            a.appendChild(newSpan);
+            document.getElementById("textures").appendChild(a);
+
+            textureControls = document.querySelectorAll('.textures > a');
+            for (let i = 0; i < textureControls.length; i++) {
+                textureControls[i].addEventListener('click', handleTexture);
+            }
+        }
     }
 
 
@@ -558,7 +575,6 @@ const Controls = () =>
     // Constructed Controls object
     return {
         init,
-        notify,
-        updateTextures
+        notify
     };
 };
