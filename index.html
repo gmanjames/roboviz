@@ -16,13 +16,8 @@
             <span class="toggle" for="model-controls">&#9776</span>
             <h3 class="model-title">Select a model and group</h3>
             <select for="model" id="modelName">
-                <option value="1">group name</option>
-                <option value="2">group name</option>
             </select>
             <select for="model-group" id="groupName">
-                <option value="1">group name</option>
-                <option value="2">group name</option>
-                <option value="3">group name</option>
             </select>
             <div class="control control-color">
                 <h4>Colors:</h4>
@@ -98,20 +93,8 @@
         <script src="js/visualizer.js"></script>
         <script>
 
-            // To start the application, we need to set up the controls.
-            // The 'Controls' function takes as arguments the areas containing
-            // the various inputs.
-
-            let playbackCtrls, modelCtrls, controls;
-
-            // Playback: play/pause, speed and time.
-            playbackCtrls = document.getElementById('playbackCtrls');
-
-            // Model controls: color and texture options, transparency.
-            modelCtrls = document.getElementById('modelCtrls');
-
             // Initialize the controls by adding event listeners etc.
-            controls = Controls(modelCtrls, playbackCtrls);
+            const controls = Controls();
             controls.init();
 
             // Add to the global space
