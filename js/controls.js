@@ -114,6 +114,8 @@ const Controls = () =>
 
         const searchParams = new URLSearchParams(window.location.search);
         if (searchParams.has('logref')) {
+            reference = searchParams.get('logref');
+            alert(reference);
             loadRefAnimation(searchParams.get('logref'));
         }
         else if (searchParams.has('test')) {
@@ -261,7 +263,10 @@ const Controls = () =>
         evt.preventDefault();
 
         document.getElementById('progress-holder').style.display = 'inline';
-        document.getElementById('splash-screen').style.display = 'none';
+
+        if (document.getElementById('splash-screen').getAttribute('display') != 'none') {
+          document.getElementById('splash-screen').style.display = 'none';
+        }
 
         let files = evt.dataTransfer.files; // FileList object.
         loadDroppedAnimation(files[0]).then((evt) => {

@@ -245,6 +245,7 @@ select[for="model-group"] {
     left: 50%;
     transform: translate(-50%, -50%);
     display: none;
+    opacity: 50%;
   }
 
   #progress-bar {
