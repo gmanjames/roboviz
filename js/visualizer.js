@@ -108,19 +108,19 @@ const Visualizer = (fps) =>
 		renderer.gammaInput = true;
 		renderer.gammaOutput = true;
 		renderer.setClearColor(0x001a0d, 1.0);
-		renderer.shadowMapEnabled = true;
+		renderer.shadowMap.enabled = true;
 
 		// Grid floor and fog to add perspective for model movement.
 		scene.fog = new THREE.Fog(0x001a0d, 1500, 4500);
-		var grid = new THREE.GridHelper(10000, 100, 0x001a0d, 0x006633);
+		let grid = new THREE.GridHelper(10000, 100, 0x001a0d, 0x006633);
 		scene.add(grid);
 
 
 		// Ground plane geometry matching grid size.
-        var groundGeometry = new THREE.PlaneGeometry(10000, 10000, 1, 1);
+        let groundGeometry = new THREE.PlaneGeometry(10000, 10000, 1, 1);
 
 		// Transparent and not-shiny ground plane material.
-        var groundMaterial = new THREE.MeshLambertMaterial({
+        let groundMaterial = new THREE.MeshLambertMaterial({
 			color: 0x4dffa6,
 			transparent: true,
 			opacity: 0.6,
@@ -133,7 +133,7 @@ const Visualizer = (fps) =>
 		});
 
 		// Create ground plane and rotate into horizontal position.
-        var ground = new THREE.Mesh(groundGeometry, groundMaterial);
+        let ground = new THREE.Mesh(groundGeometry, groundMaterial);
         ground.receiveShadow = true;
         ground.rotation.x = -0.5 * Math.PI;
 

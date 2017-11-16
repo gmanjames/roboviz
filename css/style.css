@@ -140,12 +140,48 @@ select[for="model-group"] {
     background-image: url("../assets/images/bricks.png");
 }
 
-.textures a[data-texture="gray"] .sample {
-    background-image: url("../assets/images/gray.png");
+.textures a[data-texture="cloth"] .sample {
+    background-image: url("../assets/images/cloth.png");
+}
+
+.textures a[data-texture="concrete"] .sample {
+    background-image: url("../assets/images/concrete.png");
+}
+
+.textures a[data-texture="desert"] .sample {
+    background-image: url("../assets/images/desert.png");
+}
+
+.textures a[data-texture="grass"] .sample {
+    background-image: url("../assets/images/grass.png");
+}
+
+.textures a[data-texture="lace"] .sample {
+    background-image: url("../assets/images/lace.png");
+}
+
+.textures a[data-texture="marble"] .sample {
+    background-image: url("../assets/images/marble.png");
 }
 
 .textures a[data-texture="matrix"] .sample {
     background-image: url("../assets/images/matrix.png");
+}
+
+.textures a[data-texture="metal"] .sample {
+    background-image: url("../assets/images/metal.png");
+}
+
+.textures a[data-texture="steel"] .sample {
+    background-image: url("../assets/images/steel.png");
+}
+
+.textures a[data-texture="stone"] .sample {
+    background-image: url("../assets/images/stone.png");
+}
+
+.textures a[data-texture="wood"] .sample {
+    background-image: url("../assets/images/wood.png");
 }
 
 .colors {
