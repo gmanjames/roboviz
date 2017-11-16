@@ -24,7 +24,7 @@ const Controls = () =>
     /*
      * Name of the currently selected model
      */
-    const modelSelect = document.getElementById('modelName')
+    const modelSelect = document.getElementById('modelName');
 
     /*
      * Name of the currently selected model group
@@ -114,7 +114,14 @@ const Controls = () =>
 
         const searchParams = new URLSearchParams(window.location.search);
         if (searchParams.has('logref')) {
-            loadRefAnimation(searchParams.get('logref'));
+            let urlPath = searchParams.get('logref');
+            if (urlPath.includes('http')) {
+                loadRefAnimation(urlPath);
+            }
+            else {
+                let url = 'https://raw.githubusercontent.com/' + urlPath;
+                loadRefAnimation(url);
+            }
         }
         else if (searchParams.has('test')) {
             loadTestAnimation(parseInt(searchParams.get('test')));
@@ -477,8 +484,8 @@ const Controls = () =>
                   document.getElementById('progress-holder').style.display = 'none';
                 }
 
-                var amtLoaded = (evt.loaded / evt.total) * 100;
-                var theWidth = amtLoaded.toString();
+                let amtLoaded = (evt.loaded / evt.total) * 100;
+                let theWidth = amtLoaded.toString();
                 theWidth = theWidth + '%';
                 document.getElementById('progress-bar').style.width = theWidth; // update progress bar
             });
@@ -500,6 +507,9 @@ const Controls = () =>
             const id = loadNewVisualizer(data);
             resizeVisualizers();
             updateControls(visualizers[id]);
+        }).catch((error) => {
+            alert('The specified path to the logfile has returned an error. \
+An example path here is:\n\n :userName/:repoName/branchName/path/to/fileName.json \n\n' + error);
         });
     }
 
