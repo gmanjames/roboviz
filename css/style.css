@@ -47,16 +47,23 @@ body * {
     height: 16px;
     line-height: 16px;
     border-radius: 50%;
-    background-color: hsla(0, 47%, 50%, 0.7);
     padding: 6px;
     color: white;
     text-align: center;
     margin: 0;
+}
+
+.rm-file[data-state="enabled"] {
+    background-color: hsla(0, 47%, 50%, 0.7);
     cursor: pointer;
 }
 
-.rm-file:hover {
+.rm-file[data-state="enabled"]:hover {
     box-shadow: 0 0 7px hsla(0, 47%, 95%, 0.9);
+}
+
+.rm-file[data-state="disabled"] {
+    background-color: hsla(0, 0%, 50%, 0.7);
 }
 
 .toolbar {

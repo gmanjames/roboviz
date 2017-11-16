@@ -257,7 +257,7 @@ const Controls = () =>
             textureControls[i].addEventListener('click', handleTexture);
         }
 
-        textureBtn.addEventListener('change', handleNewTexture);  
+        textureBtn.addEventListener('change', handleNewTexture);
 
         transparency.addEventListener('input', handleTransparency);
 
@@ -394,7 +394,7 @@ const Controls = () =>
 
         reader.readAsDataURL(file[0]);
         reader.onload = addImg;
-        
+
         function addImg(imgsrc) {
             fileName = fileName.replace(/\.[^/.]+$/, ""); //Remove extension
 
@@ -705,6 +705,7 @@ const Controls = () =>
             active.style.left  = '0';
             inactive.innerHTML = '';
             inactive.classList.add('window-inactive');
+            active.querySelector('.rm-file').dataset.state = 'disabled';
         }
         else if (numActive === 2) {
 
@@ -713,9 +714,10 @@ const Controls = () =>
             active.style.left  = '0';
             active.style.width = '50%';
             active.classList.remove('window-inactive');
-
             inactive.style.left = '50%';
             inactive.style.width = '50%';
+            active.querySelector('.rm-file').dataset.state = 'enabled';
+            inactive.querySelector('.rm-file').dataset.state = 'enabled';
         }
     }
 
