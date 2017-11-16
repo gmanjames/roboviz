@@ -267,8 +267,6 @@ const Controls = () =>
 
         transparency.addEventListener('input', handleTransparency);
 
-        rmModelBtn.addEventListener('click', handleRmModel);
-
         // Playback controls
         playPauseBtn.addEventListener('click', handlePlayPause);
         resetBtn.addEventListener('click', handleResetCamera);
@@ -407,26 +405,34 @@ const Controls = () =>
      *
      * param evt - Javascript event
      *
-     * Remove the currently active animation.
+     * Remove the selected animation.
      */
     function handleRmModel(evt) {
 
-        const active = getCurrentActive();
+        const winId = evt.target.dataset.window;
+        if (getNumberActive() > 1) {
 
-        visualizers[active] = {
-            state: { active: false }
-        };
+            if (winId.includes('1')) {
 
-        if (active === 1) {
-            activeVisualizer = visualizers[2].instance;
+                visualizers[1] = {
+                    state: { active: false }
+                };
+
+                activeVisualizer = visualizers[2].instance;
+            }
+            else {
+
+                visualizers[2] = {
+                    state: { active: false }
+                };
+
+                activeVisualizer = visualizers[1].instance;
+            }
+
+            adjustWindows();
+            resizeVisualizers();
+            updateControls();
         }
-        else {
-            activeVisualizer = visualizers[1].instance;
-        }
-
-        adjustWindows();
-        resizeVisualizers();
-        updateControls();
     }
 
 
@@ -573,6 +579,9 @@ const Controls = () =>
         visualizers[id].instance = activeVisualizer;
         activeVisualizer.init(winw);
 
+        // Add event listener to rm-file button
+        winw.querySelector('.rm-file').addEventListener('click', handleRmModel);
+
         // Load animation represented by data and store assoc info
         const animation = activeVisualizer.loadAnimation(dat);
         visualizers[id].animation = animation;
@@ -600,7 +609,6 @@ const Controls = () =>
                 active += 1;
         }
 
-        console.log(active);
         return active;
     }
 
@@ -622,17 +630,26 @@ const Controls = () =>
 
 
     function getWindow(active) {
+
         let winId;
+
         switch(active) {
+
+            // No vis loaded so return first window
             case 0:
                 winId = 1;
                 break;
+
+            // One vis loaded so return window without active visualizer
             case 1:
-                winId = 2;
+                winId = visualizers[1].state.active ? 2 : 1;
                 break;
+
+            // Both vis's active so return currently active window
             default:
                 winId = getCurrentActive();
         }
+
 
         return [winId, document.getElementById('window' + winId)];
     }
@@ -653,6 +670,7 @@ const Controls = () =>
 
             // Adjust active to full screen and hide inactive
             active.style.width = '100%';
+            active.style.left  = '0';
             inactive.innerHTML = '';
             inactive.classList.add('window-inactive');
         }
@@ -664,7 +682,7 @@ const Controls = () =>
             active.style.width = '50%';
             active.classList.remove('window-inactive');
 
-            inactive.style.right = '0';
+            inactive.style.left = '50%';
             inactive.style.width = '50%';
         }
     }

@@ -84,6 +84,13 @@ const Visualizer = (fps) =>
         renderer.setSize(windowElem.clientWidth, windowElem.clientHeight);
         windowElem.appendChild(renderer.domElement);
 
+        const closeBtn = document.createElement('p');
+        closeBtn.classList.add('rm-file');
+        closeBtn.dataset.window = windowElem.id;
+        closeBtn.appendChild(document.createTextNode('x'));
+        windowElem.appendChild(closeBtn);
+
+
         camera.position.set(600, 600, 1000);
         camera.lookAt(new THREE.Vector3(0,0,0));
 
