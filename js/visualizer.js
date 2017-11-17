@@ -329,8 +329,8 @@ const Visualizer = (fps) =>
      *
      * ...
      */
-    const loadAnimation = function(dat) {
-        createModel(dat);
+    const loadAnimation = async function(dat) {
+        await createModel(dat);
 
         // Return information about the animation loaded
         let start = animation.start,
