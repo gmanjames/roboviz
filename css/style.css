@@ -408,34 +408,44 @@ select[for="model-group"] {
      border: 0px solid;
      font-size: 10pt;
      border-radius: 5px;
-     border-color: #333;
+     background-color: #eee;
      width: 20px;
-     height: 400px;
+     height: 33vh;
      left: -20px;
      position: absolute;
-     transform: translate(0, 50%);
      opacity: 0.5;
+     transform: translate(0, 33vh);
    }
 
    @media (max-width: 960px) {
 
-     #splash-head {
+     #splash-screen {
+       padding: none;
+       margin-left: none;
+       overflow: hidden;
+     }
+
+     #splash-title {
        font-size: 20vw;
        font-weight: 100;
        letter-spacing: 10px;
-       margin: 20px;
      }
 
      #instructions {
-      margin-top: 5vw;
+      display: flex;
+      margin: 5vh;
+      transform: none;
+      justify-content: center;
      }
 
      .option {
        border-right: none;
        border-bottom: solid;
+       border-width: thin;
+       width: 90vw;
      }
 
      #option-container {
-       flex-direction: column;
+      display: none;
      }
    }
