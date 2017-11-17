@@ -18,13 +18,8 @@
             <span class="toggle" for="model-controls">&#9776</span>
             <h3 class="model-title">Select a model and group</h3>
             <select for="model" id="modelName">
-                <option value="1">group name</option>
-                <option value="2">group name</option>
             </select>
             <select for="model-group" id="groupName">
-                <option value="1">group name</option>
-                <option value="2">group name</option>
-                <option value="3">group name</option>
             </select>
             <div class="control control-color">
                 <h4>Colors:</h4>
@@ -40,11 +35,21 @@
             </div>
             <div class="control control-texture">
                 <h4>Textures:</h4>
-                <div class="textures">
+                <div class="textures" id="textures">
                     <a href="#" data-texture="bricks">bricks<span class="sample"></span></a>
-                    <a href="#" data-texture="gray">gray<span class="sample"></span></a>
+                    <a href="#" data-texture="cloth">cloth<span class="sample"></span></a>
+                    <a href="#" data-texture="concrete">concrete<span class="sample"></span></a>
+                    <a href="#" data-texture="desert">desert<span class="sample"></span></a>
+                    <a href="#" data-texture="grass">grass<span class="sample"></span></a>
+                    <a href="#" data-texture="lace">lace<span class="sample"></span></a>
+                    <a href="#" data-texture="marble">marble<span class="sample"></span></a>
                     <a href="#" data-texture="matrix">matrix<span class="sample"></span></a>
+                    <a href="#" data-texture="metal">metal<span class="sample"></span></a>
+                    <a href="#" data-texture="steel">steel<span class="sample"></span></a>
+                    <a href="#" data-texture="stone">stone<span class="sample"></span></a>
+                    <a href="#" data-texture="wood">wood<span class="sample"></span></a>
                 </div>
+                <input type="file" id="file-texture"/>
             </div>
             <div class="control-transparency">
                 <h4>Transparency:</h4>
@@ -133,7 +138,7 @@
             modelCtrls = document.getElementById('modelCtrls');
 
             // Initialize the controls by adding event listeners etc.
-            controls = Controls(modelCtrls, playbackCtrls);
+            const controls = Controls();
             controls.init();
 
             // Add to the global space
