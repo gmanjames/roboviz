@@ -263,18 +263,20 @@ select[for="model-group"] {
    #splash-screen {
      background-color: #ddd;
      font-family: 'Barlow', arial, sans-serif;
-     height: 100%;
-     width: 100%;
-     overflow: hidden;
-     position: relative;
+     height: 100vh;
+     width: 100vw;
+     overflow: visible;
+     color: #333;
+     position: absolute;
+     transition: margin-left 0.5s ease-in-out;
+
    }
 
-   #splash-screen > p {
-     box-shadow: 10px;
+   .slide-right {
+     margin-left: 100vw;
    }
 
    #the-head {
-     color: #333;
      text-align: center;
    }
 
@@ -289,8 +291,22 @@ select[for="model-group"] {
      font-size: 20pt;
    }
 
-   #option-container {
+   #instructions {
     margin-top: 60px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    text-align: center;
+   }
+
+   #get-started {
+     display: flex;
+     justify-content: center;
+   }
+
+   #option-container {
+    display: flex;
+    flex-direction: row;
    }
 
    .option {
@@ -298,12 +314,40 @@ select[for="model-group"] {
      border-right: solid;
      border-width: thin;
      padding: 20px;
-     display: inline-block;
      font-size: 20px;
+     display: flex;
+     justify-content: center;
    }
 
    #last-option {
      border-right: none;
+   }
+
+   #hide-splash {
+     display: flex;
+     justify-content: center;
+   }
+
+   #hide-button {
+     padding: 7px 37px;
+     border: 0px solid;
+     font-size: 30pt;
+     border-radius: 5px;
+     background-color: #eee;
+     border-color: #333;
+   }
+
+   #show-button {
+     border: 0px solid;
+     font-size: 10pt;
+     border-radius: 5px;
+     background-color: #eee;
+     border-color: #333;
+     width: 20px;
+     height: 400px;
+     left: -20px;
+     position: absolute;
+     transform: translate(0, 50%);
    }
 
    @media (max-width: 960px) {
@@ -315,7 +359,7 @@ select[for="model-group"] {
        margin: 20px;
      }
 
-     #option-container {
+     #instructions {
       margin-top: 5vw;
      }
 

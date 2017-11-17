@@ -84,21 +84,31 @@
 
           <!-- splash screen -->
         <div id="splash-screen">
+
+          <button id="show-button">&larr;</button>
+
           <div id="the-head">
-            <p id="splash-head">ASIMove</p>
-            <p id="description">To get started try one of the following</p>
-          <div id="option-container">
-            <div class="option">
-              <p>Drag a file onto the screen</p>
+            <p id="splash-head">RePLAY</p>
+          </div>
+          <div id="instructions">
+            <div id="get-started">
+              <p id="description">To get started try one of the following</p>
             </div>
-            <div class="option">
-              <p>Specify log file using URL query</p>
-            </div>
-            <div class="option" id="last-option">
-              <p>Type the file path location into your URL</p>
+            <div id="option-container">
+              <div class="option">
+                <p>Drag a file onto the screen</p>
+              </div>
+              <div class="option">
+                <p>Specify log file using URL query</p>
+              </div>
+              <div class="option" id="last-option">
+                <p>Type the file path location into your URL</p>
+              </div>
             </div>
           </div>
-          <div>
+          <div id="hide-splash">
+            <button id="hide-button">&rarr;</button>
+          </div>
         </div>
 
         <!-- js -->
@@ -112,6 +122,7 @@
             // To start the application, we need to set up the controls.
             // The 'Controls' function takes as arguments the areas containing
             // the various inputs.
+
 
             let playbackCtrls, modelCtrls, controls;
 
@@ -128,7 +139,20 @@
             // Add to the global space
             window['controls'] = controls;
 
+        </script>
+        <script>
+            document.getElementById('hide-button').onclick = function() {removeSplash()};
+            document.getElementById('show-button').onclick = function() {revealSplash()};
 
+            function removeSplash() {
+              var s = document.getElementById('splash-screen');
+              s.className += " slide-right";
+            }
+
+            function revealSplash() {
+              var s = document.getElementById('splash-screen');
+              s.className = "";
+            }
         </script>
     </body>
 </html>
