@@ -104,6 +104,11 @@ const Controls = () =>
     const visualizers = {};
 
     /*
+     *
+     */
+    let isLoading = false;
+
+    /*
      * The visualizer for which the control options currently apply
      */
     let activeVisualizer;
@@ -178,7 +183,6 @@ const Controls = () =>
      * associated with the currently active visualizer.
      */
     function updateControls() {
-
         const active    = getCurrentActive();
         const modelInfo = visualizers[active];
 
@@ -302,14 +306,15 @@ const Controls = () =>
 
         evt.preventDefault();
 
-        document.getElementById('progress-holder').style.display = 'inline';
+        initLoading();
 
         let files = evt.dataTransfer.files; // FileList object.
         loadDroppedAnimation(files[0]).then((evt) => {
             return JSON.parse(evt.target.result);
         }).then((dat) => {
-            loadNewVisualizer(dat);
-            updateControls();
+            loadNewVisualizer(dat).then(() => {
+                updateControls();
+            });
         });
     }
 
@@ -584,9 +589,13 @@ const Controls = () =>
      * successful aqcuisition of the resource, in this case, the json file.
      */
     function loadRefAnimation(urlRef) {
-        fetch(urlRef).then((res) => res.json()).then(async (data) => {
-            await loadNewVisualizer(data);
-            updateControls();
+
+        initLoading();
+
+        fetch(urlRef).then((res) => res.json()).then(data => {
+            loadNewVisualizer(data).then(() => {
+                updateControls();
+            });
         });
     }
 
@@ -599,11 +608,16 @@ const Controls = () =>
      * Returns a function that creates a model from the data held in the test
      * model array at the specified index.
      */
-    async function loadTestAnimation(animation) {
-        await loadNewVisualizer(testModels[animation]);
-        updateControls();
+    function loadTestAnimation(animation) {
+        loadNewVisualizer(testModels[animation]).then(() => {
+            updateControls();
+        });
     }
 
+
+    function initLoading() {
+
+    }
 
     async function loadNewVisualizer(dat) {
 
@@ -630,7 +644,6 @@ const Controls = () =>
         // Load animation represented by data and store assoc info
         const animation = await activeVisualizer.loadAnimation(dat);
         visualizers[id].animation = animation;
-        console.log(visualizers[id]);
 
         // Set up state for visualizer
         const state = {
