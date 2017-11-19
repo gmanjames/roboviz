@@ -31,6 +31,11 @@ const Visualizer = (fps) =>
     const textureLoader = new THREE.TextureLoader();
 
     /*
+     * STL loader for meshes in the STL format
+     */
+    const stlLoader = new THREE.STLLoader();
+
+    /*
      * Desired time interval between frames.
      */
     const interval = 1000 / fps;
@@ -157,7 +162,7 @@ const Visualizer = (fps) =>
      *
      * Extract model information from JSON data.
      */
-    function createModel(data)
+    async function createModel(data)
     {
         let model  = new THREE.Group(),
             frames = data.frames,
@@ -192,6 +197,10 @@ const Visualizer = (fps) =>
                         geometry = new THREE.SphereBufferGeometry(obj.diameter, 32, 32);
                         material = new THREE.MeshLambertMaterial( { color: parseInt(obj.color),  overdraw: 0.5 } );
                     }
+                    else if (obj.type === "mesh") {
+                        geometry = await loadData(obj.url);
+                        material = new THREE.MeshLambertMaterial( { color: parseInt(obj.color),  overdraw: 0.5 } );
+                    }
 
                     material.transparent = true;
                     let mesh = new THREE.Mesh(geometry, material);
@@ -203,6 +212,15 @@ const Visualizer = (fps) =>
 
         scene.add(model);
         animation = {model, step, start, stop, frames};
+    }
+
+
+    function loadData(url) {
+        return new Promise((resolve, reject) => {
+            stlLoader.load(url, geom => {
+                resolve(geom);
+            })
+        });
     }
 
 
@@ -317,8 +335,8 @@ const Visualizer = (fps) =>
      *
      * ...
      */
-    const loadAnimation = function(dat) {
-        createModel(dat);
+    const loadAnimation = async function(dat) {
+        await createModel(dat);
 
         // Return information about the animation loaded
         let start = animation.start,

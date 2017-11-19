@@ -584,8 +584,8 @@ const Controls = () =>
      * successful aqcuisition of the resource, in this case, the json file.
      */
     function loadRefAnimation(urlRef) {
-        fetch(urlRef).then((res) => res.json()).then((data) => {
-            loadNewVisualizer(data);
+        fetch(urlRef).then((res) => res.json()).then(async (data) => {
+            await loadNewVisualizer(data);
             updateControls();
         });
     }
@@ -599,13 +599,13 @@ const Controls = () =>
      * Returns a function that creates a model from the data held in the test
      * model array at the specified index.
      */
-    function loadTestAnimation(animation) {
-        loadNewVisualizer(testModels[animation]);
+    async function loadTestAnimation(animation) {
+        await loadNewVisualizer(testModels[animation]);
         updateControls();
     }
 
 
-    function loadNewVisualizer(dat) {
+    async function loadNewVisualizer(dat) {
 
         // Fetch currently active window and connect visualizer instance
         const active = getNumberActive();
@@ -628,8 +628,9 @@ const Controls = () =>
         winw.querySelector('.rm-file').addEventListener('click', handleRmModel);
 
         // Load animation represented by data and store assoc info
-        const animation = activeVisualizer.loadAnimation(dat);
+        const animation = await activeVisualizer.loadAnimation(dat);
         visualizers[id].animation = animation;
+        console.log(visualizers[id]);
 
         // Set up state for visualizer
         const state = {
@@ -718,6 +719,7 @@ const Controls = () =>
             active.style.left  = '0';
             inactive.innerHTML = '';
             inactive.classList.add('window-inactive');
+            active.querySelector('.rm-file').dataset.state = 'disabled';
         }
         else if (numActive === 2) {
 
@@ -726,9 +728,10 @@ const Controls = () =>
             active.style.left  = '0';
             active.style.width = '50%';
             active.classList.remove('window-inactive');
-
             inactive.style.left = '50%';
             inactive.style.width = '50%';
+            active.querySelector('.rm-file').dataset.state = 'enabled';
+            inactive.querySelector('.rm-file').dataset.state = 'enabled';
         }
     }
 
