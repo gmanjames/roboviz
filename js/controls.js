@@ -228,6 +228,12 @@ const Controls = () =>
         playbackTime.step = modelInfo.animation.step;
         rightTimeLabel.innerHTML = modelInfo.animation.stop;
         leftTimeLabel.innerHTML  = modelInfo.animation.start;
+
+        if (!modelInfo.state.playing) {
+            playPauseBtn.dataset.toggle = "pause";
+        } else {
+            playPauseBtn.dataset.toggle = "play";
+        }
     }
 
 
@@ -257,7 +263,7 @@ const Controls = () =>
             textureControls[i].addEventListener('click', handleTexture);
         }
 
-        textureBtn.addEventListener('change', handleNewTexture);  
+        textureBtn.addEventListener('change', handleNewTexture);
 
         transparency.addEventListener('input', handleTransparency);
 
@@ -347,6 +353,8 @@ const Controls = () =>
      */
     function handleModelSelect(evt) {
         const id = parseInt(evt.target.value);
+        activeVisualizer.setIsActive(false);
+        visualizers[id].instance.setIsActive(true);
         activeVisualizer = visualizers[id].instance;
         updateControls();
     }
@@ -394,7 +402,7 @@ const Controls = () =>
 
         reader.readAsDataURL(file[0]);
         reader.onload = addImg;
-        
+
         function addImg(imgsrc) {
             fileName = fileName.replace(/\.[^/.]+$/, ""); //Remove extension
 
@@ -607,9 +615,14 @@ const Controls = () =>
         winw.innerHTML = '';
 
         // Create new visualizer instance
+        if (activeVisualizer !== undefined) {
+            activeVisualizer.setIsActive(false);
+        }
+
         activeVisualizer = Visualizer(DEFAULT_FPS);
         visualizers[id].instance = activeVisualizer;
         activeVisualizer.init(winw);
+        activeVisualizer.setIsActive(true);
 
         // Add event listener to rm-file button
         winw.querySelector('.rm-file').addEventListener('click', handleRmModel);

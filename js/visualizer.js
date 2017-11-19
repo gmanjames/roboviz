@@ -51,6 +51,11 @@ const Visualizer = (fps) =>
     let isPlaying = true;
 
     /*
+     * Used to determine if visualizer should notify controls
+     */
+    let isActive = false;
+
+    /*
      * Multiplier for the speed and direction of the animation.
      */
     let playbackSpeed = 1;
@@ -274,7 +279,8 @@ const Visualizer = (fps) =>
 
         let frame = Math.round((currentTime % animation.stop) / animation.step);
 
-        window.controls.notify(frame * animation.step);
+        if (isActive)
+            window.controls.notify(frame * animation.step);
 
         for (const group of animation.model.children) {
             group.position.set(animation.frames[frame][group.name].position[0],
@@ -365,6 +371,19 @@ const Visualizer = (fps) =>
      */
     const setSpeed = function(speedVal) {
         playbackSpeed = speedVal;
+    };
+
+
+    /*
+     * setIsActive:
+     *
+     * param active - New boolean for if this visualizer is active
+     *
+     * Set whether or not this visualizer is active. This value is used to
+     * determine if the visualizer should be notifying controls of clock time.
+     */
+    const setIsActive = function(active) {
+        isActive = active;
     };
 
 
@@ -470,6 +489,7 @@ const Visualizer = (fps) =>
         resetCamera,
         setSpeed,
         setTime,
+        setIsActive,
         changeColor,
         changeTexture,
         changeTransparency,
