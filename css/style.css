@@ -328,8 +328,8 @@ select[for="model-group"] {
    #splash-screen {
      background-color: #ddd;
      font-family: 'Barlow', arial, sans-serif;
-     height: 100vh;
-     width: 100vw;
+     height: 100%;
+     width: 100%;
      overflow: visible;
      color: #333;
      position: absolute;
@@ -347,8 +347,8 @@ select[for="model-group"] {
 
    #splash-title {
      font-size: 140pt;
-     font-weight: 100;
-     letter-spacing: 10px;
+     font-weight: lighter;
+     letter-spacing: 20px;
      margin: 20px;
    }
 
@@ -362,7 +362,6 @@ select[for="model-group"] {
     flex-direction: column;
     justify-content: center;
     text-align: center;
-
    }
 
    #get-started {
@@ -402,19 +401,22 @@ select[for="model-group"] {
      background-color: #efefef;
      border-color: #333;
      box-shadow: 2px 2px #aaa;
+     cursor: pointer;
    }
 
    #show-button {
      border: 0px solid;
-     font-size: 10pt;
+     font-size: 1.5em;
      border-radius: 5px;
      background-color: #eee;
-     width: 20px;
+     width: 30px;
      height: 33vh;
-     left: -20px;
+     left: -30px;
      position: absolute;
      opacity: 0.5;
      transform: translate(0, 33vh);
+     padding: 2px;
+     cursor: pointer;
    }
 
    @media (max-width: 960px) {
@@ -446,6 +448,6 @@ select[for="model-group"] {
      }
 
      #option-container {
-      display: none;
+       flex-direction: column;
      }
    }
