@@ -602,7 +602,7 @@ const Controls = () =>
             });
         }).catch((error) => {
             alert('The specified path to the logfile has returned an error. \
-                An example path here is:\n\n :userName/:repoName/branchName/path/to/fileName.json \n\n' + error);
+An example path here is:\n\n :userName/:repoName/branchName/path/to/fileName.json \n\n' + error);
         });
     }
 
