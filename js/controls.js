@@ -306,8 +306,6 @@ const Controls = () =>
 
         evt.preventDefault();
 
-        initLoading();
-
         let files = evt.dataTransfer.files; // FileList object.
         loadDroppedAnimation(files[0]).then((evt) => {
             return JSON.parse(evt.target.result);
@@ -589,9 +587,6 @@ const Controls = () =>
      * successful aqcuisition of the resource, in this case, the json file.
      */
     function loadRefAnimation(urlRef) {
-
-        initLoading();
-
         fetch(urlRef).then((res) => res.json()).then(data => {
             loadNewVisualizer(data).then(() => {
                 updateControls();
@@ -614,10 +609,6 @@ const Controls = () =>
         });
     }
 
-
-    function initLoading() {
-
-    }
 
     async function loadNewVisualizer(dat) {
 
