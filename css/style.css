@@ -346,14 +346,14 @@ select[for="model-group"] {
    }
 
    #splash-title {
-     font-size: 100pt;
+     font-size: 140pt;
      font-weight: 100;
      letter-spacing: 10px;
      margin: 20px;
    }
 
    #description {
-     font-size: 20pt;
+     font-size: 35pt;
    }
 
    #instructions {
@@ -362,7 +362,7 @@ select[for="model-group"] {
     flex-direction: column;
     justify-content: center;
     text-align: center;
-    transform: translate(0, 40%);
+
    }
 
    #get-started {
@@ -380,7 +380,7 @@ select[for="model-group"] {
      border-right: solid;
      border-width: thin;
      padding: 20px;
-     font-size: 20px;
+     font-size: 30px;
      display: flex;
      justify-content: center;
    }
