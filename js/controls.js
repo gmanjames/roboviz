@@ -16,14 +16,15 @@ const Controls = () =>
     const DEFAULT_FPS = 60;
 
     /*
-     *
+     * Area that is used to capture any file that will dropped onto the
+     * screen for use as a new log file.
      */
     const dropZone = document.getElementById('dropZone');
 
     /*
      * Name of the currently selected model
      */
-    const modelSelect = document.getElementById('modelName')
+    const modelSelect = document.getElementById('modelName');
 
     /*
      * Name of the currently selected model group
@@ -36,8 +37,7 @@ const Controls = () =>
     const colorControls = document.querySelectorAll('.colors > a');
 
     /*
-     * Control for the opacity of the currently selected model group
-     * Input box for teh hexidecimal information if you wanted to specify it.
+     * Control for the color of the currently selected model group
      */
     const colorInput = document.getElementById('colorWell');
 
@@ -51,7 +51,17 @@ const Controls = () =>
      * Elements containing url's to specific textures for selecting a texture
      * to be applied to the current model group selected.
      */
-    const textureControls = document.querySelectorAll('.textures > a');
+    let textureControls = document.querySelectorAll('.textures > a');
+
+    /*
+     * Button to add a new texture temporarily to the list of textures
+     */
+    const textureBtn = document.getElementById('file-texture');
+
+    /*
+     * Button for removing animation
+     */
+    const rmModelBtn = document.getElementById('rmModelBtn');
 
     /*
      * Button for pausing and playing
@@ -112,9 +122,33 @@ const Controls = () =>
      */
     const init = function() {
 
+        // Initialize visualizers without animation
+
+        // Visualizer for first window
+        visualizers['1'] = {
+            state: { active: false }
+        };
+
+        // Visualizer for the second window
+        visualizers['2'] = {
+            state: { active: false }
+        };
+
+        // Set default active visualizers
+        activeVisualizer = visualizers['1'].instance;
+
+        // Search URL parameters as source of data
         const searchParams = new URLSearchParams(window.location.search);
+
         if (searchParams.has('logref')) {
-            loadRefAnimation(searchParams.get('logref'));
+            let urlPath = searchParams.get('logref');
+            if (urlPath.includes('http')) {
+                loadRefAnimation(urlPath);
+            }
+            else {
+                let url = 'https://raw.githubusercontent.com/' + urlPath;
+                loadRefAnimation(url);
+            }
         }
         else if (searchParams.has('test')) {
             loadTestAnimation(parseInt(searchParams.get('test')));
@@ -155,37 +189,57 @@ const Controls = () =>
      * Function to update the various controls options with the information
      * associated with the currently active visualizer.
      */
-    function updateControls(modelInfo) {
+    function updateControls() {
 
-        // Model controls
+        const active    = getCurrentActive();
+        const modelInfo = visualizers[active];
+
+        // Group components for model
         groupSelect.innerHTML = '';
-        for (let group of modelInfo.groups) {
+
+        for (let group of modelInfo.animation.groups) {
             let option = document.createElement('option');
             option.value = group;
             option.appendChild(document.createTextNode(group));
             groupSelect.appendChild(option);
         }
 
+        // Available models
         modelSelect.innerHTML = '';
 
-        let modelNumber = 0;
-        for (let vis in visualizers) {
-            modelNumber++;
-            let option = document.createElement('option');
-            if (modelNumber === modelInfo.id) {
-                option.selected = 'selected';
-            }
-            option.value = modelNumber;
-            option.appendChild(document.createTextNode('model-' + modelNumber));
-            modelSelect.appendChild(option);
+        const modelOneOpt = document.createElement('option');
+        const modelTwoOpt = document.createElement('option');
+
+        modelOneOpt.appendChild(document.createTextNode('model 1'));
+        modelTwoOpt.appendChild(document.createTextNode('model 2'));
+        modelOneOpt.value = '1';
+        modelTwoOpt.value = '2';
+
+        if (active === 1) {
+            modelOneOpt.selected = 'selected';
+        }
+        else {
+            modelTwoOpt.selected = 'selected';
         }
 
+        if (!visualizers[1].state.active) {
+            modelOneOpt.disabled = 'disabled';
+        }
+
+        if (!visualizers[2].state.active) {
+            modelTwoOpt.disabled = 'disabled';
+        }
+
+
+        modelSelect.appendChild(modelOneOpt);
+        modelSelect.appendChild(modelTwoOpt);
+
         // Playback controls
-        playbackTime.min  = modelInfo.start;
-        playbackTime.max  = modelInfo.stop;
-        playbackTime.step = modelInfo.step;
-        rightTimeLabel.innerHTML = modelInfo.stop;
-        leftTimeLabel.innerHTML  = modelInfo.start;
+        playbackTime.min  = modelInfo.animation.start;
+        playbackTime.max  = modelInfo.animation.stop;
+        playbackTime.step = modelInfo.animation.step;
+        rightTimeLabel.innerHTML = modelInfo.animation.stop;
+        leftTimeLabel.innerHTML  = modelInfo.animation.start;
     }
 
     function openModel(evt, modelName) {
@@ -240,6 +294,8 @@ const Controls = () =>
             textureControls[i].addEventListener('click', handleTexture);
         }
 
+        textureBtn.addEventListener('change', handleNewTexture);
+
         transparency.addEventListener('input', handleTransparency);
 
         // Playback controls
@@ -283,9 +339,8 @@ const Controls = () =>
         loadDroppedAnimation(files[0]).then((evt) => {
             return JSON.parse(evt.target.result);
         }).then((dat) => {
-            const id = loadNewVisualizer(dat);
-            resizeVisualizers();
-            updateControls(visualizers[id]);
+            loadNewVisualizer(dat);
+            updateControls();
         });
     }
 
@@ -329,8 +384,8 @@ const Controls = () =>
      */
     function handleModelSelect(evt) {
         const id = parseInt(evt.target.value);
-        updateControls(visualizers[id]);
         activeVisualizer = visualizers[id].instance;
+        updateControls();
     }
 
 
@@ -364,6 +419,44 @@ const Controls = () =>
 
 
     /*
+     * handleNewTexture:
+     *
+     * param evt - Javascript evt
+     *
+     * Loads the selected texture and adds it to the list of textures.
+     */
+    function handleNewTexture(evt) {
+        let file = textureBtn.files;
+        let reader = new FileReader;
+        let fileName = file[0].name;
+
+        reader.readAsDataURL(file[0]);
+        reader.onload = addImg;
+
+        function addImg(imgsrc) {
+            fileName = fileName.replace(/\.[^/.]+$/, ""); //Remove extension
+
+            let a = document.createElement('a');
+            a.href = "#";
+            a.setAttribute("data-texture", fileName);
+            a.innerHTML = fileName;
+
+            let newSpan = document.createElement('span');
+            newSpan.className = "sample";
+            newSpan.style.backgroundImage = "url(" + imgsrc.target.result + ")";
+
+            a.appendChild(newSpan);
+            document.getElementById("textures").appendChild(a);
+
+            textureControls = document.querySelectorAll('.textures > a');
+            for (let i = 0; i < textureControls.length; i++) {
+                textureControls[i].addEventListener('click', handleTexture);
+            }
+        }
+    }
+
+
+    /*
      * handleTransparency
      *
      * param evt - Javascript event
@@ -378,6 +471,42 @@ const Controls = () =>
 
 
     /*
+     * handleRmModel:
+     *
+     * param evt - Javascript event
+     *
+     * Remove the selected animation.
+     */
+    function handleRmModel(evt) {
+
+        const winId = evt.target.dataset.window;
+        if (getNumberActive() > 1) {
+
+            if (winId.includes('1')) {
+
+                visualizers[1] = {
+                    state: { active: false }
+                };
+
+                activeVisualizer = visualizers[2].instance;
+            }
+            else {
+
+                visualizers[2] = {
+                    state: { active: false }
+                };
+
+                activeVisualizer = visualizers[1].instance;
+            }
+
+            adjustWindows();
+            resizeVisualizers();
+            updateControls();
+        }
+    }
+
+
+    /*
      * handlePlayPause
      *
      * param evt - Javascript event
@@ -386,13 +515,17 @@ const Controls = () =>
      * current state of the play/pause button.
      */
     function handlePlayPause(evt) {
-        const state = evt.target.dataset.toggle;
-        if (state === "play") {
+
+        const state = getState('playing');
+
+        visualizers[getCurrentActive()].state.playing = !state;
+        activeVisualizer.togglePlay();
+
+        if (state) {
             evt.target.dataset.toggle = "pause";
         } else {
             evt.target.dataset.toggle = "play";
         }
-        activeVisualizer.togglePlay();
     }
 
 
@@ -457,14 +590,13 @@ const Controls = () =>
 
             // On progress, update progress bar
             reader.addEventListener('progress', evt => {
-                console.log(evt.loaded / evt.total);
 
                 if ((evt.loaded / evt.total) == 1) { // hide progress bar once loaded
                   document.getElementById('progress-holder').style.display = 'none';
                 }
 
-                var amtLoaded = (evt.loaded / evt.total) * 100;
-                var theWidth = amtLoaded.toString();
+                let amtLoaded = (evt.loaded / evt.total) * 100;
+                let theWidth = amtLoaded.toString();
                 theWidth = theWidth + '%';
                 document.getElementById('progress-bar').style.width = theWidth; // update progress bar
             });
@@ -483,9 +615,11 @@ const Controls = () =>
      */
     function loadRefAnimation(urlRef) {
         fetch(urlRef).then((res) => res.json()).then((data) => {
-            const id = loadNewVisualizer(data);
-            resizeVisualizers();
-            updateControls(visualizers[id]);
+            loadNewVisualizer(data);
+            updateControls();
+        }).catch((error) => {
+            alert('The specified path to the logfile has returned an error. \
+An example path here is:\n\n :userName/:repoName/branchName/path/to/fileName.json \n\n' + error);
         });
     }
 
@@ -499,75 +633,145 @@ const Controls = () =>
      * model array at the specified index.
      */
     function loadTestAnimation(animation) {
-        const id = loadNewVisualizer(testModels[animation]);
-        resizeVisualizers();
-        updateControls(visualizers[id]);
+        loadNewVisualizer(testModels[animation]);
+        updateControls();
     }
 
 
     function loadNewVisualizer(dat) {
-        const numVisualizers = Object.keys(visualizers).length;
-        let id;
-        if (numVisualizers === 0) {
-            id = 1;
-        }
-        else if (numVisualizers === 1) {
-            adjustWindows(2);
-            id = 2;
-        }
-        else if (numVisualizers === 2) {
-            id = getActive();
+
+        // Fetch currently active window and connect visualizer instance
+        const active = getNumberActive();
+        const [id, winw] = getWindow(active);
+
+        // Clear the window for the new visualization
+        winw.innerHTML = '';
+
+        // Create new visualizer instance
+        activeVisualizer = Visualizer(DEFAULT_FPS);
+        visualizers[id].instance = activeVisualizer;
+        activeVisualizer.init(winw);
+
+        // Add event listener to rm-file button
+        winw.querySelector('.rm-file').addEventListener('click', handleRmModel);
+
+        // Load animation represented by data and store assoc info
+        const animation = activeVisualizer.loadAnimation(dat);
+        visualizers[id].animation = animation;
+
+        // Set up state for visualizer
+        const state = {
+            active: true,
+            lastTime: 0,
+            playing: true
         }
 
-        const instance  = Visualizer(DEFAULT_FPS),
-              newWindow = getWindow(id);
-        activeVisualizer = instance;
-        newWindow.innerHTML = '';
-        instance.init(newWindow);
-        visualizers[id] = Object.assign({id, instance}, instance.loadAnimation(dat));
-        return id;
+        // Replace state
+        visualizers[id].state = state;
+
+        // Resize windows accordingly
+        adjustWindows();
+        resizeVisualizers();
     }
 
 
-    function getActive() {
-        let num = modelSelect.value;
-        if (num === undefined) {
+    function getNumberActive() {
+        let active = 0;
+        for (let id of Object.keys(visualizers)) {
+            if (visualizers[id].state.active)
+                active += 1;
+        }
+
+        return active;
+    }
+
+
+    function getCurrentActive() {
+
+        if (visualizers[1].instance !== undefined
+            && visualizers[1].instance === activeVisualizer) {
             return 1;
         }
 
-        return num;
-    }
-
-
-    function getWindow(num) {
-        return document.getElementById('window' + num);
-    }
-
-
-    function adjustWindows(numWindows) {
-        const inactive = getWindow(((getActive() + 1) % MAX_VISUALIZERS) + 1),
-              active   = getWindow(getActive());
-        if (numWindows === 1) {
-            inactive.classList.add('window-inactive');
-            active.style.width = '100%';
+        if (visualizers[2].instance !== undefined
+            && visualizers[2].instance === activeVisualizer) {
+            return 2;
         }
-        else if (numWindows === 2) {
-            active.style.left = '0';
+
+        return parseInt(modelSelect.value);
+    }
+
+
+    function getWindow(active) {
+
+        let winId;
+
+        switch(active) {
+
+            // No vis loaded so return first window
+            case 0:
+                winId = 1;
+                break;
+
+            // One vis loaded so return window without active visualizer
+            case 1:
+                winId = visualizers[1].state.active ? 2 : 1;
+                break;
+
+            // Both vis's active so return currently active window
+            default:
+                winId = getCurrentActive();
+        }
+
+
+        return [winId, document.getElementById('window' + winId)];
+    }
+
+
+    function getState(state) {
+        return visualizers[getCurrentActive()].state[state];
+    }
+
+
+    function adjustWindows() {
+
+        const numActive = getNumberActive();
+        const inactive = document.getElementById('window' + (((getCurrentActive() + 2) % 2) + 1));
+        const active   = document.getElementById('window' + getCurrentActive());
+
+        if (numActive === 1) {
+
+            // Adjust active to full screen and hide inactive
+            active.style.width = '100%';
+            active.style.left  = '0';
+            inactive.innerHTML = '';
+            inactive.classList.add('window-inactive');
+            active.querySelector('.rm-file').dataset.state = 'disabled';
+        }
+        else if (numActive === 2) {
+
+            // Assign each window half of the total width of the screen
+            // TODO: implement responsive checking here
+            active.style.left  = '0';
             active.style.width = '50%';
-            inactive.classList.remove('window-inactive');
-            inactive.style.right = '0';
+            active.classList.remove('window-inactive');
+            inactive.style.left = '50%';
             inactive.style.width = '50%';
+            active.querySelector('.rm-file').dataset.state = 'enabled';
+            inactive.querySelector('.rm-file').dataset.state = 'enabled';
         }
     }
 
 
     function resizeVisualizers() {
         for (const vis of Object.keys(visualizers)) {
-            const width  = getWindow(visualizers[vis].id).clientWidth,
-                  height = getWindow(visualizers[vis].id).clientHeight;
-            visualizers[vis].instance.resize(width, height);
+            if (visualizers[vis].instance !== undefined) {
+                visualizers[vis].instance.resize(document.getElementById('window' + vis).clientWidth,
+                                                 document.getElementById('window' + vis).clientHeight);
+            }
         }
     }
+
 
     // Constructed Controls object
     return {
