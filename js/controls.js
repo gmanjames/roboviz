@@ -104,6 +104,11 @@ const Controls = () =>
     const visualizers = {};
 
     /*
+     *
+     */
+    let isLoading = false;
+
+    /*
      * The visualizer for which the control options currently apply
      */
     let activeVisualizer;
@@ -185,7 +190,6 @@ const Controls = () =>
      * associated with the currently active visualizer.
      */
     function updateControls() {
-
         const active    = getCurrentActive();
         const modelInfo = visualizers[active];
 
@@ -315,8 +319,9 @@ const Controls = () =>
         loadDroppedAnimation(files[0]).then((evt) => {
             return JSON.parse(evt.target.result);
         }).then((dat) => {
-            loadNewVisualizer(dat);
-            updateControls();
+            loadNewVisualizer(dat).then(() => {
+                updateControls();
+            });
         });
     }
 
@@ -592,11 +597,12 @@ const Controls = () =>
      */
     function loadRefAnimation(urlRef) {
         fetch(urlRef).then((res) => res.json()).then(async (data) => {
-            await loadNewVisualizer(data);
-            updateControls();
+            loadNewVisualizer(data).then(() => {
+                updateControls();
+            });
         }).catch((error) => {
             alert('The specified path to the logfile has returned an error. \
-An example path here is:\n\n :userName/:repoName/branchName/path/to/fileName.json \n\n' + error);
+                An example path here is:\n\n :userName/:repoName/branchName/path/to/fileName.json \n\n' + error);
         });
     }
 
@@ -609,9 +615,10 @@ An example path here is:\n\n :userName/:repoName/branchName/path/to/fileName.jso
      * Returns a function that creates a model from the data held in the test
      * model array at the specified index.
      */
-    async function loadTestAnimation(animation) {
-        await loadNewVisualizer(testModels[animation]);
-        updateControls();
+    function loadTestAnimation(animation) {
+        loadNewVisualizer(testModels[animation]).then(() => {
+            updateControls();
+        });
     }
 
 
@@ -640,7 +647,6 @@ An example path here is:\n\n :userName/:repoName/branchName/path/to/fileName.jso
         // Load animation represented by data and store assoc info
         const animation = await activeVisualizer.loadAnimation(dat);
         visualizers[id].animation = animation;
-        console.log(visualizers[id]);
 
         // Set up state for visualizer
         const state = {

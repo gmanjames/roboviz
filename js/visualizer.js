@@ -252,19 +252,6 @@ const Visualizer = (fps) =>
 
 
     /*
-     * initLoading:
-     *
-     * Called to begin loading animation. After the data is retrieved from the
-     * log-file the the loading animation initialized by this function should
-     * be stopped by the appropriate callback.
-     */
-    function initLoading() {
-        // here we need to clear scene
-        console.log('loading initialized');
-    }
-
-
-    /*
      * update:
      *
      * Progress the time of the animation that will be used to calculate the
@@ -367,6 +354,7 @@ const Visualizer = (fps) =>
     const togglePlay = function() {
         isPlaying = !isPlaying;
     };
+
 
     /*
      * setTime:
