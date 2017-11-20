@@ -55,10 +55,7 @@ body * {
 }
 
 .styled-select {
-    background: url(http://i62.tinypic.com/15xvbd5.png) no-repeat 96% 0;
-    /*overflow: hidden;
-    //background-color: black;
-    -webkit-border-radius: 20px;*/
+    background: rgba(223, 223, 219, .4) url(http://i62.tinypic.com/15xvbd5.png) no-repeat 96% 0;
     overflow:hidden;
     width:350px;
     -moz-border-radius: 9px 9px 9px 9px;
@@ -86,7 +83,8 @@ body * {
     left: 0;
     background-color: rgba(0, 0, 0, .15);
     padding: 32px 64px 64px 16px;
-    color: white;
+    color: #DFDFDB;
+    font: Helvetica, Sans-Serif;
     //border-right: 4px solid rgba(198, 111, 30, .35);
 }
 
