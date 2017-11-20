@@ -31,6 +31,11 @@ const Visualizer = (fps) =>
     const textureLoader = new THREE.TextureLoader();
 
     /*
+     * STL loader for meshes in the STL format
+     */
+    const stlLoader = new THREE.STLLoader();
+
+    /*
      * Desired time interval between frames.
      */
     const interval = 1000 / fps;
@@ -49,6 +54,11 @@ const Visualizer = (fps) =>
      * Toggle between animation playing and paused states.
      */
     let isPlaying = true;
+
+    /*
+     * Used to determine if visualizer should notify controls
+     */
+    let isActive = false;
 
     /*
      * Multiplier for the speed and direction of the animation.
@@ -152,7 +162,7 @@ const Visualizer = (fps) =>
      *
      * Extract model information from JSON data.
      */
-    function createModel(data)
+    async function createModel(data)
     {
         let model  = new THREE.Group(),
             frames = data.frames,
@@ -187,6 +197,10 @@ const Visualizer = (fps) =>
                         geometry = new THREE.SphereBufferGeometry(obj.diameter, 32, 32);
                         material = new THREE.MeshLambertMaterial( { color: parseInt(obj.color),  overdraw: 0.5 } );
                     }
+                    else if (obj.type === "mesh") {
+                        geometry = await loadData(obj.url);
+                        material = new THREE.MeshLambertMaterial( { color: parseInt(obj.color),  overdraw: 0.5 } );
+                    }
 
                     material.transparent = true;
                     let mesh = new THREE.Mesh(geometry, material);
@@ -198,6 +212,15 @@ const Visualizer = (fps) =>
 
         scene.add(model);
         animation = {model, step, start, stop, frames};
+    }
+
+
+    function loadData(url) {
+        return new Promise((resolve, reject) => {
+            stlLoader.load(url, geom => {
+                resolve(geom);
+            })
+        });
     }
 
 
@@ -225,19 +248,6 @@ const Visualizer = (fps) =>
         }
 
         loop();
-    }
-
-
-    /*
-     * initLoading:
-     *
-     * Called to begin loading animation. After the data is retrieved from the
-     * log-file the the loading animation initialized by this function should
-     * be stopped by the appropriate callback.
-     */
-    function initLoading() {
-        // here we need to clear scene
-        console.log('loading initialized');
     }
 
 
@@ -274,7 +284,8 @@ const Visualizer = (fps) =>
 
         let frame = Math.round((currentTime % animation.stop) / animation.step);
 
-        window.controls.notify(frame * animation.step);
+        if (isActive)
+            window.controls.notify(frame * animation.step);
 
         for (const group of animation.model.children) {
             group.position.set(animation.frames[frame][group.name].position[0],
@@ -311,8 +322,8 @@ const Visualizer = (fps) =>
      *
      * ...
      */
-    const loadAnimation = function(dat) {
-        createModel(dat);
+    const loadAnimation = async function(dat) {
+        await createModel(dat);
 
         // Return information about the animation loaded
         let start = animation.start,
@@ -344,6 +355,7 @@ const Visualizer = (fps) =>
         isPlaying = !isPlaying;
     };
 
+
     /*
      * setTime:
      *
@@ -365,6 +377,19 @@ const Visualizer = (fps) =>
      */
     const setSpeed = function(speedVal) {
         playbackSpeed = speedVal;
+    };
+
+
+    /*
+     * setIsActive:
+     *
+     * param active - New boolean for if this visualizer is active
+     *
+     * Set whether or not this visualizer is active. This value is used to
+     * determine if the visualizer should be notifying controls of clock time.
+     */
+    const setIsActive = function(active) {
+        isActive = active;
     };
 
 
@@ -470,6 +495,7 @@ const Visualizer = (fps) =>
         resetCamera,
         setSpeed,
         setTime,
+        setIsActive,
         changeColor,
         changeTexture,
         changeTransparency,
