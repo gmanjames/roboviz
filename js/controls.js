@@ -104,6 +104,11 @@ const Controls = () =>
     const visualizers = {};
 
     /*
+     *
+     */
+    let isLoading = false;
+
+    /*
      * The visualizer for which the control options currently apply
      */
     let activeVisualizer;
@@ -185,7 +190,6 @@ const Controls = () =>
      * associated with the currently active visualizer.
      */
     function updateControls() {
-
         const active    = getCurrentActive();
         const modelInfo = visualizers[active];
 
@@ -235,6 +239,12 @@ const Controls = () =>
         playbackTime.step = modelInfo.animation.step;
         rightTimeLabel.innerHTML = modelInfo.animation.stop;
         leftTimeLabel.innerHTML  = modelInfo.animation.start;
+
+        if (!modelInfo.state.playing) {
+            playPauseBtn.dataset.toggle = "pause";
+        } else {
+            playPauseBtn.dataset.toggle = "play";
+        }
     }
 
 
@@ -309,8 +319,9 @@ const Controls = () =>
         loadDroppedAnimation(files[0]).then((evt) => {
             return JSON.parse(evt.target.result);
         }).then((dat) => {
-            loadNewVisualizer(dat);
-            updateControls();
+            loadNewVisualizer(dat).then(() => {
+                updateControls();
+            });
         });
     }
 
@@ -354,6 +365,8 @@ const Controls = () =>
      */
     function handleModelSelect(evt) {
         const id = parseInt(evt.target.value);
+        activeVisualizer.setIsActive(false);
+        visualizers[id].instance.setIsActive(true);
         activeVisualizer = visualizers[id].instance;
         updateControls();
     }
@@ -583,9 +596,10 @@ const Controls = () =>
      * successful aqcuisition of the resource, in this case, the json file.
      */
     function loadRefAnimation(urlRef) {
-        fetch(urlRef).then((res) => res.json()).then((data) => {
-            loadNewVisualizer(data);
-            updateControls();
+        fetch(urlRef).then((res) => res.json()).then(async (data) => {
+            loadNewVisualizer(data).then(() => {
+                updateControls();
+            });
         }).catch((error) => {
             alert('The specified path to the logfile has returned an error. \
 An example path here is:\n\n :userName/:repoName/branchName/path/to/fileName.json \n\n' + error);
@@ -602,12 +616,13 @@ An example path here is:\n\n :userName/:repoName/branchName/path/to/fileName.jso
      * model array at the specified index.
      */
     function loadTestAnimation(animation) {
-        loadNewVisualizer(testModels[animation]);
-        updateControls();
+        loadNewVisualizer(testModels[animation]).then(() => {
+            updateControls();
+        });
     }
 
 
-    function loadNewVisualizer(dat) {
+    async function loadNewVisualizer(dat) {
 
         // Fetch currently active window and connect visualizer instance
         const active = getNumberActive();
@@ -617,15 +632,20 @@ An example path here is:\n\n :userName/:repoName/branchName/path/to/fileName.jso
         winw.innerHTML = '';
 
         // Create new visualizer instance
+        if (activeVisualizer !== undefined) {
+            activeVisualizer.setIsActive(false);
+        }
+
         activeVisualizer = Visualizer(DEFAULT_FPS);
         visualizers[id].instance = activeVisualizer;
         activeVisualizer.init(winw);
+        activeVisualizer.setIsActive(true);
 
         // Add event listener to rm-file button
         winw.querySelector('.rm-file').addEventListener('click', handleRmModel);
 
         // Load animation represented by data and store assoc info
-        const animation = activeVisualizer.loadAnimation(dat);
+        const animation = await activeVisualizer.loadAnimation(dat);
         visualizers[id].animation = animation;
 
         // Set up state for visualizer
