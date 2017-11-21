@@ -54,11 +54,6 @@ const Controls = () =>
     const textureBtn = document.getElementById('file-texture');
 
     /*
-     * Button for removing animation
-     */
-    const rmModelBtn = document.getElementById('rmModelBtn');
-
-    /*
      * Button for pausing and playing
      */
     const playPauseBtn = document.getElementById('playPauseBtn');
@@ -126,12 +121,12 @@ const Controls = () =>
 
         // Visualizer for first window
         visualizers['1'] = {
-            state: { active: false }
+            state: { active: false, currentTime: 0 }
         };
 
         // Visualizer for the second window
         visualizers['2'] = {
-            state: { active: false }
+            state: { active: false,  currentTime: 0 }
         };
 
         // Set default active visualizers
@@ -175,8 +170,12 @@ const Controls = () =>
             time = time.toPrecision(3);
         }
 
-        playbackTime.value = time;
-        playbackTimeVal.innerHTML = time;
+        const active = getCurrentActive();
+        if (visualizers[active].state.playing) {
+            visualizers[active].state.currentTime = time;
+            playbackTimeVal.innerHTML = time;
+            playbackTime.value = time;
+        }
     };
 
 
@@ -239,6 +238,9 @@ const Controls = () =>
         playbackTime.step = modelInfo.animation.step;
         rightTimeLabel.innerHTML = modelInfo.animation.stop;
         leftTimeLabel.innerHTML  = modelInfo.animation.start;
+
+        playbackTimeVal.innerHTML = modelInfo.state.currentTime;
+        playbackTime.value = modelInfo.state.currentTime;
 
         if (!modelInfo.state.playing) {
             playPauseBtn.dataset.toggle = "pause";
@@ -492,19 +494,15 @@ const Controls = () =>
         if (getNumberActive() > 1) {
 
             if (winId.includes('1')) {
-
                 visualizers[1] = {
                     state: { active: false }
                 };
-
                 activeVisualizer = visualizers[2].instance;
             }
             else {
-
                 visualizers[2] = {
                     state: { active: false }
                 };
-
                 activeVisualizer = visualizers[1].instance;
             }
 
@@ -573,6 +571,23 @@ const Controls = () =>
     function handleSpeed(evt) {
         activeVisualizer.setSpeed(parseFloat(evt.target.value));
         playbackSdVal.innerHTML = evt.target.value;
+    }
+
+    /*
+     * handleFloors
+     *
+     * param evt - Javascript event
+     *
+     * ...
+     */
+    function handleFloors(evt) {
+        const winId = evt.target.dataset.window;
+        if (winId.includes('1')) {
+            visualizers[1].instance.displayFloor(evt.target.checked);
+        }
+        else if (winId.includes('2')) {
+            visualizers[2].instance.displayFloor(evt.target.checked);
+        }
     }
 
 
@@ -671,6 +686,9 @@ An example path here is:\n\n :userName/:repoName/branchName/path/to/fileName.jso
         // Add event listener to rm-file button
         winw.querySelector('.rm-file').addEventListener('click', handleRmModel);
 
+        // Add event listener to toggle-floor
+        winw.querySelector('.floor-toggle input').addEventListener('change', handleFloors);
+        
         // Load animation represented by data and store assoc info
         const animation = await activeVisualizer.loadAnimation(dat);
         visualizers[id].animation = animation;
@@ -678,7 +696,7 @@ An example path here is:\n\n :userName/:repoName/branchName/path/to/fileName.jso
         // Set up state for visualizer
         const state = {
             active: true,
-            lastTime: 0,
+            currentTime: animation.start,
             playing: true
         }
 

@@ -80,6 +80,16 @@ const Visualizer = (fps) =>
      */
     let texture;
 
+    /*
+     * Grid helper for scene
+     */
+    let grid;
+
+    /*
+     * Default ground for the 3D environment
+     */
+    let ground;
+
 
     ////////////////////////////////////////////////////
     //              Application Logic                 //
@@ -100,6 +110,15 @@ const Visualizer = (fps) =>
         closeBtn.appendChild(document.createTextNode('x'));
         windowElem.appendChild(closeBtn);
 
+        const floorToggle = document.createElement('p');
+        const floorInput  = document.createElement('input');
+        floorInput.type = 'checkbox';
+        floorInput.checked = true;
+        floorInput.dataset.window = windowElem.id;
+        floorToggle.classList.add('floor-toggle');
+        floorToggle.appendChild(document.createTextNode('display floor'));
+        floorToggle.appendChild(floorInput);
+        windowElem.appendChild(floorToggle);
 
         camera.position.set(600, 600, 1000);
         camera.lookAt(new THREE.Vector3(0,0,0));
@@ -122,7 +141,7 @@ const Visualizer = (fps) =>
 
 		// Grid floor and fog to add perspective for model movement.
 		scene.fog = new THREE.Fog(0x001a0d, 1500, 4500);
-		let grid = new THREE.GridHelper(10000, 100, 0x001a0d, 0x006633);
+		grid = new THREE.GridHelper(10000, 100, 0x001a0d, 0x006633);
 		scene.add(grid);
 
 
@@ -143,7 +162,7 @@ const Visualizer = (fps) =>
 		});
 
 		// Create ground plane and rotate into horizontal position.
-        let ground = new THREE.Mesh(groundGeometry, groundMaterial);
+        ground = new THREE.Mesh(groundGeometry, groundMaterial);
         ground.receiveShadow = true;
         ground.rotation.x = -0.5 * Math.PI;
 
@@ -204,6 +223,11 @@ const Visualizer = (fps) =>
 
                     material.transparent = true;
                     let mesh = new THREE.Mesh(geometry, material);
+
+                    if (obj.type === "mesh" && obj.scale !== undefined) {
+                        mesh.scale.set(obj.scale[0], obj.scale[1], obj.scale[2]);
+                    }
+
                     comp.add(mesh);
                 }
 
@@ -283,6 +307,10 @@ const Visualizer = (fps) =>
         }
 
         let frame = Math.round((currentTime % animation.stop) / animation.step);
+
+        if (frame >= (animation.stop - animation.start) / animation.step) {
+            frame = frame - 1;
+        }
 
         if (isActive)
             window.controls.notify(frame * animation.step);
@@ -490,6 +518,16 @@ const Visualizer = (fps) =>
         camera.updateProjectionMatrix();
     };
 
+    /*
+     * displayFloor:
+     *
+     * Hide or display the floor mesh and grid
+     */
+    const displayFloor = function(visible) {
+        ground.visible = visible;
+        grid.visible = visible;
+    };
+
 
     // Constructed application object
     return {
@@ -503,6 +541,7 @@ const Visualizer = (fps) =>
         changeColor,
         changeTexture,
         changeTransparency,
-        resize
+        resize,
+        displayFloor
     };
 };

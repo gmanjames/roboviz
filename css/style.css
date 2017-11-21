@@ -66,6 +66,22 @@ body * {
     background-color: hsla(0, 0%, 50%, 0.7);
 }
 
+.floor-toggle {
+    position: absolute;
+    top: 8px;
+    right: 64px;
+    margin: 0;
+    padding: 16px 8px;
+    color: white;
+    background-color: hsla(0, 0%, 0%, 0.6);
+    border-radius: 3px;
+    z-index: 999;
+}
+
+.floor-toggle input {
+    margin-left: 8px;
+}
+
 .toolbar {
     position: absolute;
     top: 0;
