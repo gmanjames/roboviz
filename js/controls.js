@@ -59,11 +59,6 @@ const Controls = () =>
     const textureBtn = document.getElementById('file-texture');
 
     /*
-     * Button for removing animation
-     */
-    const rmModelBtn = document.getElementById('rmModelBtn');
-
-    /*
      * Button for pausing and playing
      */
     const playPauseBtn = document.getElementById('playPauseBtn');
@@ -109,6 +104,11 @@ const Controls = () =>
     const visualizers = {};
 
     /*
+     *
+     */
+    let isLoading = false;
+
+    /*
      * The visualizer for which the control options currently apply
      */
     let activeVisualizer;
@@ -126,12 +126,12 @@ const Controls = () =>
 
         // Visualizer for first window
         visualizers['1'] = {
-            state: { active: false }
+            state: { active: false, currentTime: 0 }
         };
 
         // Visualizer for the second window
         visualizers['2'] = {
-            state: { active: false }
+            state: { active: false,  currentTime: 0 }
         };
 
         // Set default active visualizers
@@ -175,8 +175,12 @@ const Controls = () =>
             time = time.toPrecision(3);
         }
 
-        playbackTime.value = time;
-        playbackTimeVal.innerHTML = time;
+        const active = getCurrentActive();
+        if (visualizers[active].state.playing) {
+            visualizers[active].state.currentTime = time;
+            playbackTimeVal.innerHTML = time;
+            playbackTime.value = time;
+        }
     };
 
 
@@ -190,7 +194,6 @@ const Controls = () =>
      * associated with the currently active visualizer.
      */
     function updateControls() {
-
         const active    = getCurrentActive();
         const modelInfo = visualizers[active];
 
@@ -199,8 +202,8 @@ const Controls = () =>
 
         for (let group of modelInfo.animation.groups) {
             let option = document.createElement('option');
-            option.value = group;
-            option.appendChild(document.createTextNode(group));
+            option.value = group.name;
+            option.appendChild(document.createTextNode(group.name));
             groupSelect.appendChild(option);
         }
 
@@ -240,6 +243,15 @@ const Controls = () =>
         playbackTime.step = modelInfo.animation.step;
         rightTimeLabel.innerHTML = modelInfo.animation.stop;
         leftTimeLabel.innerHTML  = modelInfo.animation.start;
+
+        playbackTimeVal.innerHTML = modelInfo.state.currentTime;
+        playbackTime.value = modelInfo.state.currentTime;
+
+        if (!modelInfo.state.playing) {
+            playPauseBtn.dataset.toggle = "pause";
+        } else {
+            playPauseBtn.dataset.toggle = "play";
+        }
     }
 
     function openModel(evt, modelName) {
@@ -280,6 +292,7 @@ const Controls = () =>
         // Model controls
         modelCtrls.querySelector('.toggle[for="model-controls"]').addEventListener('click', handleMenuToggle);
         modelSelect.addEventListener('change', handleModelSelect);
+        groupSelect.addEventListener('change', handleGroupSelect);
 
         for (let i = 0; i < colorControls.length; i++) {
             colorControls[i].addEventListener('click', handleColor);
@@ -339,8 +352,9 @@ const Controls = () =>
         loadDroppedAnimation(files[0]).then((evt) => {
             return JSON.parse(evt.target.result);
         }).then((dat) => {
-            loadNewVisualizer(dat);
-            updateControls();
+            loadNewVisualizer(dat).then(() => {
+                updateControls();
+            });
         });
     }
 
@@ -384,8 +398,28 @@ const Controls = () =>
      */
     function handleModelSelect(evt) {
         const id = parseInt(evt.target.value);
+        activeVisualizer.setIsActive(false);
+        visualizers[id].instance.setIsActive(true);
         activeVisualizer = visualizers[id].instance;
         updateControls();
+    }
+
+
+    /*
+     * handleGroupSelect
+     *
+     * param evt - Javascript evt
+     *
+     * ...
+     */
+    function handleGroupSelect(evt) {
+        const groupName = groupSelect.value;
+        const modelInfo = visualizers[getCurrentActive()];
+        for (const group of modelInfo.animation.groups) {
+            if (group.name == groupName) {
+                transparency.value = group.transparency;
+            }
+        }
     }
 
 
@@ -466,6 +500,14 @@ const Controls = () =>
      */
     function handleTransparency(evt) {
         let groupName = groupSelect.value;
+        // Save local value of transparency to be applied when group is selected
+        const modelInfo = visualizers[getCurrentActive()];
+        for (const group of modelInfo.animation.groups) {
+            if (group.name == groupName) {
+                group.transparency = transparency.value;
+            }
+        }
+        // Do the actual change
         activeVisualizer.changeTransparency(groupName, parseFloat(evt.target.value));
     }
 
@@ -483,19 +525,15 @@ const Controls = () =>
         if (getNumberActive() > 1) {
 
             if (winId.includes('1')) {
-
                 visualizers[1] = {
                     state: { active: false }
                 };
-
                 activeVisualizer = visualizers[2].instance;
             }
             else {
-
                 visualizers[2] = {
                     state: { active: false }
                 };
-
                 activeVisualizer = visualizers[1].instance;
             }
 
@@ -566,6 +604,23 @@ const Controls = () =>
         playbackSdVal.innerHTML = evt.target.value;
     }
 
+    /*
+     * handleFloors
+     *
+     * param evt - Javascript event
+     *
+     * ...
+     */
+    function handleFloors(evt) {
+        const winId = evt.target.dataset.window;
+        if (winId.includes('1')) {
+            visualizers[1].instance.displayFloor(evt.target.checked);
+        }
+        else if (winId.includes('2')) {
+            visualizers[2].instance.displayFloor(evt.target.checked);
+        }
+    }
+
 
     ////////////////////////////////////////////////////
     //               Log-file Handeling               //
@@ -614,9 +669,10 @@ const Controls = () =>
      * successful aqcuisition of the resource, in this case, the json file.
      */
     function loadRefAnimation(urlRef) {
-        fetch(urlRef).then((res) => res.json()).then((data) => {
-            loadNewVisualizer(data);
-            updateControls();
+        fetch(urlRef).then((res) => res.json()).then(async (data) => {
+            loadNewVisualizer(data).then(() => {
+                updateControls();
+            });
         }).catch((error) => {
             alert('The specified path to the logfile has returned an error. \
 An example path here is:\n\n :userName/:repoName/branchName/path/to/fileName.json \n\n' + error);
@@ -633,12 +689,13 @@ An example path here is:\n\n :userName/:repoName/branchName/path/to/fileName.jso
      * model array at the specified index.
      */
     function loadTestAnimation(animation) {
-        loadNewVisualizer(testModels[animation]);
-        updateControls();
+        loadNewVisualizer(testModels[animation]).then(() => {
+            updateControls();
+        });
     }
 
 
-    function loadNewVisualizer(dat) {
+    async function loadNewVisualizer(dat) {
 
         // Fetch currently active window and connect visualizer instance
         const active = getNumberActive();
@@ -648,21 +705,29 @@ An example path here is:\n\n :userName/:repoName/branchName/path/to/fileName.jso
         winw.innerHTML = '';
 
         // Create new visualizer instance
+        if (activeVisualizer !== undefined) {
+            activeVisualizer.setIsActive(false);
+        }
+
         activeVisualizer = Visualizer(DEFAULT_FPS);
         visualizers[id].instance = activeVisualizer;
         activeVisualizer.init(winw);
+        activeVisualizer.setIsActive(true);
 
         // Add event listener to rm-file button
         winw.querySelector('.rm-file').addEventListener('click', handleRmModel);
 
+        // Add event listener to toggle-floor
+        winw.querySelector('.floor-toggle input').addEventListener('change', handleFloors);
+        
         // Load animation represented by data and store assoc info
-        const animation = activeVisualizer.loadAnimation(dat);
+        const animation = await activeVisualizer.loadAnimation(dat);
         visualizers[id].animation = animation;
 
         // Set up state for visualizer
         const state = {
             active: true,
-            lastTime: 0,
+            currentTime: animation.start,
             playing: true
         }
 

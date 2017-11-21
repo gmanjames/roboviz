@@ -31,6 +31,11 @@ const Visualizer = (fps) =>
     const textureLoader = new THREE.TextureLoader();
 
     /*
+     * STL loader for meshes in the STL format
+     */
+    const stlLoader = new THREE.STLLoader();
+
+    /*
      * Desired time interval between frames.
      */
     const interval = 1000 / fps;
@@ -49,6 +54,11 @@ const Visualizer = (fps) =>
      * Toggle between animation playing and paused states.
      */
     let isPlaying = true;
+
+    /*
+     * Used to determine if visualizer should notify controls
+     */
+    let isActive = false;
 
     /*
      * Multiplier for the speed and direction of the animation.
@@ -70,6 +80,16 @@ const Visualizer = (fps) =>
      */
     let texture;
 
+    /*
+     * Grid helper for scene
+     */
+    let grid;
+
+    /*
+     * Default ground for the 3D environment
+     */
+    let ground;
+
 
     ////////////////////////////////////////////////////
     //              Application Logic                 //
@@ -90,6 +110,15 @@ const Visualizer = (fps) =>
         closeBtn.appendChild(document.createTextNode('x'));
         windowElem.appendChild(closeBtn);
 
+        const floorToggle = document.createElement('p');
+        const floorInput  = document.createElement('input');
+        floorInput.type = 'checkbox';
+        floorInput.checked = true;
+        floorInput.dataset.window = windowElem.id;
+        floorToggle.classList.add('floor-toggle');
+        floorToggle.appendChild(document.createTextNode('display floor'));
+        floorToggle.appendChild(floorInput);
+        windowElem.appendChild(floorToggle);
 
         camera.position.set(600, 600, 1000);
         camera.lookAt(new THREE.Vector3(0,0,0));
@@ -112,7 +141,7 @@ const Visualizer = (fps) =>
 
 		// Grid floor and fog to add perspective for model movement.
 		scene.fog = new THREE.Fog(0x001a0d, 1500, 4500);
-		let grid = new THREE.GridHelper(10000, 100, 0x001a0d, 0x006633);
+		grid = new THREE.GridHelper(10000, 100, 0x001a0d, 0x006633);
 		scene.add(grid);
 
 
@@ -133,7 +162,7 @@ const Visualizer = (fps) =>
 		});
 
 		// Create ground plane and rotate into horizontal position.
-        let ground = new THREE.Mesh(groundGeometry, groundMaterial);
+        ground = new THREE.Mesh(groundGeometry, groundMaterial);
         ground.receiveShadow = true;
         ground.rotation.x = -0.5 * Math.PI;
 
@@ -152,7 +181,7 @@ const Visualizer = (fps) =>
      *
      * Extract model information from JSON data.
      */
-    function createModel(data)
+    async function createModel(data)
     {
         let model  = new THREE.Group(),
             frames = data.frames,
@@ -187,9 +216,18 @@ const Visualizer = (fps) =>
                         geometry = new THREE.SphereBufferGeometry(obj.diameter, 32, 32);
                         material = new THREE.MeshLambertMaterial( { color: parseInt(obj.color),  overdraw: 0.5 } );
                     }
+                    else if (obj.type === "mesh") {
+                        geometry = await loadData(obj.url);
+                        material = new THREE.MeshLambertMaterial( { color: parseInt(obj.color),  overdraw: 0.5 } );
+                    }
 
                     material.transparent = true;
                     let mesh = new THREE.Mesh(geometry, material);
+
+                    if (obj.type === "mesh" && obj.scale !== undefined) {
+                        mesh.scale.set(obj.scale[0], obj.scale[1], obj.scale[2]);
+                    }
+
                     comp.add(mesh);
                 }
 
@@ -198,6 +236,15 @@ const Visualizer = (fps) =>
 
         scene.add(model);
         animation = {model, step, start, stop, frames};
+    }
+
+
+    function loadData(url) {
+        return new Promise((resolve, reject) => {
+            stlLoader.load(url, geom => {
+                resolve(geom);
+            })
+        });
     }
 
 
@@ -225,19 +272,6 @@ const Visualizer = (fps) =>
         }
 
         loop();
-    }
-
-
-    /*
-     * initLoading:
-     *
-     * Called to begin loading animation. After the data is retrieved from the
-     * log-file the the loading animation initialized by this function should
-     * be stopped by the appropriate callback.
-     */
-    function initLoading() {
-        // here we need to clear scene
-        console.log('loading initialized');
     }
 
 
@@ -274,7 +308,12 @@ const Visualizer = (fps) =>
 
         let frame = Math.round((currentTime % animation.stop) / animation.step);
 
-        window.controls.notify(frame * animation.step);
+        if (frame >= (animation.stop - animation.start) / animation.step) {
+            frame = frame - 1;
+        }
+
+        if (isActive)
+            window.controls.notify(frame * animation.step);
 
         for (const group of animation.model.children) {
             group.position.set(animation.frames[frame][group.name].position[0],
@@ -311,8 +350,8 @@ const Visualizer = (fps) =>
      *
      * ...
      */
-    const loadAnimation = function(dat) {
-        createModel(dat);
+    const loadAnimation = async function(dat) {
+        await createModel(dat);
 
         // Return information about the animation loaded
         let start = animation.start,
@@ -322,7 +361,11 @@ const Visualizer = (fps) =>
             groups = [];
 
         for (const group of animation.model.children) {
-            groups.push(group.name);
+            let groupObj = {};
+            groupObj.name = group.name;
+            groupObj.transparency = group.children[0].material.opacity;
+            groupObj.color = group.children[0].material.color;
+            groups.push(groupObj);
         }
 
         return {
@@ -343,6 +386,7 @@ const Visualizer = (fps) =>
     const togglePlay = function() {
         isPlaying = !isPlaying;
     };
+
 
     /*
      * setTime:
@@ -365,6 +409,19 @@ const Visualizer = (fps) =>
      */
     const setSpeed = function(speedVal) {
         playbackSpeed = speedVal;
+    };
+
+
+    /*
+     * setIsActive:
+     *
+     * param active - New boolean for if this visualizer is active
+     *
+     * Set whether or not this visualizer is active. This value is used to
+     * determine if the visualizer should be notifying controls of clock time.
+     */
+    const setIsActive = function(active) {
+        isActive = active;
     };
 
 
@@ -461,6 +518,16 @@ const Visualizer = (fps) =>
         camera.updateProjectionMatrix();
     };
 
+    /*
+     * displayFloor:
+     *
+     * Hide or display the floor mesh and grid
+     */
+    const displayFloor = function(visible) {
+        ground.visible = visible;
+        grid.visible = visible;
+    };
+
 
     // Constructed application object
     return {
@@ -470,9 +537,11 @@ const Visualizer = (fps) =>
         resetCamera,
         setSpeed,
         setTime,
+        setIsActive,
         changeColor,
         changeTexture,
         changeTransparency,
-        resize
+        resize,
+        displayFloor
     };
 };
