@@ -361,7 +361,11 @@ const Visualizer = (fps) =>
             groups = [];
 
         for (const group of animation.model.children) {
-            groups.push(group.name);
+            let groupObj = {};
+            groupObj.name = group.name;
+            groupObj.transparency = group.children[0].material.opacity;
+            groupObj.color = group.children[0].material.color;
+            groups.push(groupObj);
         }
 
         return {
