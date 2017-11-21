@@ -197,7 +197,6 @@ const Controls = () =>
         groupSelect.innerHTML = '';
 
         for (let group of modelInfo.animation.groups) {
-            console.log(group);
             let option = document.createElement('option');
             option.value = group.name;
             option.appendChild(document.createTextNode(group.name));
