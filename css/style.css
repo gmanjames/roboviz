@@ -38,6 +38,34 @@ body * {
     height: 0;
 }
 
+.rm-file {
+    box-sizing: content-box;
+    position: absolute;
+    top: 16px;
+    right: 16px;
+    width: 16px;
+    height: 16px;
+    line-height: 16px;
+    border-radius: 50%;
+    padding: 6px;
+    color: white;
+    text-align: center;
+    margin: 0;
+}
+
+.rm-file[data-state="enabled"] {
+    background-color: hsla(0, 47%, 50%, 0.7);
+    cursor: pointer;
+}
+
+.rm-file[data-state="enabled"]:hover {
+    box-shadow: 0 0 7px hsla(0, 47%, 95%, 0.9);
+}
+
+.rm-file[data-state="disabled"] {
+    background-color: hsla(0, 0%, 50%, 0.7);
+}
+
 .toolbar {
     position: absolute;
     top: 0;
@@ -55,10 +83,7 @@ body * {
 }
 
 .styled-select {
-    background: url(http://i62.tinypic.com/15xvbd5.png) no-repeat 96% 0;
-    /*overflow: hidden;
-    //background-color: black;
-    -webkit-border-radius: 20px;*/
+    background: rgba(223, 223, 219, .4) url(http://i62.tinypic.com/15xvbd5.png) no-repeat 96% 0;
     overflow:hidden;
     width:350px;
     -moz-border-radius: 9px 9px 9px 9px;
@@ -86,7 +111,8 @@ body * {
     left: 0;
     background-color: rgba(0, 0, 0, .15);
     padding: 32px 64px 64px 16px;
-    color: white;
+    color: #DFDFDB;
+    font: Helvetica, Sans-Serif;
     //border-right: 4px solid rgba(198, 111, 30, .35);
 }
 
@@ -154,12 +180,48 @@ select[for="model-group"] {
     background-image: url("../assets/images/bricks.png");
 }
 
-.textures a[data-texture="gray"] .sample {
-    background-image: url("../assets/images/gray.png");
+.textures a[data-texture="cloth"] .sample {
+    background-image: url("../assets/images/cloth.png");
+}
+
+.textures a[data-texture="concrete"] .sample {
+    background-image: url("../assets/images/concrete.png");
+}
+
+.textures a[data-texture="desert"] .sample {
+    background-image: url("../assets/images/desert.png");
+}
+
+.textures a[data-texture="grass"] .sample {
+    background-image: url("../assets/images/grass.png");
+}
+
+.textures a[data-texture="lace"] .sample {
+    background-image: url("../assets/images/lace.png");
+}
+
+.textures a[data-texture="marble"] .sample {
+    background-image: url("../assets/images/marble.png");
 }
 
 .textures a[data-texture="matrix"] .sample {
     background-image: url("../assets/images/matrix.png");
+}
+
+.textures a[data-texture="metal"] .sample {
+    background-image: url("../assets/images/metal.png");
+}
+
+.textures a[data-texture="steel"] .sample {
+    background-image: url("../assets/images/steel.png");
+}
+
+.textures a[data-texture="stone"] .sample {
+    background-image: url("../assets/images/stone.png");
+}
+
+.textures a[data-texture="wood"] .sample {
+    background-image: url("../assets/images/wood.png");
 }
 
 .colors {
