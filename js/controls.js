@@ -198,8 +198,8 @@ const Controls = () =>
 
         for (let group of modelInfo.animation.groups) {
             let option = document.createElement('option');
-            option.value = group;
-            option.appendChild(document.createTextNode(group));
+            option.value = group.name;
+            option.appendChild(document.createTextNode(group.name));
             groupSelect.appendChild(option);
         }
 
@@ -265,6 +265,7 @@ const Controls = () =>
         // Model controls
         modelCtrls.querySelector('.toggle[for="model-controls"]').addEventListener('click', handleMenuToggle);
         modelSelect.addEventListener('change', handleModelSelect);
+        groupSelect.addEventListener('change', handleGroupSelect);
 
         for (let i = 0; i < colorControls.length; i++) {
             colorControls[i].addEventListener('click', handleColor);
@@ -373,6 +374,24 @@ const Controls = () =>
 
 
     /*
+     * handleGroupSelect
+     *
+     * param evt - Javascript evt
+     *
+     * ...
+     */
+    function handleGroupSelect(evt) {
+        const groupName = groupSelect.value;
+        const modelInfo = visualizers[getCurrentActive()];
+        for (const group of modelInfo.animation.groups) {
+            if (group.name == groupName) {
+                transparency.value = group.transparency;
+            }
+        }
+    }
+
+
+    /*
      * handleColor:
      *
      * param evt - Javascript evt
@@ -448,6 +467,14 @@ const Controls = () =>
      */
     function handleTransparency(evt) {
         let groupName = groupSelect.value;
+        // Save local value of transparency to be applied when group is selected
+        const modelInfo = visualizers[getCurrentActive()];
+        for (const group of modelInfo.animation.groups) {
+            if (group.name == groupName) {
+                group.transparency = transparency.value;
+            }
+        }
+        // Do the actual change
         activeVisualizer.changeTransparency(groupName, parseFloat(evt.target.value));
     }
 
