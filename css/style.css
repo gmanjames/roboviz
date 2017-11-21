@@ -106,7 +106,6 @@ body * {
     -webkit-border-radius: 9px 9px 9px 9px;
     border-radius: 9px 9px 9px 9px;
     box-shadow: 1px 1px 11px #330033;
-    //background: #58B14C url("http://i62.tinypic.com/15xvbd5.png") no-repeat scroll 319px center;
 }
 
 .styled-select select {
@@ -129,7 +128,6 @@ body * {
     padding: 32px 64px 64px 16px;
     color: #DFDFDB;
     font: Helvetica, Sans-Serif;
-    //border-right: 4px solid rgba(198, 111, 30, .35);
 }
 
 .model-controls[data-state="expanded"] {
@@ -289,15 +287,9 @@ select[for="model-group"] {
  * Playback Controls
  */
 
-#speedControls {
-    /*border: 1px solid red;*/
-}
-
 #speedOutput {
     position: relative;
     display: inline-block;
-    /*border: 1px solid blue;*/
-    /*text-align: center;*/
     height: 20px;
     width: 30px;
     left: -86px;
@@ -313,22 +305,25 @@ select[for="model-group"] {
  }
 
 .playback-controls > button {
-    background-color: rgba(0, 0, 0, .15);
+    background-color: rgba(223, 223, 219, .4);
     color: black;
-    border:none; /* Green */
+    border:none;
     padding: 0;
-    padding: 8px 16px;
+    padding: 8px 0;
     margin: 0 32px;
     border-radius: 0px;
     cursor: pointer;
+    width: 118px;
 }
 
 .playback-controls > button[data-toggle="play"]:after {
     content: "PAUSE";
+    color: black;
  }
 
  .playback-controls > button[data-toggle="pause"]:after {
      content: "PLAY";
+     color: black;
  }
 
  .range-with-label {
@@ -339,10 +334,10 @@ select[for="model-group"] {
      margin: 0 auto;
      margin-bottom: 8px;
      width: 48px;
-     height: 32px;
+     padding: 8px 0;
      border: 1px solid hsl(0, 0%, 80%);
      border-radius: 3px;
-     text-align: left;
+     text-align: center;
      vertical-align: middle;
  }
 
@@ -351,15 +346,27 @@ select[for="model-group"] {
 }
  .range-with-label .right-label {
      float: right;
+     color: rgba(223, 223, 219, 1);
  }
 
  .range-with-label .left-label {
      float: left;
+     color: rgba(223, 223, 219, 1);
  }
 
  /*
   * Progress Bar
   */
+
+  #modelTimeVal {
+      color: black;
+      background-color: rgba(223, 223, 219, .4);
+  }
+
+  #modelSpeedVal {
+      color: black;
+      background-color: rgba(223, 223, 219, .4)
+  }
 
   #progress-holder {
     height: 10px;
