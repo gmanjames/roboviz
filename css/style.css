@@ -264,7 +264,7 @@ select[for="model-group"] {
      text-align: center;
  }
 
-.playback-controls > button {
+/*.playback-controls > button {
     border: none;
     padding: 0;
     padding: 8px 16px;
@@ -272,14 +272,27 @@ select[for="model-group"] {
     border-radius: 3px;
     cursor: pointer;
     border: 1px solid black;
+}*/
+
+.img-button {
+    width: 64px;
+    height: 48px;
+    border: none;
+    padding: 0;
+    border-radius: 3px;
+    cursor: pointer;
+    background-color: hsl(0, 0%, 95%);
+    background-size: 100%;
+    background-position: center;
+    background-repeat: no-repeat;
 }
 
-.playback-controls > button[data-toggle="play"]:after {
-    content: "PAUSE";
+.playback-controls > .img-button[data-toggle="play"] {
+    background-image: url('../assets/images/pause.png');
  }
 
- .playback-controls > button[data-toggle="pause"]:after {
-     content: "PLAY";
+ .playback-controls > .img-button[data-toggle="pause"] {
+     background-image: url('../assets/images/play.png');
  }
 
  .range-with-label {
