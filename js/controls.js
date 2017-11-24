@@ -37,6 +37,11 @@ const Controls = () =>
     const colorControls = document.querySelectorAll('.colors > a');
 
     /*
+     * Control for the color of the currently selected model group
+     */
+    const colorInput = document.getElementById('colorWell');
+
+    /*
      * Range type input element for controlling the opacity of the current
      * model group selected.
      */
@@ -249,6 +254,26 @@ const Controls = () =>
         }
     }
 
+    function openModel(evt, modelName) {
+        let i, tabcontent, tablinks;
+
+        // Get all elements with class="tabcontent" and hide them
+        tabcontent = document.getElementsByClassName("tabcontent");
+        for (i = 0; i < tabcontent.length; i++) {
+            tabcontent[i].style.display = "none";
+        }
+
+        // Get all elements with class="tablinks" and remove the class "active"
+        tablinks = document.getElementsByClassName("tablinks");
+        for (i = 0; i < tablinks.length; i++) {
+            tablinks[i].className = tablinks[i].className.replace("active", "");
+        }
+
+        //Show the current tab, and add an "active" class to the button that
+        //opend the tab
+        document.getElementById(modelName).style.display = "block";
+        evt.currentTarget.className += " active";
+    }
 
     /*
      * addEventListeners:
@@ -272,6 +297,11 @@ const Controls = () =>
         for (let i = 0; i < colorControls.length; i++) {
             colorControls[i].addEventListener('click', handleColor);
         }
+
+        colorInput.addEventListener('change', function (e) {
+                e.target.dataset.color = e.target.value;
+                handleColor(e);
+        });
 
         for (let i = 0; i < textureControls.length; i++) {
             textureControls[i].addEventListener('click', handleTexture);
@@ -403,7 +433,8 @@ const Controls = () =>
      */
     function handleColor(evt) {
         let groupName = groupSelect.value;
-        activeVisualizer.changeColor(groupName, parseInt(evt.target.dataset.color));
+
+        activeVisualizer.changeColor(groupName, evt.target.value);
     }
 
 

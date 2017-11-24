@@ -90,13 +90,44 @@ body * {
     min-height: 3rem;
 }
 
+.model-title {
+    color: #DFDFDB;
+    text-align: center;
+    font: Helvetica, Sans-Serif;
+    text-transform: uppercase;
+    margin-top: -10px;
+}
+
+.styled-select {
+    background: rgba(223, 223, 219, .4) url(http://i62.tinypic.com/15xvbd5.png) no-repeat 96% 0;
+    overflow:hidden;
+    width:350px;
+    -moz-border-radius: 9px 9px 9px 9px;
+    -webkit-border-radius: 9px 9px 9px 9px;
+    border-radius: 9px 9px 9px 9px;
+    box-shadow: 1px 1px 11px #330033;
+}
+
+.styled-select select {
+    background: transparent;
+    border: none;
+    color: #fff;
+}
+
+.raise:hover {
+  box-shadow: 0 12px 16px 0 rgba(0,0,0,0.24), 0 17px 50px 0 rgba(0,0,0,0.19);
+  transform: translateY(-0.25em);
+}
+
 .model-controls {
     width: 464px;
     height: 100%;
     position: absolute;
     left: 0;
+    background-color: rgba(0, 0, 0, .15);
     padding: 32px 64px 64px 16px;
-    border-right: 1px solid black;
+    color: #DFDFDB;
+    font: Helvetica, Sans-Serif;
 }
 
 .model-controls[data-state="expanded"] {
@@ -256,6 +287,15 @@ select[for="model-group"] {
  * Playback Controls
  */
 
+#speedOutput {
+    position: relative;
+    display: inline-block;
+    height: 20px;
+    width: 30px;
+    left: -86px;
+    bottom: -15px;
+}
+
  .playback-controls {
      position: absolute;
      bottom: 0;
@@ -264,12 +304,14 @@ select[for="model-group"] {
      text-align: center;
  }
 
-/*.playback-controls > button {
-    border: none;
+.playback-controls > button {
+    background-color: rgba(223, 223, 219, .4);
+    color: black;
+    border:none;
     padding: 0;
-    padding: 8px 16px;
+    padding: 8px 0;
     margin: 0 32px;
-    border-radius: 3px;
+    border-radius: 0px;
     cursor: pointer;
     border: 1px solid black;
 }*/
@@ -303,10 +345,10 @@ select[for="model-group"] {
      margin: 0 auto;
      margin-bottom: 8px;
      width: 48px;
-     height: 32px;
+     padding: 8px 0;
      border: 1px solid hsl(0, 0%, 80%);
      border-radius: 3px;
-     text-align: left;
+     text-align: center;
      vertical-align: middle;
  }
 
@@ -315,15 +357,27 @@ select[for="model-group"] {
 }
  .range-with-label .right-label {
      float: right;
+     color: rgba(223, 223, 219, 1);
  }
 
  .range-with-label .left-label {
      float: left;
+     color: rgba(223, 223, 219, 1);
  }
 
  /*
   * Progress Bar
   */
+
+  #modelTimeVal {
+      color: black;
+      background-color: rgba(223, 223, 219, .4);
+  }
+
+  #modelSpeedVal {
+      color: black;
+      background-color: rgba(223, 223, 219, .4)
+  }
 
   #progress-holder {
     height: 10px;
