@@ -124,9 +124,9 @@ body * {
     height: 100%;
     position: absolute;
     left: 0;
-    background-color: rgba(0, 0, 0, .15);
+    background-color: hsla(0, 0%, 0%, 0.6);
     padding: 32px 64px 64px 16px;
-    color: #DFDFDB;
+    color: hsl(0, 0%, 0%, 95%);
     font: Helvetica, Sans-Serif;
 }
 
@@ -296,11 +296,23 @@ select[for="model-group"] {
     bottom: -15px;
 }
 
+.ctrls-wrapper {
+    position: absolute;
+}
+
+.ctrls-wrapper[data-for="playback-controls"] {
+    bottom: 0;
+    width: 100%;
+    padding: 16px;
+}
+
  .playback-controls {
-     position: absolute;
-     bottom: 0;
      width: 100%;
+     max-width: 800px;
+     margin: 0 auto;
      padding: 16px 0;
+     background-color: hsla(0, 0%, 0%, 0.6);
+     border-radius: 3px;
      text-align: center;
  }
 
@@ -331,6 +343,7 @@ select[for="model-group"] {
  }
 
  .range-with-label .value {
+     display: block;
      margin: 0 auto;
      margin-bottom: 8px;
      width: 48px;
