@@ -66,12 +66,17 @@ const Controls = () =>
     /*
      * Button for reseting the camera
      */
-    const resetBtn = document.getElementById('resetBtn');
+    //const resetBtn = document.getElementById('resetBtn');
 
     /*
      *
      */
     const playbackSpeed = document.getElementById('modelSpeed');
+
+    /*
+     *
+     */
+    const speedInput = document.getElementById('speedInput');
 
     /*
      * Control for setting the current position in time of the animation
@@ -81,7 +86,7 @@ const Controls = () =>
     /*
      * Visual display of the animation's position in time
      */
-    const playbackTimeVal = document.getElementById('modelTimeVal');
+    const timeInput = document.getElementById('timeInput');
 
     /*
      * Label for the total duration of the animation
@@ -106,7 +111,7 @@ const Controls = () =>
     /*
      *
      */
-    let isLoading = false;
+    let preventNotify = false;
 
     /*
      * The visualizer for which the control options currently apply
@@ -164,22 +169,15 @@ const Controls = () =>
      * param time - the current time of the active animation.
      *
      * When the visualizer updates, the controls need to be notified of the
-     * updated time value in order to update control element's values.
+     *     updated time value in order to update control element's values.
      */
-    const notify = function(time) {
-
-        if (time < 1 && time >= 0) {
-            time = time.toPrecision(2);
-        }
-        else {
-            time = time.toPrecision(3);
-        }
-
+    const notify = function(time)
+    {
         const active = getCurrentActive();
-        if (visualizers[active].state.playing) {
+        if (visualizers[active].state.playing && !preventNotify) {
             visualizers[active].state.currentTime = time;
-            playbackTimeVal.innerHTML = time;
-            playbackTime.value = time;
+            timeInput.value    = time.toPrecision(2);
+            playbackTime.value = time.toPrecision(2);
         }
     };
 
@@ -191,7 +189,7 @@ const Controls = () =>
      * visualizer.
      *
      * Function to update the various controls options with the information
-     * associated with the currently active visualizer.
+     *     associated with the currently active visualizer.
      */
     function updateControls() {
         const active    = getCurrentActive();
@@ -244,7 +242,7 @@ const Controls = () =>
         rightTimeLabel.innerHTML = modelInfo.animation.stop;
         leftTimeLabel.innerHTML  = modelInfo.animation.start;
 
-        playbackTimeVal.innerHTML = modelInfo.state.currentTime;
+        timeInput.value = modelInfo.state.currentTime;
         playbackTime.value = modelInfo.state.currentTime;
 
         if (!modelInfo.state.playing) {
@@ -280,42 +278,47 @@ const Controls = () =>
      *
      * ...
      */
-    function addEventListeners() {
+    function addEventListeners()
+    {
+        windowEvtListeners();
+        modelCtrlsEvtListeners();
+        playbackCtrlsEvtListeners();
+    }
 
-        // Update size of visualizers
+
+    function windowEvtListeners()
+    {
         window.addEventListener('resize', handleWindowResize);
-
-        // Drop zone event listeners
         dropZone.addEventListener('drop', handleDrop, false);
         dropZone.addEventListener('dragover', handleDragOver, false);
+    }
 
-        // Model controls
+
+    function modelCtrlsEvtListeners()
+    {
         modelCtrls.querySelector('.toggle[for="model-controls"]').addEventListener('click', handleMenuToggle);
         modelSelect.addEventListener('change', handleModelSelect);
         groupSelect.addEventListener('change', handleGroupSelect);
-
-        for (let i = 0; i < colorControls.length; i++) {
-            colorControls[i].addEventListener('click', handleColor);
-        }
-
-        colorInput.addEventListener('change', function (e) {
-                e.target.dataset.color = e.target.value;
-                handleColor(e);
-        });
-
-        for (let i = 0; i < textureControls.length; i++) {
-            textureControls[i].addEventListener('click', handleTexture);
-        }
-
         textureBtn.addEventListener('change', handleNewTexture);
-
         transparency.addEventListener('input', handleTransparency);
+        colorInput.addEventListener('change', handleColor);
+        textureControls.forEach(elem => { elem.addEventListener('click', handleTexture); });
+    }
 
-        // Playback controls
+
+    function playbackCtrlsEvtListeners()
+    {
         playPauseBtn.addEventListener('click', handlePlayPause);
-        resetBtn.addEventListener('click', handleResetCamera);
-        playbackSpeed.addEventListener('input', handleSpeed);
-        playbackTime.addEventListener('input', handleTime);
+        playbackSpeed.addEventListener('input', handleSpeedSlideInput);
+        speedInput.addEventListener('change', handleSpeedInputChange);
+        playbackTime.addEventListener('input', handleTimeSlideInput);
+
+        // While the input is being slid, we do not want to update the value
+        playbackTime.addEventListener('mousedown', evt => { preventNotify = true; });
+        playbackTime.addEventListener('mouseup',   evt => { preventNotify = false; })
+
+        timeInput.addEventListener('change', handleTimeInputChange);
+        timeInput.addEventListener('input', evt => { preventNotify = true; });
     }
 
 
@@ -330,9 +333,11 @@ const Controls = () =>
      *
      * ...
      */
-    function handleWindowResize(evt) {
+    function handleWindowResize(evt)
+    {
         resizeVisualizers();
     }
+
 
     /*
      * handleDrop:
@@ -432,9 +437,7 @@ const Controls = () =>
      * in addition to the current hex value.
      */
     function handleColor(evt) {
-        let groupName = groupSelect.value;
-
-        activeVisualizer.changeColor(groupName, evt.target.value);
+        activeVisualizer.changeColor(groupSelect.value, evt.target.value);
     }
 
 
@@ -552,8 +555,8 @@ const Controls = () =>
      * Event handeler for pausing or playing the animation determined by the
      * current state of the play/pause button.
      */
-    function handlePlayPause(evt) {
-
+    function handlePlayPause(evt)
+    {
         const state = getState('playing');
 
         visualizers[getCurrentActive()].state.playing = !state;
@@ -574,35 +577,68 @@ const Controls = () =>
      *
      * Event handler for reseting the camera to the default perspective.
      */
-    function handleResetCamera(evt) {
+    function handleResetCamera(evt)
+    {
         activeVisualizer.resetCamera();
     }
 
 
     /*
-     * handleTime
+     * handleTimeSlideInput
      *
      * param evt - Javascript event
      *
      * ...
      */
-    function handleTime(evt) {
+    function handleTimeSlideInput(evt)
+    {
+        preventNotify = true;
         activeVisualizer.setTime(parseFloat(evt.target.value));
-        playbackTimeVal.innerHTML = evt.target.value;
+        timeInput.value = evt.target.value;
     }
 
 
     /*
-     * handleSpeed
+     * handleTimeInputChange
+     *
+     * param evt - Javascript event
+     *
+     * Callback for when a new time for the animation is entered.
+     */
+    function handleTimeInputChange(evt)
+    {
+        preventNotify = false;
+        activeVisualizer.setTime(parseFloat(evt.target.value));
+    }
+
+
+    /*
+     * handleSpeedSlideInput
      *
      * param evt - Javascript event
      *
      * ...
      */
-    function handleSpeed(evt) {
+    function handleSpeedSlideInput(evt)
+    {
         activeVisualizer.setSpeed(parseFloat(evt.target.value));
-        playbackSdVal.innerHTML = evt.target.value;
+        speedInput.value = evt.target.value;
     }
+
+
+    /*
+     * handleSpeedInputChange
+     *
+     * param evt - Javascript event
+     *
+     * ...
+     */
+    function handleSpeedInputChange(evt)
+    {
+        activeVisualizer.setSpeed(parseFloat(evt.target.value));
+        playbackSpeed.value = evt.target.value;
+    }
+
 
     /*
      * handleFloors
@@ -719,7 +755,7 @@ An example path here is:\n\n :userName/:repoName/branchName/path/to/fileName.jso
 
         // Add event listener to toggle-floor
         winw.querySelector('.floor-toggle input').addEventListener('change', handleFloors);
-        
+
         // Load animation represented by data and store assoc info
         const animation = await activeVisualizer.loadAnimation(dat);
         visualizers[id].animation = animation;

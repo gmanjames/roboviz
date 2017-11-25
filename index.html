@@ -15,6 +15,14 @@
         <div id="modelCtrls" class='model-controls' data-state="collapsed">
             <span class="toggle" for="model-controls">&#9776;</span>
             <h3 class="model-title">Select a model and group</h3>
+                <div class="select">
+                    <p class="active">--</p>
+                    <div class="select-collapse" data-state="expanded">
+                        <ul class="select-list">
+                            
+                        </ul>
+                    </div>
+                </div>
                 <select class="styled-select rounded" for="model" id="modelName">
                 </select>
                 <select class="styled-select rounded" for="model-group" id="groupName">
@@ -63,21 +71,24 @@
         </div>
 
         <!-- controls related to controling the display features of the animation -->
-        <div id="playbackCtrls" class='playback-controls'>
-            <div class="range-with-label">
-                <div id="modelSpeedVal" class="value"></div>
-                <input id="modelSpeed" type="range" min="-4" max="4" step="0.25">
-                <label class="right-label">4</label>
-                <label class="left-label">-4</label>
+        <div class="ctrls-wrapper" data-for="playback-controls">
+            <div id="playbackCtrls" class='playback-controls'>
+                <div class="range-with-label">
+                    <input id="speedInput" class="value" type="text" value="1" />
+                    <input id="modelSpeed" type="range" min="-4" max="4" step="0.25" value="1">
+                    <label class="right-label">4</label>
+                    <label class="left-label">-4</label>
+                    <p class="for">Playback Speed</p>
+                </div>
+                <button class="img-button" id="playPauseBtn" data-toggle="play"></button>
+                <div class="range-with-label">
+                    <input id="timeInput" class="value" type="text" value="1" />
+                    <input id="modelTime" type="range">
+                    <label for="modelTime" class="right-label">--</label>
+                    <label for="modelTime" class="left-label">--</label>
+                    <p class="for">Current Time</p>
+                </div>
             </div>
-            <button class="img-button" id="playPauseBtn" data-toggle="play"></button>
-            <div class="range-with-label">
-                <div id="modelTimeVal" class="value"></div>
-                <input id="modelTime" type="range">
-                <label for="modelTime" class="right-label">--</label>
-                <label for="modelTime" class="left-label">--</label>
-            </div>
-            <button class="raise" id="resetBtn">Reset Camera</button>
         </div>
 
         <!-- js -->

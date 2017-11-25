@@ -30,7 +30,6 @@ body * {
     position: absolute;
     width: 100%;
     height: 100%;
-    border: 1px solid black;
 }
 
 .window-inactive {
@@ -114,19 +113,14 @@ body * {
     color: #fff;
 }
 
-.raise:hover {
-  box-shadow: 0 12px 16px 0 rgba(0,0,0,0.24), 0 17px 50px 0 rgba(0,0,0,0.19);
-  transform: translateY(-0.25em);
-}
-
 .model-controls {
     width: 464px;
     height: 100%;
     position: absolute;
     left: 0;
-    background-color: rgba(0, 0, 0, .15);
+    background-color: hsla(0, 0%, 0%, 0.6);
     padding: 32px 64px 64px 16px;
-    color: #DFDFDB;
+    color: hsl(0, 0%, 0%, 95%);
     font: Helvetica, Sans-Serif;
 }
 
@@ -148,6 +142,7 @@ body * {
     width: 64px;
     padding: 16px 0;
     text-align: center;
+    color: hsl(0, 0%, 95%);
 }
 
 select[for="model-group"] {
@@ -189,6 +184,45 @@ select[for="model-group"] {
     background-size: cover;
     border: 1px solid black;
 }
+
+.select {
+    width: 100%;
+    background-color: hsla(0, 0%, 95%, 1);
+}
+
+.select .active {
+    margin: 0;
+    padding: 16px 8px;
+}
+
+.select .select-collapse {
+    display: none;
+    background-color: hsla(0, 0%, 85%, 1);
+}
+
+.select .select-list {
+    list-style-type: none;
+    margin: 0;
+    padding: 0;
+}
+
+.select .select-list li {
+    padding: 16px 8px;
+    cursor: pointer;
+    border-top: 1px solid hsla(0, 0%, 60%, 1);
+}
+
+.select .select-list li:hover {
+    background-color: hsla(0, 0%, 75%, 1);
+}
+
+.select:hover .select-collapse {
+    display: inherit;
+}
+
+
+
+.select
 
 .textures a[data-texture="bricks"] .sample {
     background-image: url("../assets/images/bricks.png");
@@ -287,34 +321,32 @@ select[for="model-group"] {
  * Playback Controls
  */
 
-#speedOutput {
-    position: relative;
-    display: inline-block;
-    height: 20px;
-    width: 30px;
-    left: -86px;
-    bottom: -15px;
+.ctrls-wrapper {
+    position: absolute;
+}
+
+.ctrls-wrapper[data-for="playback-controls"] {
+    bottom: 0;
+    width: 100%;
+    padding: 16px;
 }
 
  .playback-controls {
-     position: absolute;
-     bottom: 0;
      width: 100%;
+     max-width: 800px;
+     margin: 0 auto;
      padding: 16px 0;
+     background-color: hsla(0, 0%, 0%, 0.6);
+     border-radius: 3px;
      text-align: center;
+     vertical-align: middle;
  }
 
 .playback-controls > button {
-    background-color: rgba(223, 223, 219, .4);
-    color: black;
-    border:none;
-    padding: 0;
-    padding: 8px 0;
+    display: inline-block;
+    vertical-align: middle;
     margin: 0 32px;
-    border-radius: 0px;
-    cursor: pointer;
-    border: 1px solid black;
-}*/
+}
 
 .img-button {
     width: 64px;
@@ -323,7 +355,7 @@ select[for="model-group"] {
     padding: 0;
     border-radius: 3px;
     cursor: pointer;
-    background-color: hsl(0, 0%, 95%);
+    background-color: hsla(0, 0%, 95%, 0.5);
     background-size: 100%;
     background-position: center;
     background-repeat: no-repeat;
@@ -339,30 +371,42 @@ select[for="model-group"] {
 
  .range-with-label {
      display: inline-block;
- }
-
- .range-with-label .value {
-     margin: 0 auto;
-     margin-bottom: 8px;
-     width: 48px;
-     padding: 8px 0;
-     border: 1px solid hsl(0, 0%, 80%);
-     border-radius: 3px;
-     text-align: center;
      vertical-align: middle;
  }
 
+ .range-with-label .value {
+     display: block;
+     margin: 0 auto;
+     margin-bottom: 8px;
+     width: 48px;
+     padding: 8px 2px;
+     border: 1px solid hsl(0, 0%, 80%);
+     border-radius: 3px;
+     vertical-align: middle;
+     font-size: 16px;
+     background-color: hsla(0, 0%, 95%, 0.5);
+ }
+
 .range-with-label label {
+    color: hsl(0, 0%, 95%);
+    letter-spacing: 0.1em;
     min-width: 16px;
 }
+
  .range-with-label .right-label {
      float: right;
+     margin-left: 6px;
      color: rgba(223, 223, 219, 1);
  }
 
  .range-with-label .left-label {
      float: left;
+     margin-right: 6px;
      color: rgba(223, 223, 219, 1);
+ }
+
+ .range-with-label .for {
+     margin: 0;
  }
 
  /*
