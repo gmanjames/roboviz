@@ -63,10 +63,21 @@ const Controls = () =>
      */
     const playPauseBtn = document.getElementById('playPauseBtn');
 
+
+    /*
+     * Button to pause all animations
+     */
+    const pauseAll = document.getElementById('pauseAll');
+
+    /*
+     * Button to pause all animations
+     */
+    const playAll = document.getElementById('playAll');
+
     /*
      * Button for reseting the camera
      */
-    //const resetBtn = document.getElementById('resetBtn');
+    const resetBtn = document.getElementById('resetBtn');
 
     /*
      *
@@ -102,6 +113,11 @@ const Controls = () =>
      * Visual display of the speed the animation is playing at
      */
     const playbackSdVal = document.getElementById('modelSpeedVal');
+
+    /*
+     *
+     */
+    const playbackSlider = document.getElementById('playbackSlider');
 
     /*
      * Object to contain loaded visualizers and associated info
@@ -324,6 +340,8 @@ const Controls = () =>
     function playbackCtrlsEvtListeners()
     {
         playPauseBtn.addEventListener('click', handlePlayPause);
+        playAll.addEventListener('click', handlePlayAll);
+        pauseAll.addEventListener('click', handlePauseAll);
         playbackSpeed.addEventListener('input', handleSpeedSlideInput);
         speedInput.addEventListener('change', handleSpeedInputChange);
         playbackTime.addEventListener('input', handleTimeSlideInput);
@@ -334,6 +352,12 @@ const Controls = () =>
 
         timeInput.addEventListener('change', handleTimeInputChange);
         timeInput.addEventListener('input', evt => { preventNotify = true; });
+
+        document.querySelectorAll('.pagination a').forEach(a => {
+            a.addEventListener('click', handlePagination);
+        });
+
+        resetBtn.addEventListener('click', handleResetCamera);
     }
 
 
@@ -641,6 +665,56 @@ const Controls = () =>
         } else {
             evt.target.dataset.toggle = "play";
         }
+    }
+
+
+    /* ------------------------------------------------------------------------
+     * handlePlayAll
+     * ------------------------------------------------------------------------
+     * param evt - Javascript event
+     *
+     * Event handler for playing every loaded animation
+     */
+    function handlePlayAll(evt)
+    {
+        if (visualizers[1].state.active)
+            visualizers[1].instance.setPlay(true);
+        if (visualizers[2].state.active)
+            visualizers[2].instance.setPlay(true);
+
+        playPauseBtn.dataset.toggle = "play";
+    }
+
+
+     /* ------------------------------------------------------------------------
+      * handlePauseAll
+      * ------------------------------------------------------------------------
+      * param evt - Javascript event
+      *
+      * Event handler for pausing every loaded animation
+      */
+     function handlePauseAll(evt)
+     {
+        if (visualizers[1].state.active)
+            visualizers[1].instance.setPlay(false);
+        if (visualizers[2].state.active)
+            visualizers[2].instance.setPlay(false);
+
+        playPauseBtn.dataset.toggle = "pause";
+     }
+
+
+    /* ------------------------------------------------------------------------
+     * handlePagination
+     * ------------------------------------------------------------------------
+     * param evt - Javascript event
+     *
+     * ...
+     */
+    function handlePagination(evt)
+    {
+        evt.preventDefault();
+        playbackSlider.dataset.position = evt.target.dataset.page;
     }
 
 

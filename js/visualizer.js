@@ -91,16 +91,13 @@ const Visualizer = (fps) =>
     let ground;
 
 
-    ////////////////////////////////////////////////////
-    //              Application Logic                 //
-    ////////////////////////////////////////////////////
-
-    /*
+    /* ------------------------------------------------------------------------
      * init:
-     *
+     * ------------------------------------------------------------------------
      * Logic for setting up the initial Three.js scene, event listeners, etc.
      */
-    const init = function(windowElem) {
+    const init = function(windowElem)
+    {
         renderer.setSize(windowElem.clientWidth, windowElem.clientHeight);
         windowElem.appendChild(renderer.domElement);
 
@@ -174,9 +171,9 @@ const Visualizer = (fps) =>
     };
 
 
-    /*
+    /* ------------------------------------------------------------------------
      * createModel:
-     *
+     * ------------------------------------------------------------------------
      * param data - JSON data for model parsed from file.
      *
      * Extract model information from JSON data.
@@ -248,13 +245,14 @@ const Visualizer = (fps) =>
     }
 
 
-    /*
+    /* ------------------------------------------------------------------------
      * animationLoop:
-     *
+     * ------------------------------------------------------------------------
      * Game loop implementation for updating logical coordinates of models and
      * rendering the scene.
      */
-    function animationLoop() {
+    function animationLoop()
+    {
         let then = Date.now();
         let loop = () => {
 
@@ -275,14 +273,14 @@ const Visualizer = (fps) =>
     }
 
 
-    /*
+    /* ------------------------------------------------------------------------
      * update:
-     *
+     * ------------------------------------------------------------------------
      * Progress the time of the animation that will be used to calculate the
      * current frame. Notify the controls of the change in time.
      */
-    function update() {
-
+    function update()
+    {
         let delta = clock.getDelta() * playbackSpeed;
 
         if (isPlaying) {
@@ -295,13 +293,13 @@ const Visualizer = (fps) =>
     }
 
 
-    /*
+    /* ------------------------------------------------------------------------
      * updateModel:
-     *
+     * ------------------------------------------------------------------------
      * ...
      */
-    function updateModel() {
-
+    function updateModel()
+    {
         if (currentTime < 0) {
             currentTime = animation.stop;
         }
@@ -329,28 +327,26 @@ const Visualizer = (fps) =>
     }
 
 
-    /*
+    /* ------------------------------------------------------------------------
      * render:
-     *
+     * ------------------------------------------------------------------------
      * ...
      */
-    function render() {
+    function render()
+    {
         renderer.render( scene, camera );
     }
 
 
-    ////////////////////////////////////////////////////
-    //              Visualizer Methods                //
-    ////////////////////////////////////////////////////
-
-    /*
+    /* ------------------------------------------------------------------------
      * loadAnimation:
-     *
+     * ------------------------------------------------------------------------
      * param dat - Data for a new animation.
      *
      * ...
      */
-    const loadAnimation = async function(dat) {
+    const loadAnimation = async function(dat)
+    {
         await createModel(dat);
 
         // Return information about the animation loaded
@@ -378,36 +374,50 @@ const Visualizer = (fps) =>
     };
 
 
-    /*
+    /* ------------------------------------------------------------------------
      * togglePlay:
-     *
+     * ------------------------------------------------------------------------
      * Pause or resume animation
      */
-    const togglePlay = function() {
+    const togglePlay = function()
+    {
         isPlaying = !isPlaying;
     };
 
 
-    /*
+    /* ------------------------------------------------------------------------
+     * togglePlay:
+     * ------------------------------------------------------------------------
+     * Pause or resume animation
+     */
+    const setPlay = function(play)
+    {
+        isPlaying = play;
+    };
+
+
+    /* ------------------------------------------------------------------------
      * setTime:
-     *
+     * ------------------------------------------------------------------------
      * param timeVal - The position in the animation to play from
      *
      * Move the animation to the frame specified by the param timeVal
      */
-    const setTime = function(timeVal) {
+    const setTime = function(timeVal)
+    {
         currentTime = timeVal;
     };
 
 
-    /*
+    /* ------------------------------------------------------------------------
      * setSpeed:
-     *
+     * ------------------------------------------------------------------------
      * param speedVal - Multiplier for playback speed
      *
      * Set the speed and direction of the animation
      */
-    const setSpeed = function(speedVal) {
+    const setSpeed = function(speedVal)
+    {
         playbackSpeed = speedVal;
     };
 
@@ -534,6 +544,7 @@ const Visualizer = (fps) =>
         init,
         loadAnimation,
         togglePlay,
+        setPlay,
         resetCamera,
         setSpeed,
         setTime,
