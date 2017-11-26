@@ -80,12 +80,12 @@ const Controls = () =>
     const resetBtn = document.getElementById('resetBtn');
 
     /*
-     *
+     * Range slider for setting speed
      */
     const playbackSpeed = document.getElementById('modelSpeed');
 
     /*
-     *
+     * Input box for setting speed
      */
     const speedInput = document.getElementById('speedInput');
 
@@ -115,7 +115,7 @@ const Controls = () =>
     const playbackSdVal = document.getElementById('modelSpeedVal');
 
     /*
-     *
+     * Element containing the playback control panes
      */
     const playbackSlider = document.getElementById('playbackSlider');
 
@@ -125,7 +125,7 @@ const Controls = () =>
     const visualizers = {};
 
     /*
-     *
+     * Boolean for checking if the time should be updated
      */
     let preventNotify = false;
 
@@ -135,9 +135,9 @@ const Controls = () =>
     let activeVisualizer;
 
 
-    /*
+    /* ------------------------------------------------------------------------
      * init:
-     *
+     * ------------------------------------------------------------------------
      * Init method called to hookup graphical components with visualizer
      * functions.
      */
@@ -179,9 +179,9 @@ const Controls = () =>
     };
 
 
-    /*
+    /* ------------------------------------------------------------------------
      * notify:
-     *
+     * ------------------------------------------------------------------------
      * param time - the current time of the active animation.
      *
      * When the visualizer updates, the controls need to be notified of the
@@ -198,9 +198,9 @@ const Controls = () =>
     };
 
 
-    /*
+    /* ------------------------------------------------------------------------
      * updateControls:
-     *
+     * ------------------------------------------------------------------------
      * param modelInfo - The animation information for the currently active
      * visualizer.
      *
@@ -305,10 +305,10 @@ const Controls = () =>
     }
 
 
-    /*
+    /* ------------------------------------------------------------------------
      * addEventListeners:
-     *
-     * ...
+     * ------------------------------------------------------------------------
+     * Add event handlers to all of the controls
      */
     function addEventListeners()
     {
@@ -361,13 +361,9 @@ const Controls = () =>
     }
 
 
-    ////////////////////////////////////////////////////
-    //                Event Listeners                 //
-    ////////////////////////////////////////////////////
-
-    /*
+    /* ------------------------------------------------------------------------
      * handleWindowResize:
-     *
+     * ------------------------------------------------------------------------
      * param evt - Javascript event
      *
      * ...
@@ -378,9 +374,9 @@ const Controls = () =>
     }
 
 
-    /*
+    /* ------------------------------------------------------------------------
      * handleDrop:
-     *
+     * ------------------------------------------------------------------------
      * param evt - Javascript event
      *
      * Callback function for the Javascript 'drop' event used to handle a file
