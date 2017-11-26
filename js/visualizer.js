@@ -360,7 +360,7 @@ const Visualizer = (fps) =>
             let groupObj = {};
             groupObj.name = group.name;
             groupObj.transparency = group.children[0].material.opacity;
-            groupObj.color = group.children[0].material.color;
+            groupObj.color = "#" + group.children[0].material.color.getHexString();
             groups.push(groupObj);
         }
 

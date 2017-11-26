@@ -283,6 +283,14 @@ const Controls = () =>
         }
 
         groupSelect.querySelector('select option').value = modelInfo.animation.groups[0].name;
+		
+		// Update color to new model's and group's state
+		colorWell.parentNode.querySelector('label').textContent = modelInfo.animation.groups[0].color;
+		colorWell.value = modelInfo.animation.groups[0].color;
+		
+		// Update transparency to new model's and group's state
+		transparency.value = modelInfo.animation.groups[0].transparency;
+		transVal.value = parseFloat(modelInfo.animation.groups[0].transparency);
     }
 
 
@@ -474,6 +482,9 @@ const Controls = () =>
         for (const group of modelInfo.animation.groups) {
             if (group.name == groupName) {
                 transparency.value = group.transparency;
+				transVal.value = parseFloat(group.transparency);
+				colorWell.parentNode.querySelector('label').textContent = group.color;
+				colorWell.value = group.color;
             }
         }
     }
@@ -514,8 +525,18 @@ const Controls = () =>
      */
     function handleColor(evt)
     {
-        colorWell.parentNode.querySelector('label').textContent = evt.target.value + " : ";
-        activeVisualizer.changeColor(groupSelect.querySelector('select').value, evt.target.value);
+		let groupName = groupSelect.querySelector('select').value;
+		let colorWellText = colorWell.parentNode.querySelector('label').textContent;
+        colorWellText = evt.target.value + " : ";
+		
+		const modelInfo = visualizers[getCurrentActive()];
+        for (const group of modelInfo.animation.groups) {
+            if (group.name == groupName) {
+                group.color = colorWellText.substring(0,colorWellText.length-3);
+            }
+        }
+		
+        activeVisualizer.changeColor(groupName, evt.target.value);
     }
 
 
