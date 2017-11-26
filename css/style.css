@@ -37,6 +37,17 @@ body * {
     height: 0;
 }
 
+.window[data-state='active']::after {
+    content: "[active]";
+    color: hsla(181, 100%, 50%, 0.5);
+    position: absolute;
+    display: block;
+    top: 48px;
+    right: 64px;
+    margin: 0;
+    padding: 16px 8px;
+}
+
 .rm-file {
     box-sizing: content-box;
     position: absolute;
@@ -74,7 +85,7 @@ body * {
     color: white;
     background-color: hsla(0, 0%, 0%, 0.6);
     border-radius: 3px;
-    z-index: 999;
+    z-index: 998;
 }
 
 .floor-toggle input {
@@ -91,10 +102,9 @@ body * {
 
 .model-title {
     color: #DFDFDB;
-    text-align: center;
     font: Helvetica, Sans-Serif;
     text-transform: uppercase;
-    margin-top: -10px;
+    font-weight: 400;
 }
 
 .styled-select {
@@ -114,13 +124,13 @@ body * {
 }
 
 .model-controls {
+    z-index: 999;
     width: 464px;
     height: 100%;
     position: absolute;
     left: 0;
     background-color: hsla(0, 0%, 0%, 0.6);
     padding: 32px 64px 64px 16px;
-    color: hsl(0, 0%, 0%, 95%);
     font: Helvetica, Sans-Serif;
 }
 
@@ -134,6 +144,13 @@ body * {
     transition: margin-left 0.3s ease-out;
 }
 
+.model-controls .title {
+    font-weight: 400;
+    margin-bottom: 8px;
+    color: hsl(0, 0%, 70%);
+    letter-spacing: 0.1em;
+}
+
 .toggle[for="model-controls"] {
     position: absolute;
     top: 0;
@@ -145,14 +162,11 @@ body * {
     color: hsl(0, 0%, 95%);
 }
 
-select[for="model-group"] {
-    margin-bottom: 8px;
-}
-
 .control {
     padding: 8px;
     border-radius: 3px;
-    border: 1px solid hsl(0, 0%, 70%);
+    color: hsl(0, 0%, 10%);
+    background-color: hsla(0, 0%, 95%, 0.5);
     margin-bottom: 24px;
 }
 
@@ -185,9 +199,16 @@ select[for="model-group"] {
     border: 1px solid black;
 }
 
+.select:first-of-type {
+    z-index: 999;
+}
+
 .select {
+    position: relative;
     width: 100%;
+    margin-bottom: 16px;
     background-color: hsla(0, 0%, 95%, 1);
+    color: hsl(0, 0%, 10%);
 }
 
 .select .active {
@@ -197,7 +218,13 @@ select[for="model-group"] {
 
 .select .select-collapse {
     display: none;
+    position: absolute;
+    box-shadow: 0 4px 3px hsla(0, 0%, 10%, 1);
+    top: 100%;
+    width: 100%;
     background-color: hsla(0, 0%, 85%, 1);
+    max-height: 204px;
+    overflow-y: scroll;
 }
 
 .select .select-list {
@@ -208,21 +235,34 @@ select[for="model-group"] {
 
 .select .select-list li {
     padding: 16px 8px;
-    cursor: pointer;
     border-top: 1px solid hsla(0, 0%, 60%, 1);
+    color: hsla(0, 0%, 75%, 1);
 }
 
-.select .select-list li:hover {
+.select .select-list li[data-disabled='false'] {
+    color: hsl(0, 0%, 10%);
+}
+
+.select .select-list li[data-disabled='false']:hover {
+    cursor: pointer;
     background-color: hsla(0, 0%, 75%, 1);
+}
+
+.select .select-list li[data-selected='true'] {
+    background-color: hsl(0, 0%, 50%);
+}
+
+.select .select-list li[data-selected='true']:hover {
+    background-color: hsl(0, 0%, 50%);
 }
 
 .select:hover .select-collapse {
     display: inherit;
 }
 
-
-
-.select
+.select select {
+    display: none;
+}
 
 .textures a[data-texture="bricks"] .sample {
     background-image: url("../assets/images/bricks.png");
@@ -272,48 +312,8 @@ select[for="model-group"] {
     background-image: url("../assets/images/wood.png");
 }
 
-.colors {
-    margin-bottom: 24px;
-}
-
-.colors a {
-    text-decoration: none;
-    color: hsl(0, 0%, 70%);
-    margin-right: 16px;
-    vertical-align: middle;
-    transition: color 0.2s ease-out;
-}
-
-.colors a:hover {
-    color: hsl(0, 0%, 0%);
-}
-
-.colors a:after {
-    content: "";
-    margin-left: 8px;
-    display: inline-block;
-    width: 24px;
-    height: 24px;
-}
-
-.colors a[data-color="0xff0000"]:after {
-    background-color: #ff0000;
-    border: 1px solid black;
-}
-
-.colors a[data-color="0x0000ff"]:after {
-    background-color: #0000ff;
-    border: 1px solid black;
-}
-
-.colors a[data-color="0x00ff00"]:after {
-    background-color: #00ff00;
-    border: 1px solid black;
-}
-
-.colors a[data-color="0xffff00"]:after {
-    background-color: #ffff00;
-    border: 1px solid black;
+.colors label {
+    margin-right: 8px;
 }
 
 
@@ -372,6 +372,7 @@ select[for="model-group"] {
  .range-with-label {
      display: inline-block;
      vertical-align: middle;
+     text-align: center;
  }
 
  .range-with-label .value {

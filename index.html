@@ -12,30 +12,38 @@
         <div id="window2" class="window window-inactive"></div>
 
         <!-- controls related to model appearance -->
-        <div id="modelCtrls" class='model-controls' data-state="collapsed">
+        <div id="modelCtrls" class='model-controls' data-state="expanded">
             <span class="toggle" for="model-controls">&#9776;</span>
-            <h3 class="model-title">Select a model and group</h3>
-                <div class="select">
-                    <p class="active">--</p>
-                    <div class="select-collapse" data-state="expanded">
-                        <ul class="select-list">
-                            
-                        </ul>
-                    </div>
+            <h4 class="title">Active Visualization</h4>
+            <div id="modelName" class="select">
+                <p class="active">--</p>
+                <div class="select-collapse" data-state="expanded">
+                    <ul class="select-list" data-for="modelSelect">
+                    </ul>
                 </div>
-                <select class="styled-select rounded" for="model" id="modelName">
+                <select id="modelSelect">
+                    <option value=""></option>
                 </select>
-                <select class="styled-select rounded" for="model-group" id="groupName">
-                </select>
-                <div class="control control-color">
-                    <div class="colors">
-                        <!-- TOOD: consider a slider for hue, sat., val., etc. -->
-                        <label for="colorWell">Color:</label>
-                        <input type="color" value="#ff0000" id="colorWell"></input> <!--consider dynamically specifying value for value-->
-                    </div>
+            </div>
+            <h4 class="title">Group Name</h4>
+            <div id="groupName" class="select">
+                <p class="active">--</p>
+                <div class="select-collapse" data-state="expanded">
+                    <ul class="select-list" data-for="groupSelect">
+                    </ul>
                 </div>
+                <select id="groupSelect">
+                    <option value=""></option>
+                </select>
+            </div>
+            <h4 class="title">Color</h4>
+            <div class="control colors">
+                <!-- TOOD: consider a slider for hue, sat., val., etc. -->
+                <label for="colorWell">-- : </label>
+                <input type="color" value="#ff0000" id="colorWell"></input> <!--consider dynamically specifying value for value-->
+            </div>
+            <h4 class="title">Textures</h4>
             <div class="control control-texture">
-                <h4>Textures:</h4>
                 <div class="textures" id="textures">
                     <a href="#" data-texture="bricks">bricks<span class="sample"></span></a>
                     <a href="#" data-texture="cloth">cloth<span class="sample"></span></a>
@@ -52,12 +60,12 @@
                 </div>
                 <input type="file" id="file-texture"/>
             </div>
-            <div class="control-transparency">
-                <h4>Transparency:</h4>
                 <div class="range-with-label">
+                    <input id="transVal" class="value" type="text" value="1" />
                     <input id="transparencyCtrl" type="range" value="1" list="modelTransparency" min="0" max="1" step="0.1">
                     <label class="right-label">1</label>
                     <label class="left-label">0</label>
+                    <p class="for">Transparency</p>
                 </div>
             </div>
         </div>
