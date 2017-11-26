@@ -369,6 +369,7 @@ const Controls = () =>
         activeVisualizer.setIsActive(false);
         visualizers[id].instance.setIsActive(true);
         activeVisualizer = visualizers[id].instance;
+		handleGroupSelect(evt);
         updateControls();
     }
 
