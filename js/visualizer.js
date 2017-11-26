@@ -130,35 +130,35 @@ const Visualizer = (fps) =>
         let ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
         scene.add(ambientLight);
 
-		// Scene background.
-		renderer.gammaInput = true;
-		renderer.gammaOutput = true;
-		renderer.setClearColor(0x001a0d, 1.0);
-		renderer.shadowMap.enabled = true;
+    		// Scene background.
+    		renderer.gammaInput = true;
+    		renderer.gammaOutput = true;
+    		renderer.setClearColor(0x001a0d, 1.0);
+    		renderer.shadowMap.enabled = true;
 
-		// Grid floor and fog to add perspective for model movement.
-		scene.fog = new THREE.Fog(0x001a0d, 1500, 4500);
-		grid = new THREE.GridHelper(10000, 100, 0x001a0d, 0x006633);
-		scene.add(grid);
+    		// Grid floor and fog to add perspective for model movement.
+    		scene.fog = new THREE.Fog(0x001a0d, 1500, 4500);
+    		grid = new THREE.GridHelper(10000, 100, 0x001a0d, 0x006633);
+    		scene.add(grid);
 
 
-		// Ground plane geometry matching grid size.
+		    // Ground plane geometry matching grid size.
         let groundGeometry = new THREE.PlaneGeometry(10000, 10000, 1, 1);
 
-		// Transparent and not-shiny ground plane material.
+		    // Transparent and not-shiny ground plane material.
         let groundMaterial = new THREE.MeshLambertMaterial({
-			color: 0x4dffa6,
-			transparent: true,
-			opacity: 0.6,
-			side: THREE.DoubleSide,
-			emissive: 0x4dffa6,
-			// Helps solve z-plane clipping by off setting the ground plane from the grid.
-			polygonOffset: true,
-			polygonOffsetFactor: 1.0,
-			polygonOffsetUnits: 4.0
+  			color: 0x4dffa6,
+  			transparent: true,
+  			opacity: 0.6,
+  			side: THREE.DoubleSide,
+  			emissive: 0x4dffa6,
+  			// Helps solve z-plane clipping by off setting the ground plane from the grid.
+  			polygonOffset: true,
+  			polygonOffsetFactor: 1.0,
+  			polygonOffsetUnits: 4.0
 		});
 
-		// Create ground plane and rotate into horizontal position.
+		    // Create ground plane and rotate into horizontal position.
         ground = new THREE.Mesh(groundGeometry, groundMaterial);
         ground.receiveShadow = true;
         ground.rotation.x = -0.5 * Math.PI;
