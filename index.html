@@ -14,20 +14,36 @@
         <!-- controls related to model appearance -->
         <div id="modelCtrls" class='model-controls' data-state="collapsed">
             <span class="toggle" for="model-controls">&#9776;</span>
-            <h3 class="model-title">Select a model and group</h3>
-                <select class="styled-select rounded" for="model" id="modelName">
-                </select>
-                <select class="styled-select rounded" for="model-group" id="groupName">
-                </select>
-                <div class="control control-color">
-                    <div class="colors">
-                        <!-- TOOD: consider a slider for hue, sat., val., etc. -->
-                        <label for="colorWell">Color:</label>
-                        <input type="color" value="#ff0000" id="colorWell"></input> <!--consider dynamically specifying value for value-->
-                    </div>
+            <h4 class="title">Active Visualization</h4>
+            <div id="modelName" class="select">
+                <p class="active">--</p>
+                <div class="select-collapse" data-state="expanded">
+                    <ul class="select-list" data-for="modelSelect">
+                    </ul>
                 </div>
+                <select id="modelSelect">
+                    <option value=""></option>
+                </select>
+            </div>
+            <h4 class="title">Group Name</h4>
+            <div id="groupName" class="select">
+                <p class="active">--</p>
+                <div class="select-collapse" data-state="expanded">
+                    <ul class="select-list" data-for="groupSelect">
+                    </ul>
+                </div>
+                <select id="groupSelect">
+                    <option value=""></option>
+                </select>
+            </div>
+            <h4 class="title">Color</h4>
+            <div class="control colors">
+                <!-- TOOD: consider a slider for hue, sat., val., etc. -->
+                <label for="colorWell">-- : </label>
+                <input type="color" value="#ff0000" id="colorWell"></input> <!--consider dynamically specifying value for value-->
+            </div>
+            <h4 class="title">Textures</h4>
             <div class="control control-texture">
-                <h4>Textures:</h4>
                 <div class="textures" id="textures">
                     <a href="#" data-texture="bricks">bricks<span class="sample"></span></a>
                     <a href="#" data-texture="cloth">cloth<span class="sample"></span></a>
@@ -44,12 +60,12 @@
                 </div>
                 <input type="file" id="file-texture"/>
             </div>
-            <div class="control-transparency">
-                <h4>Transparency:</h4>
                 <div class="range-with-label">
+                    <input id="transVal" class="value" type="text" value="1" />
                     <input id="transparencyCtrl" type="range" value="1" list="modelTransparency" min="0" max="1" step="0.1">
                     <label class="right-label">1</label>
                     <label class="left-label">0</label>
+                    <p class="for">Transparency</p>
                 </div>
             </div>
         </div>
@@ -63,21 +79,44 @@
         </div>
 
         <!-- controls related to controling the display features of the animation -->
-        <div id="playbackCtrls" class='playback-controls'>
-            <div class="range-with-label">
-                <div id="modelSpeedVal" class="value"></div>
-                <input id="modelSpeed" type="range" min="-4" max="4" step="0.25">
-                <label class="right-label">4</label>
-                <label class="left-label">-4</label>
+        <div class="ctrls-wrapper" data-for="playback-controls">
+            <div class="playback-controls">
+                <div id="playbackSlider" class='playback-slider' data-position="1">
+                    <div class="playback-pane">
+                        <div class="range-with-label">
+                            <input id="speedInput" class="value" type="text" value="1" />
+                            <input id="modelSpeed" type="range" min="-4" max="4" step="0.25" value="1">
+                            <label class="right-label">4</label>
+                            <label class="left-label">-4</label>
+                            <p class="for">Playback Speed</p>
+                        </div>
+                        <button class="img-btn middle-btn" id="playPauseBtn" data-toggle="play"></button>
+                        <div class="range-with-label">
+                            <input id="timeInput" class="value" type="text" value="1" />
+                            <input id="modelTime" type="range">
+                            <label for="modelTime" class="right-label">--</label>
+                            <label for="modelTime" class="left-label">--</label>
+                            <p class="for">Current Time</p>
+                        </div>
+                    </div>
+                    <div class="playback-pane">
+                        <div class="control-group">
+                            <h4>Camera</h4>
+                            <button id="resetBtn" class="playback-btn">Reset camera</button>
+                        </div>
+                        <div class="control-group">
+                            <h4>Playback</h4>
+                            <button class="playback-btn" id="playAll">Play all</button>
+                            <button class="playback-btn" id="pauseAll">Pause all</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="pagination">
+                    <label>page: </label>
+                    <a data-page="1" href="#">1</a>
+                    <a data-page="2" href="#">2</a>
+                </div>
             </div>
-            <button class="raise" id="playPauseBtn" data-toggle="play"></button>
-            <div class="range-with-label">
-                <div id="modelTimeVal" class="value"></div>
-                <input id="modelTime" type="range">
-                <label for="modelTime" class="right-label">--</label>
-                <label for="modelTime" class="left-label">--</label>
-            </div>
-            <button class="raise" id="resetBtn">Reset Camera</button>
         </div>
 
         <!-- js -->
