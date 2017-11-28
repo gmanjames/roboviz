@@ -80,17 +80,24 @@ const Visualizer = (fps) =>
      */
     let texture;
 
-
-    ////////////////////////////////////////////////////
-    //              Application Logic                 //
-    ////////////////////////////////////////////////////
+    /*
+     * Grid helper for scene
+     */
+    let grid;
 
     /*
+     * Default ground for the 3D environment
+     */
+    let ground;
+
+
+    /* ------------------------------------------------------------------------
      * init:
-     *
+     * ------------------------------------------------------------------------
      * Logic for setting up the initial Three.js scene, event listeners, etc.
      */
-    const init = function(windowElem) {
+    const init = function(windowElem)
+    {
         renderer.setSize(windowElem.clientWidth, windowElem.clientHeight);
         windowElem.appendChild(renderer.domElement);
 
@@ -100,6 +107,15 @@ const Visualizer = (fps) =>
         closeBtn.appendChild(document.createTextNode('x'));
         windowElem.appendChild(closeBtn);
 
+        const floorToggle = document.createElement('p');
+        const floorInput  = document.createElement('input');
+        floorInput.type = 'checkbox';
+        floorInput.checked = true;
+        floorInput.dataset.window = windowElem.id;
+        floorToggle.classList.add('floor-toggle');
+        floorToggle.appendChild(document.createTextNode('display floor'));
+        floorToggle.appendChild(floorInput);
+        windowElem.appendChild(floorToggle);
 
         camera.position.set(600, 600, 1000);
         camera.lookAt(new THREE.Vector3(0,0,0));
@@ -114,36 +130,36 @@ const Visualizer = (fps) =>
         let ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
         scene.add(ambientLight);
 
-		// Scene background.
-		renderer.gammaInput = true;
-		renderer.gammaOutput = true;
-		renderer.setClearColor(0x001a0d, 1.0);
-		renderer.shadowMap.enabled = true;
+    		// Scene background.
+    		renderer.gammaInput = true;
+    		renderer.gammaOutput = true;
+    		renderer.setClearColor(0x001a0d, 1.0);
+    		renderer.shadowMap.enabled = true;
 
-		// Grid floor and fog to add perspective for model movement.
-		scene.fog = new THREE.Fog(0x001a0d, 1500, 4500);
-		let grid = new THREE.GridHelper(10000, 100, 0x001a0d, 0x006633);
-		scene.add(grid);
+    		// Grid floor and fog to add perspective for model movement.
+    		scene.fog = new THREE.Fog(0x001a0d, 1500, 4500);
+    		grid = new THREE.GridHelper(10000, 100, 0x001a0d, 0x006633);
+    		scene.add(grid);
 
 
-		// Ground plane geometry matching grid size.
+        // Ground plane geometry matching grid size.
         let groundGeometry = new THREE.PlaneGeometry(10000, 10000, 1, 1);
 
-		// Transparent and not-shiny ground plane material.
+        // Transparent and not-shiny ground plane material.
         let groundMaterial = new THREE.MeshLambertMaterial({
-			color: 0x4dffa6,
-			transparent: true,
-			opacity: 0.6,
-			side: THREE.DoubleSide,
-			emissive: 0x4dffa6,
-			// Helps solve z-plane clipping by off setting the ground plane from the grid.
-			polygonOffset: true,
-			polygonOffsetFactor: 1.0,
-			polygonOffsetUnits: 4.0
+      			color: 0x4dffa6,
+      			transparent: true,
+      			opacity: 0.6,
+      			side: THREE.DoubleSide,
+      			emissive: 0x4dffa6,
+      			// Helps solve z-plane clipping by off setting the ground plane from the grid.
+      			polygonOffset: true,
+      			polygonOffsetFactor: 1.0,
+      			polygonOffsetUnits: 4.0
 		});
 
-		// Create ground plane and rotate into horizontal position.
-        let ground = new THREE.Mesh(groundGeometry, groundMaterial);
+        // Create ground plane and rotate into horizontal position.
+        ground = new THREE.Mesh(groundGeometry, groundMaterial);
         ground.receiveShadow = true;
         ground.rotation.x = -0.5 * Math.PI;
 
@@ -155,9 +171,9 @@ const Visualizer = (fps) =>
     };
 
 
-    /*
+    /* ------------------------------------------------------------------------
      * createModel:
-     *
+     * ------------------------------------------------------------------------
      * param data - JSON data for model parsed from file.
      *
      * Extract model information from JSON data.
@@ -204,6 +220,11 @@ const Visualizer = (fps) =>
 
                     material.transparent = true;
                     let mesh = new THREE.Mesh(geometry, material);
+
+                    if (obj.type === "mesh" && obj.scale !== undefined) {
+                        mesh.scale.set(obj.scale[0], obj.scale[1], obj.scale[2]);
+                    }
+
                     comp.add(mesh);
                 }
 
@@ -224,13 +245,14 @@ const Visualizer = (fps) =>
     }
 
 
-    /*
+    /* ------------------------------------------------------------------------
      * animationLoop:
-     *
+     * ------------------------------------------------------------------------
      * Game loop implementation for updating logical coordinates of models and
      * rendering the scene.
      */
-    function animationLoop() {
+    function animationLoop()
+    {
         let then = Date.now();
         let loop = () => {
 
@@ -251,14 +273,14 @@ const Visualizer = (fps) =>
     }
 
 
-    /*
+    /* ------------------------------------------------------------------------
      * update:
-     *
+     * ------------------------------------------------------------------------
      * Progress the time of the animation that will be used to calculate the
      * current frame. Notify the controls of the change in time.
      */
-    function update() {
-
+    function update()
+    {
         let delta = clock.getDelta() * playbackSpeed;
 
         if (isPlaying) {
@@ -271,18 +293,22 @@ const Visualizer = (fps) =>
     }
 
 
-    /*
+    /* ------------------------------------------------------------------------
      * updateModel:
-     *
+     * ------------------------------------------------------------------------
      * ...
      */
-    function updateModel() {
-
+    function updateModel()
+    {
         if (currentTime < 0) {
             currentTime = animation.stop;
         }
 
         let frame = Math.round((currentTime % animation.stop) / animation.step);
+
+        if (frame >= (animation.stop - animation.start) / animation.step) {
+            frame = frame - 1;
+        }
 
         if (isActive)
             window.controls.notify(frame * animation.step);
@@ -301,28 +327,26 @@ const Visualizer = (fps) =>
     }
 
 
-    /*
+    /* ------------------------------------------------------------------------
      * render:
-     *
+     * ------------------------------------------------------------------------
      * ...
      */
-    function render() {
+    function render()
+    {
         renderer.render( scene, camera );
     }
 
 
-    ////////////////////////////////////////////////////
-    //              Visualizer Methods                //
-    ////////////////////////////////////////////////////
-
-    /*
+    /* ------------------------------------------------------------------------
      * loadAnimation:
-     *
+     * ------------------------------------------------------------------------
      * param dat - Data for a new animation.
      *
      * ...
      */
-    const loadAnimation = async function(dat) {
+    const loadAnimation = async function(dat)
+    {
         await createModel(dat);
 
         // Return information about the animation loaded
@@ -333,7 +357,11 @@ const Visualizer = (fps) =>
             groups = [];
 
         for (const group of animation.model.children) {
-            groups.push(group.name);
+            let groupObj = {};
+            groupObj.name = group.name;
+            groupObj.transparency = group.children[0].material.opacity;
+            groupObj.color = "#" + group.children[0].material.color.getHexString();
+            groups.push(groupObj);
         }
 
         return {
@@ -346,36 +374,50 @@ const Visualizer = (fps) =>
     };
 
 
-    /*
+    /* ------------------------------------------------------------------------
      * togglePlay:
-     *
+     * ------------------------------------------------------------------------
      * Pause or resume animation
      */
-    const togglePlay = function() {
+    const togglePlay = function()
+    {
         isPlaying = !isPlaying;
     };
 
 
-    /*
+    /* ------------------------------------------------------------------------
+     * togglePlay:
+     * ------------------------------------------------------------------------
+     * Pause or resume animation
+     */
+    const setPlay = function(play)
+    {
+        isPlaying = play;
+    };
+
+
+    /* ------------------------------------------------------------------------
      * setTime:
-     *
+     * ------------------------------------------------------------------------
      * param timeVal - The position in the animation to play from
      *
      * Move the animation to the frame specified by the param timeVal
      */
-    const setTime = function(timeVal) {
+    const setTime = function(timeVal)
+    {
         currentTime = timeVal;
     };
 
 
-    /*
+    /* ------------------------------------------------------------------------
      * setSpeed:
-     *
+     * ------------------------------------------------------------------------
      * param speedVal - Multiplier for playback speed
      *
      * Set the speed and direction of the animation
      */
-    const setSpeed = function(speedVal) {
+    const setSpeed = function(speedVal)
+    {
         playbackSpeed = speedVal;
     };
 
@@ -486,12 +528,23 @@ const Visualizer = (fps) =>
         camera.updateProjectionMatrix();
     };
 
+    /*
+     * displayFloor:
+     *
+     * Hide or display the floor mesh and grid
+     */
+    const displayFloor = function(visible) {
+        ground.visible = visible;
+        grid.visible = visible;
+    };
+
 
     // Constructed application object
     return {
         init,
         loadAnimation,
         togglePlay,
+        setPlay,
         resetCamera,
         setSpeed,
         setTime,
@@ -499,6 +552,7 @@ const Visualizer = (fps) =>
         changeColor,
         changeTexture,
         changeTransparency,
-        resize
+        resize,
+        displayFloor
     };
 };

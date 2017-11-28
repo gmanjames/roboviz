@@ -31,12 +31,22 @@ body * {
     position: absolute;
     width: 100%;
     height: 100%;
-    border: 1px solid black;
 }
 
 .window-inactive {
     width: 0;
     height: 0;
+}
+
+.window[data-state='active']::after {
+    content: "[active]";
+    color: hsla(181, 100%, 50%, 0.5);
+    position: absolute;
+    display: block;
+    top: 48px;
+    right: 64px;
+    margin: 0;
+    padding: 16px 8px;
 }
 
 .rm-file {
@@ -67,6 +77,22 @@ body * {
     background-color: hsla(0, 0%, 50%, 0.7);
 }
 
+.floor-toggle {
+    position: absolute;
+    top: 8px;
+    right: 64px;
+    margin: 0;
+    padding: 16px 8px;
+    color: white;
+    background-color: hsla(0, 0%, 0%, 0.6);
+    border-radius: 3px;
+    z-index: 998;
+}
+
+.floor-toggle input {
+    margin-left: 8px;
+}
+
 .toolbar {
     position: absolute;
     top: 0;
@@ -75,13 +101,38 @@ body * {
     min-height: 3rem;
 }
 
+.model-title {
+    color: #DFDFDB;
+    font: Helvetica, Sans-Serif;
+    text-transform: uppercase;
+    font-weight: 400;
+}
+
+.styled-select {
+    background: rgba(223, 223, 219, .4) url(http://i62.tinypic.com/15xvbd5.png) no-repeat 96% 0;
+    overflow:hidden;
+    width:350px;
+    -moz-border-radius: 9px 9px 9px 9px;
+    -webkit-border-radius: 9px 9px 9px 9px;
+    border-radius: 9px 9px 9px 9px;
+    box-shadow: 1px 1px 11px #330033;
+}
+
+.styled-select select {
+    background: transparent;
+    border: none;
+    color: #fff;
+}
+
 .model-controls {
+    z-index: 999;
     width: 464px;
     height: 100%;
     position: absolute;
     left: 0;
+    background-color: hsla(0, 0%, 0%, 0.6);
     padding: 32px 64px 64px 16px;
-    border-right: 1px solid black;
+    font: Helvetica, Sans-Serif;
 }
 
 .model-controls[data-state="expanded"] {
@@ -94,6 +145,13 @@ body * {
     transition: margin-left 0.3s ease-out;
 }
 
+.model-controls .title {
+    font-weight: 400;
+    margin-bottom: 8px;
+    color: hsl(0, 0%, 70%);
+    letter-spacing: 0.1em;
+}
+
 .toggle[for="model-controls"] {
     position: absolute;
     top: 0;
@@ -102,16 +160,14 @@ body * {
     width: 64px;
     padding: 16px 0;
     text-align: center;
-}
-
-select[for="model-group"] {
-    margin-bottom: 8px;
+    color: hsl(0, 0%, 95%);
 }
 
 .control {
     padding: 8px;
     border-radius: 3px;
-    border: 1px solid hsl(0, 0%, 70%);
+    color: hsl(0, 0%, 10%);
+    background-color: hsla(0, 0%, 95%, 0.5);
     margin-bottom: 24px;
 }
 
@@ -142,6 +198,71 @@ select[for="model-group"] {
     height: 27px;
     background-size: cover;
     border: 1px solid black;
+}
+
+.select:first-of-type {
+    z-index: 999;
+}
+
+.select {
+    position: relative;
+    width: 100%;
+    margin-bottom: 16px;
+    background-color: hsla(0, 0%, 95%, 1);
+    color: hsl(0, 0%, 10%);
+}
+
+.select .active {
+    margin: 0;
+    padding: 16px 8px;
+}
+
+.select .select-collapse {
+    display: none;
+    position: absolute;
+    box-shadow: 0 4px 3px hsla(0, 0%, 10%, 1);
+    top: 100%;
+    width: 100%;
+    background-color: hsla(0, 0%, 85%, 1);
+    max-height: 204px;
+    overflow-y: scroll;
+}
+
+.select .select-list {
+    list-style-type: none;
+    margin: 0;
+    padding: 0;
+}
+
+.select .select-list li {
+    padding: 16px 8px;
+    border-top: 1px solid hsla(0, 0%, 60%, 1);
+    color: hsla(0, 0%, 75%, 1);
+}
+
+.select .select-list li[data-disabled='false'] {
+    color: hsl(0, 0%, 10%);
+}
+
+.select .select-list li[data-disabled='false']:hover {
+    cursor: pointer;
+    background-color: hsla(0, 0%, 75%, 1);
+}
+
+.select .select-list li[data-selected='true'] {
+    background-color: hsl(0, 0%, 50%);
+}
+
+.select .select-list li[data-selected='true']:hover {
+    background-color: hsl(0, 0%, 50%);
+}
+
+.select:hover .select-collapse {
+    display: inherit;
+}
+
+.select select {
+    display: none;
 }
 
 .textures a[data-texture="bricks"] .sample {
@@ -192,48 +313,8 @@ select[for="model-group"] {
     background-image: url("../assets/images/wood.png");
 }
 
-.colors {
-    margin-bottom: 24px;
-}
-
-.colors a {
-    text-decoration: none;
-    color: hsl(0, 0%, 70%);
-    margin-right: 16px;
-    vertical-align: middle;
-    transition: color 0.2s ease-out;
-}
-
-.colors a:hover {
-    color: hsl(0, 0%, 0%);
-}
-
-.colors a:after {
-    content: "";
-    margin-left: 8px;
-    display: inline-block;
-    width: 24px;
-    height: 24px;
-}
-
-.colors a[data-color="0xff0000"]:after {
-    background-color: #ff0000;
-    border: 1px solid black;
-}
-
-.colors a[data-color="0x0000ff"]:after {
-    background-color: #0000ff;
-    border: 1px solid black;
-}
-
-.colors a[data-color="0x00ff00"]:after {
-    background-color: #00ff00;
-    border: 1px solid black;
-}
-
-.colors a[data-color="0xffff00"]:after {
-    background-color: #ffff00;
-    border: 1px solid black;
+.colors label {
+    margin-right: 8px;
 }
 
 
@@ -241,61 +322,176 @@ select[for="model-group"] {
  * Playback Controls
  */
 
- .playback-controls {
-     position: absolute;
-     bottom: 0;
-     width: 100%;
-     padding: 16px 0;
-     text-align: center;
- }
-
-.playback-controls > button {
-    border: none;
-    padding: 0;
-    padding: 8px 16px;
-    margin: 0 32px;
-    border-radius: 3px;
-    cursor: pointer;
-    border: 1px solid black;
+.ctrls-wrapper {
+    position: absolute;
 }
 
-.playback-controls > button[data-toggle="play"]:after {
-    content: "PAUSE";
+.ctrls-wrapper[data-for="playback-controls"] {
+    bottom: 0;
+    width: 100%;
+    padding: 16px;
+}
+
+.ctrls-wrapper[data-for="additional-opts"] {
+    top: 100%;
+    width: 100%;
+    padding: 16px;
+}
+
+ .playback-controls {
+     overflow-x: hidden;
+     position: relative;
+     width: 100%;
+     max-width: 800px;
+     margin: 0 auto;
+     padding: 16px 4px;
+     background-color: hsla(0, 0%, 0%, 0.6);
+     border-radius: 3px;
+     text-align: center;
+     vertical-align: middle;
  }
 
- .playback-controls > button[data-toggle="pause"]:after {
-     content: "PLAY";
+ .playback-controls .pagination {
+     position: absolute;
+     background-color: hsla(0, 0%, 95%, 0.5);
+     border-radius: 0 0 3px 3px;
+     padding: 8px 6px;
+     top: 0;
+     right: 0;
+ }
+
+ .playback-controls .pagination a {
+     color: hsl(0, 0%, 10%);
+     margin-left: 8px;
+ }
+
+ .playback-slider {
+     width: 200%;
+     height: 100%;
+ }
+
+.playback-slider[data-position="1"] {
+    margin-left: 0;
+    transition: margin-left 0.3s ease-out;
+}
+
+.playback-slider[data-position="2"] {
+    margin-left: -100%;
+    transition: margin-left 0.3s ease-out;
+}
+
+.playback-pane {
+    width: 50%;
+    height: 100%;
+    float: left;
+}
+
+.control-group {
+    display: inline-block;
+    height: 100%;
+    margin-right: 16px;
+    border-radius: 3px;
+    padding: 0 16px 8px 16px;
+    border: 1px solid hsla(0, 0%, 95%, 0.5);
+}
+
+.control-group h4 {
+    margin: 0;
+    margin: 8px 0;
+    font-weight: 400;
+    letter-spacing: 0.1em;
+    color: hsl(0, 0%, 70%);
+}
+
+.playback-controls .middle-btn {
+    display: inline-block;
+    vertical-align: middle;
+    margin: 0 32px;
+}
+
+.img-btn {
+    width: 64px;
+    height: 48px;
+    border: none;
+    padding: 0;
+    border-radius: 3px;
+    cursor: pointer;
+    background-color: hsla(0, 0%, 95%, 0.5);
+    background-size: 100%;
+    background-position: center;
+    background-repeat: no-repeat;
+}
+
+.playback-btn {
+    cursor: pointer;
+    background-color: hsla(0, 0%, 95%, 0.5);
+    border-radius: 3px;
+    padding: 8px 6px;
+    font-size: 16px;
+}
+
+.playback-controls .img-btn[data-toggle="play"] {
+    background-image: url('../assets/images/pause.png');
+ }
+
+ .playback-controls .img-btn[data-toggle="pause"] {
+     background-image: url('../assets/images/play.png');
  }
 
  .range-with-label {
      display: inline-block;
+     vertical-align: middle;
+     text-align: center;
  }
 
  .range-with-label .value {
+     display: block;
      margin: 0 auto;
      margin-bottom: 8px;
      width: 48px;
-     height: 32px;
+     padding: 8px 2px;
      border: 1px solid hsl(0, 0%, 80%);
      border-radius: 3px;
-     text-align: left;
      vertical-align: middle;
+     font-size: 16px;
+     background-color: hsla(0, 0%, 95%, 0.5);
  }
 
 .range-with-label label {
+    color: hsl(0, 0%, 95%);
+    letter-spacing: 0.1em;
     min-width: 16px;
 }
+
  .range-with-label .right-label {
      float: right;
+     margin-left: 6px;
+     color: rgba(223, 223, 219, 1);
  }
 
  .range-with-label .left-label {
      float: left;
+     margin-right: 6px;
+     color: rgba(223, 223, 219, 1);
+ }
+
+ .range-with-label .for {
+     margin: 0;
  }
 
  /*
   * Progress Bar
   */
+
+  #modelTimeVal {
+      color: black;
+      background-color: rgba(223, 223, 219, .4);
+  }
+
+  #modelSpeedVal {
+      color: black;
+      background-color: rgba(223, 223, 219, .4)
+  }
 
   #progress-holder {
     height: 10px;
