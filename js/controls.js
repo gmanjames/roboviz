@@ -16,6 +16,11 @@ const Controls = () =>
     const DEFAULT_FPS = 60;
 
     /*
+     * Splash page for displaying application instructions
+     */
+    const splashScreen = document.getElementById('splash-screen');
+
+    /*
      * Area that is used to capture any file that will dropped onto the
      * screen for use as a new log file.
      */
@@ -329,6 +334,8 @@ const Controls = () =>
     function windowEvtListeners()
     {
         window.addEventListener('resize', handleWindowResize);
+        splashScreen.querySelector('#show-button').addEventListener('click', handleSplashToggle);
+        splashScreen.querySelector('#hide-splash').addEventListener('click', handleSplashToggle);
         dropZone.addEventListener('drop', handleDrop, false);
         dropZone.addEventListener('dragover', handleDragOver, false);
     }
@@ -394,6 +401,8 @@ const Controls = () =>
     {
         evt.preventDefault();
 
+        splashScreen.dataset.state = "hidden";
+        
         document.getElementById('progress-holder').style.display = 'inline';
 
         let files = evt.dataTransfer.files; // FileList object.
@@ -431,11 +440,25 @@ const Controls = () =>
     function handleMenuToggle(evt)
     {
         const state = modelCtrls.dataset.state;
-        if (state === "collapsed") {
+        if (state === "collapsed")
             modelCtrls.dataset.state =  "expanded";
-        } else {
+        else
             modelCtrls.dataset.state = "collapsed";
-        }
+    }
+
+    /*
+     * handleSplashToggle
+     *
+     * param evt - Javascript event
+     *
+     * ...
+     */
+    function handleSplashToggle(evt)
+    {
+        if (evt.target.id === 'show-button')
+            splashScreen.dataset.state =  "display";
+        else
+            splashScreen.dataset.state = "hidden";
     }
 
 
@@ -822,7 +845,7 @@ const Controls = () =>
             visualizers[2].instance.displayFloor(evt.target.checked);
         }
     }
-	
+
 	/* ------------------------------------------------------------------------
      * handleLockCamera
      * ------------------------------------------------------------------------
@@ -887,6 +910,7 @@ const Controls = () =>
      */
     function loadRefAnimation(urlRef)
     {
+        splashScreen.dataset.state = "hidden";
         fetch(urlRef).then((res) => res.json()).then(async (data) => {
             loadNewVisualizer(data).then(() => {
                 updateControls();
@@ -908,6 +932,7 @@ An example path here is:\n\n :userName/:repoName/branchName/path/to/fileName.jso
      */
     function loadTestAnimation(animation)
     {
+        splashScreen.dataset.state = "hidden";
         loadNewVisualizer(testModels[animation]).then(() => {
             updateControls();
         });
@@ -938,7 +963,7 @@ An example path here is:\n\n :userName/:repoName/branchName/path/to/fileName.jso
 
         // Add event listener to toggle-floor
         winw.querySelector('.floor-toggle input').addEventListener('change', handleFloors);
-		
+
 		// Add event listener to toggle-camera
 		winw.querySelector('.camera-toggle input').addEventListener('change', handleLockCamera);
 

@@ -537,17 +537,26 @@ body * {
    * Splash Screen
    */
 
-   #splash-screen {
-     background-color: #ddd;
-     font-family: 'Barlow', arial, sans-serif;
-     height: 100%;
-     width: 100%;
-     overflow: visible;
-     color: #333;
-     position: absolute;
-     transition: margin-left 0.5s ease-in-out;
-     z-index: 999;
-   }
+#splash-screen {
+    background-color: #ddd;
+    font-family: 'Barlow', arial, sans-serif;
+    height: 100%;
+    width: 100%;
+    overflow: visible;
+    color: #333;
+    position: absolute;
+    z-index: 999;
+}
+
+#splash-screen[data-state="display"] {
+    margin-left: 0;
+    transition: margin-left 0.3s ease-in-out;
+}
+
+#splash-screen[data-state="hidden"] {
+    margin-left: 100%;
+    transition: margin-left 0.3s ease-in-out;
+}
 
    .slide-right {
      margin-left: 100vw;
