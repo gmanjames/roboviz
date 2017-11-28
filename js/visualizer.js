@@ -81,16 +81,35 @@ const Visualizer = (fps) =>
     let texture;
 
     /*
-     * Grid helper for scene
+     * Grid helper for the scene.
      */
     let grid;
 
     /*
-     * Default ground for the 3D environment
+     * Default ground for the 3D environment.
      */
     let ground;
-
-
+	
+	/*
+	 * Scene spotlight focused on model.
+	 */
+	let spotLight;
+	
+	/*
+	 * Current position of model.
+	 */
+	let modelPos;
+	
+	/*
+	 * Spotlight target.
+	 */
+	let lightTarg;
+	
+	/*
+	 * Boolean for toggling camera following.
+	 */
+	let freeCam;
+	
     /* ------------------------------------------------------------------------
      * init:
      * ------------------------------------------------------------------------
@@ -106,56 +125,92 @@ const Visualizer = (fps) =>
         closeBtn.dataset.window = windowElem.id;
         closeBtn.appendChild(document.createTextNode('x'));
         windowElem.appendChild(closeBtn);
-
+		
+		// Create checkbox for toggling floor visibility.
         const floorToggle = document.createElement('p');
         const floorInput  = document.createElement('input');
         floorInput.type = 'checkbox';
         floorInput.checked = true;
         floorInput.dataset.window = windowElem.id;
         floorToggle.classList.add('floor-toggle');
-        floorToggle.appendChild(document.createTextNode('display floor'));
+        floorToggle.appendChild(document.createTextNode('Display Floor'));
         floorToggle.appendChild(floorInput);
         windowElem.appendChild(floorToggle);
-
+		
+		// Create checkbox for toggling camera lock.
+        const cameraToggle = document.createElement('p');
+        const cameraInput  = document.createElement('input');
+        cameraInput.type = 'checkbox';
+        cameraInput.checked = true;
+        cameraInput.dataset.window = windowElem.id;
+        cameraToggle.classList.add('camera-toggle');
+        cameraToggle.appendChild(document.createTextNode('Cam Control'));
+        cameraToggle.appendChild(cameraInput);
+        windowElem.appendChild(cameraToggle);
+		
+		// Set default camera position.
         camera.position.set(600, 600, 1000);
         camera.lookAt(new THREE.Vector3(0,0,0));
-
-        // Directional light to enhance shadow.
-        let defaultLight = new THREE.DirectionalLight(0xffffff);
-        defaultLight.position.set(0, 1000, 0);
-        defaultLight.lookAt(new THREE.Vector3(0, 0, 0));
-        scene.add(defaultLight);
+		
+		// Spotlight.
+		spotLight = new THREE.SpotLight();
+		spotLight.position.set(0,1000,0);
+		spotLight.angle = .4;
+		spotLight.penumbra = 1;
+		spotLight.castShadow = true;
+		spotLight.distance = 2000;
+		scene.add(spotLight);
+		
+		// Directional light to enhance shadow.
+        let defaultLight1 = new THREE.DirectionalLight(0xffffff, 0.4);
+		defaultLight1.castShadow = true;
+        defaultLight1.position.set(500, 1000, 500);
+        scene.add(defaultLight1);
+		
+		let defaultLight2 = new THREE.DirectionalLight(0xffffff, 0.4);
+		defaultLight2.castShadow = true;
+        defaultLight2.position.set(-500, -1000, -500);
+        scene.add(defaultLight2);
 
         // Ambient light to make sure contrast isn't drastic.
-        let ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
+        let ambientLight = new THREE.AmbientLight(0xffffff, 0.3);
         scene.add(ambientLight);
 
-    		// Scene background.
-    		renderer.gammaInput = true;
-    		renderer.gammaOutput = true;
-    		renderer.setClearColor(0x001a0d, 1.0);
-    		renderer.shadowMap.enabled = true;
+    	// Scene background.
+    	renderer.gammaInput = true;
+    	renderer.gammaOutput = true;
+    	renderer.setClearColor(0x001a0d, 1.0);
+    	renderer.shadowMap.enabled = true;
+		/*
+		let skyGeo = new THREE.SphereGeometry(3000, 60, 40);
+        //texture = loader.load( "http://7-themes.com/data_images/out/41/6908236-space-high-resolution-wallpapers.jpg" );
+		let skyMaterial = new THREE.MeshPhongMaterial({ 
+			color: 0x00c9ed,
+			side: THREE.BackSide
+		});
+		let sky = new THREE.Mesh(skyGeo, skyMaterial);
+		sky.castShadow = false;
+		scene.add(sky);
+		*/
 
-    		// Grid floor and fog to add perspective for model movement.
-    		scene.fog = new THREE.Fog(0x001a0d, 1500, 4500);
-    		grid = new THREE.GridHelper(10000, 100, 0x001a0d, 0x006633);
-    		scene.add(grid);
-
+    	// Grid floor and fog to add perspective for model movement.
+    	scene.fog = new THREE.Fog(0x001a0d, 1500, 5000);
+    	grid = new THREE.GridHelper(10000, 100, 0x001a0d, 0x006633);
+    	scene.add(grid);
 
         // Ground plane geometry matching grid size.
         let groundGeometry = new THREE.PlaneGeometry(10000, 10000, 1, 1);
 
         // Transparent and not-shiny ground plane material.
-        let groundMaterial = new THREE.MeshLambertMaterial({
-      			color: 0x4dffa6,
-      			transparent: true,
-      			opacity: 0.6,
-      			side: THREE.DoubleSide,
-      			emissive: 0x4dffa6,
-      			// Helps solve z-plane clipping by off setting the ground plane from the grid.
-      			polygonOffset: true,
-      			polygonOffsetFactor: 1.0,
-      			polygonOffsetUnits: 4.0
+        let groundMaterial = new THREE.MeshPhongMaterial({
+      		color: 0x4dffa6,
+      		transparent: true,
+      		opacity: 0.6,
+      		side: THREE.DoubleSide,
+      		// Helps solve z-plane clipping by off setting the ground plane from the grid.
+      		polygonOffset: true,
+      		polygonOffsetFactor: 1.0,
+      		polygonOffsetUnits: 10.0
 		});
 
         // Create ground plane and rotate into horizontal position.
@@ -204,7 +259,7 @@ const Visualizer = (fps) =>
                     }
                     else if (obj.type === "ellipsoid") {
                         geometry = new THREE.SphereBufferGeometry(obj.scale[0] * 0.5, 32, 32);
-                        material = new THREE.MeshLambertMaterial( { color: parseInt(obj.color), overdraw: 0.5 } );
+                        material = new THREE.MeshLambertMaterial( { color: parseInt(obj.color), overdraw: 0.5, transparent: true } );
                         let matrix = new THREE.Matrix4();
                         matrix.makeScale(1.0, obj.scale[1] / obj.scale[0], obj.scale[2] / obj.scale[0]);
                         geometry.applyMatrix(matrix);
@@ -323,6 +378,11 @@ const Visualizer = (fps) =>
                 animation.frames[frame][group.name].quaternion[2],
                 animation.frames[frame][group.name].quaternion[3]
             );
+			
+			//modelPos = group.position;
+			//lightTarg = group;
+			modelPos = animation.model.children[0].position;
+			lightTarg = animation.model.children[0];
         }
     }
 
@@ -334,6 +394,10 @@ const Visualizer = (fps) =>
      */
     function render()
     {
+		if (freeCam == false) {
+			camera.lookAt(modelPos);
+		}
+		spotLight.target = lightTarg;
         renderer.render( scene, camera );
     }
 
@@ -537,7 +601,16 @@ const Visualizer = (fps) =>
         ground.visible = visible;
         grid.visible = visible;
     };
-
+	
+	/*
+     * cameraLock:
+     *
+     * Lock or unlock camera controls and toggle automatic model following
+     */
+    const cameraLock = function(unlocked) {
+		controls.enabled = unlocked;
+		freeCam = unlocked;
+    };
 
     // Constructed application object
     return {
@@ -553,6 +626,7 @@ const Visualizer = (fps) =>
         changeTexture,
         changeTransparency,
         resize,
-        displayFloor
+        displayFloor,
+		cameraLock
     };
 };
