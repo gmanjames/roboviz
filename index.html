@@ -1,9 +1,11 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
     <head>
         <title>RoboViz</title>
         <meta name="Content-Type" content="text/html; charset=UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
         <link type="text/css" rel="stylesheet" href="css/style.css" />
+        <link href="https://fonts.googleapis.com/css?family=Barlow" rel="stylesheet">
     </head>
     <body id='dropZone'>
 
@@ -38,9 +40,8 @@
             </div>
             <h4 class="title">Color</h4>
             <div class="control colors">
-                <!-- TOOD: consider a slider for hue, sat., val., etc. -->
                 <label for="colorWell">-- : </label>
-                <input type="color" value="#ff0000" id="colorWell"></input> <!--consider dynamically specifying value for value-->
+                <input type="color" value="#ff0000" id="colorWell">
             </div>
             <h4 class="title">Textures</h4>
             <div class="control control-texture">
@@ -67,7 +68,6 @@
                     <label class="left-label">0</label>
                     <p class="for">Transparency</p>
                 </div>
-            </div>
         </div>
 
         <div id = "progress-holder">
@@ -119,6 +119,35 @@
             </div>
         </div>
 
+          <!-- splash screen -->
+        <div id="splash-screen" data-state="display">
+
+          <button id="show-button">&#8942;</button>
+            
+          <div id="splash-head">
+            <p id="splash-title">RePLAY</p>
+          </div>
+          <div id="instructions">
+            <div id="get-started">
+              <p id="description">To get started try one of the following</p>
+            </div>
+            <div id="option-container">
+              <div class="option">
+                <p>Drag a file onto the screen</p>
+              </div>
+              <div class="option">
+                <p>Specify log file using URL query</p>
+              </div>
+              <div class="option" id="last-option">
+                <p>Type the file path location into your URL</p>
+              </div>
+            </div>
+            <div id="hide-splash">
+              <button id="hide-button">&rarr;</button>
+            </div>
+          </div>
+        </div>
+
         <!-- js -->
         <script src="vendor/three.js"></script>
         <script src="data/models.js"></script>
@@ -126,14 +155,14 @@
         <script src="vendor/OrbitControls.js"></script>
         <script src="js/controls.js"></script>
         <script src="js/visualizer.js"></script>
+        <script src="js/main.js"></script>
         <script>
 
-            // Initialize the controls by adding event listeners etc.
-            const controls = Controls();
-            controls.init();
-
-            // Add to the global space
-            window['controls'] = controls;
+            //
+            // Start the application
+            //
+            
+            replay.start();
 
         </script>
     </body>

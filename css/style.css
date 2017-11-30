@@ -16,6 +16,7 @@ body {
     height: 100%;
     min-height: 100%;
     width: 100%;
+    background-color: #efefef;
 }
 
 body * {
@@ -89,6 +90,22 @@ body * {
 }
 
 .floor-toggle input {
+    margin-left: 8px;
+}
+
+.camera-toggle {
+    position: absolute;
+    top: 8px;
+    right: 200px;
+    margin: 0;
+    padding: 16px 8px;
+    color: white;
+    background-color: hsla(0, 0%, 0%, 0.6);
+    border-radius: 3px;
+    z-index: 998;
+}
+
+.camera-toggle input {
     margin-left: 8px;
 }
 
@@ -338,7 +355,7 @@ body * {
 }
 
  .playback-controls {
-     overflow-x: hidden;
+     overflow: hidden;
      position: relative;
      width: 100%;
      max-width: 800px;
@@ -353,7 +370,7 @@ body * {
  .playback-controls .pagination {
      position: absolute;
      background-color: hsla(0, 0%, 95%, 0.5);
-     border-radius: 0 0 3px 3px;
+     border-radius: 0 3px 0 3px;
      padding: 8px 6px;
      top: 0;
      right: 0;
@@ -505,12 +522,153 @@ body * {
     left: 50%;
     transform: translate(-50%, -50%);
     display: none;
+    opacity: 0.5;
   }
 
   #progress-bar {
     background: #848484;
-    width: 0%;
+    width: 0;
     z-index: 1;
     padding: 0;
     height: 100%;
   }
+
+  /*
+   * Splash Screen
+   */
+
+#splash-screen {
+    background-color: #ddd;
+    font-family: 'Barlow', arial, sans-serif;
+    height: 100%;
+    width: 100%;
+    overflow: visible;
+    color: #333;
+    position: absolute;
+    z-index: 999;
+}
+
+#splash-screen[data-state="display"] {
+    margin-left: 0;
+    transition: margin-left 0.3s ease-in-out;
+}
+
+#splash-screen[data-state="hidden"] {
+    margin-left: 100%;
+    transition: margin-left 0.3s ease-in-out;
+}
+
+   .slide-right {
+     margin-left: 100vw;
+   }
+
+   #splash-head {
+     text-align: center;
+   }
+
+   #splash-title {
+     font-size: 140pt;
+     font-weight: lighter;
+     letter-spacing: 20px;
+     margin: 20px;
+   }
+
+   #description {
+     font-size: 35pt;
+   }
+
+   #instructions {
+    margin-top: 60px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    text-align: center;
+   }
+
+   #get-started {
+     display: flex;
+     justify-content: center;
+   }
+
+   #option-container {
+    display: flex;
+    flex-direction: row;
+   }
+
+   .option {
+     width: 33%;
+     border-right: solid;
+     border-width: thin;
+     padding: 20px;
+     font-size: 30px;
+     display: flex;
+     justify-content: center;
+   }
+
+   #last-option {
+     border: none;
+   }
+
+   #hide-splash {
+     display: flex;
+     justify-content: center;
+   }
+
+   #hide-button {
+     padding: 7px 37px;
+     border: 0 solid;
+     font-size: 30pt;
+     border-radius: 5px;
+     background-color: #efefef;
+     border-color: #333;
+     box-shadow: 2px 2px #aaa;
+     cursor: pointer;
+   }
+
+   #show-button {
+     border: 0 solid;
+     font-size: 1.5em;
+     border-radius: 5px;
+     background-color: #eee;
+     width: 30px;
+     height: 33vh;
+     left: -30px;
+     position: absolute;
+     opacity: 0.5;
+     transform: translate(0, 33vh);
+     padding: 2px;
+     cursor: pointer;
+   }
+
+   @media (max-width: 960px) {
+
+     #splash-screen {
+       padding: 0;
+       margin-left: 0;
+       overflow: hidden;
+     }
+
+     #splash-title {
+       font-size: 20vw;
+       font-weight: 100;
+       letter-spacing: 10px;
+     }
+
+     #instructions {
+      display: flex;
+      margin: 5vh;
+      transform: none;
+      justify-content: center;
+     }
+
+     .option {
+       border-right: none;
+       border-bottom: solid;
+       border-width: thin;
+       width: 90vw;
+     }
+
+     #option-container {
+       flex-direction: column;
+     }
+   }

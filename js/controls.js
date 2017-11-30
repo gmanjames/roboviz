@@ -1,8 +1,24 @@
 'use strict';
 
-/**
+/* ------------------------------------------------------------------------
  * controls.js:
+ * ------------------------------------------------------------------------
+ *  - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+ * Authors: Michael Brattin,
+ *          Kyle Finter,
+ *          Garren Ijames,
+ *          Brett Spatz,
+ *          Jesse Stewart
+ *
+ * Date Last Modified: 11-29-2017
+ * Description:
+ *      controls.js contains the logic for connecting the various user
+ * interface components (buttons, menus, etc.) with visualizer object
+ * functionality. This includes all of the playback features, model manip.
+ * features, as well as the interactivity of the menus and splash page.
+ *
  */
+
 const Controls = () =>
 {
     /*
@@ -14,6 +30,11 @@ const Controls = () =>
      * Default frames per second to run animations
      */
     const DEFAULT_FPS = 60;
+
+    /*
+     * Splash page for displaying application instructions
+     */
+    const splashScreen = document.getElementById('splash-screen');
 
     /*
      * Area that is used to capture any file that will dropped onto the
@@ -62,7 +83,6 @@ const Controls = () =>
      * Button for pausing and playing
      */
     const playPauseBtn = document.getElementById('playPauseBtn');
-
 
     /*
      * Button to pause all animations
@@ -141,8 +161,8 @@ const Controls = () =>
      * Init method called to hookup graphical components with visualizer
      * functions.
      */
-    const init = function() {
-
+    const init = function()
+    {
         // Initialize visualizers without animation
 
         // Visualizer for first window
@@ -329,6 +349,8 @@ const Controls = () =>
     function windowEvtListeners()
     {
         window.addEventListener('resize', handleWindowResize);
+        splashScreen.querySelector('#show-button').addEventListener('click', handleSplashToggle);
+        splashScreen.querySelector('#hide-splash').addEventListener('click', handleSplashToggle);
         dropZone.addEventListener('drop', handleDrop, false);
         dropZone.addEventListener('dragover', handleDragOver, false);
     }
@@ -374,7 +396,7 @@ const Controls = () =>
      * ------------------------------------------------------------------------
      * param evt - Javascript event
      *
-     * ...
+     * Window resize handler for adjusting the size of any active visualizers.
      */
     function handleWindowResize(evt)
     {
@@ -394,6 +416,8 @@ const Controls = () =>
     {
         evt.preventDefault();
 
+        splashScreen.dataset.state = "hidden";
+
         document.getElementById('progress-holder').style.display = 'inline';
 
         let files = evt.dataTransfer.files; // FileList object.
@@ -407,12 +431,12 @@ const Controls = () =>
     }
 
 
-    /*
+    /* ------------------------------------------------------------------------
      * handleDragOver:
-     *
+     * ------------------------------------------------------------------------
      * param evt - Javascript event
      *
-     * ...
+     * Handler for dragging over event.
      */
     function handleDragOver(evt)
     {
@@ -421,30 +445,47 @@ const Controls = () =>
     }
 
 
-    /*
+    /* ------------------------------------------------------------------------
      * handleMenuToggle
-     *
+     * ------------------------------------------------------------------------
      * param evt - Javascript event
      *
-     * ...
+     * Toggle the model controls menu to expand or collapse depending upon
+     * current state.
      */
     function handleMenuToggle(evt)
     {
         const state = modelCtrls.dataset.state;
-        if (state === "collapsed") {
+        if (state === "collapsed")
             modelCtrls.dataset.state =  "expanded";
-        } else {
+        else
             modelCtrls.dataset.state = "collapsed";
-        }
     }
 
 
-    /*
-     * handleModelSelect
+    /* ------------------------------------------------------------------------
+     * handleSplashToggle
+     * ------------------------------------------------------------------------
+     * param evt - Javascript event
      *
+     * Toggle the splash screen to display or hide depending upon
+     * current state.
+     */
+    function handleSplashToggle(evt)
+    {
+        if (evt.target.id === 'show-button')
+            splashScreen.dataset.state =  "display";
+        else
+            splashScreen.dataset.state = "hidden";
+    }
+
+
+    /* ------------------------------------------------------------------------
+     * handleModelSelect
+     * ------------------------------------------------------------------------
      * param evt - Javascript evt
      *
-     * ...
+     * Handler for switching between active visualizations.
      */
     function handleModelSelect(evt)
     {
@@ -467,12 +508,12 @@ const Controls = () =>
     }
 
 
-    /*
+    /* ------------------------------------------------------------------------
      * handleGroupSelect
-     *
+     * ------------------------------------------------------------------------
      * param evt - Javascript evt
      *
-     * ...
+     * Handler for switching the selected group of the currently active model.
      */
     function handleGroupSelect(evt)
     {
@@ -504,9 +545,9 @@ const Controls = () =>
         for (let i = 0; i < evt.target.parentNode.children.length; i++) {
             child = evt.target.parentNode.children[i];
             if (child === evt.target)
-            child.dataset.selected = true;
+                child.dataset.selected = true;
             else
-            child.dataset.selected = false;
+                child.dataset.selected = false;
         }
 
         const select = document.getElementById(evt.target.parentNode.dataset.for);
@@ -621,7 +662,7 @@ const Controls = () =>
      * ------------------------------------------------------------------------
      * param evt - Javascript event
      *
-     * ...
+     * Handler for text input that allows the user to type a transparency value.
      */
     function handleTransInputChange(evt)
     {
@@ -703,22 +744,22 @@ const Controls = () =>
     }
 
 
-     /* ------------------------------------------------------------------------
-      * handlePauseAll
-      * ------------------------------------------------------------------------
-      * param evt - Javascript event
-      *
-      * Event handler for pausing every loaded animation
-      */
-     function handlePauseAll(evt)
-     {
+    /* ------------------------------------------------------------------------
+     * handlePauseAll
+     * ------------------------------------------------------------------------
+     * param evt - Javascript event
+     *
+     * Event handler for pausing every loaded animation
+     */
+    function handlePauseAll(evt)
+    {
         if (visualizers[1].state.active)
             visualizers[1].instance.setPlay(false);
         if (visualizers[2].state.active)
             visualizers[2].instance.setPlay(false);
 
         playPauseBtn.dataset.toggle = "pause";
-     }
+    }
 
 
     /* ------------------------------------------------------------------------
@@ -726,7 +767,7 @@ const Controls = () =>
      * ------------------------------------------------------------------------
      * param evt - Javascript event
      *
-     * ...
+     * Handler for changing the displayed playback controls pane
      */
     function handlePagination(evt)
     {
@@ -753,7 +794,8 @@ const Controls = () =>
      * ------------------------------------------------------------------------
      * param evt - Javascript event
      *
-     * ...
+     * Handler for range input that allows the user to slide to adjust the
+     * current time of the animation.
      */
     function handleTimeSlideInput(evt)
     {
@@ -782,7 +824,8 @@ const Controls = () =>
      * ------------------------------------------------------------------------
      * param evt - Javascript event
      *
-     * ...
+     * Handler for range input that allows the user to slide to adjust the
+     * playback speed for the currently active animation.
      */
     function handleSpeedSlideInput(evt)
     {
@@ -796,7 +839,7 @@ const Controls = () =>
      * ------------------------------------------------------------------------
      * param evt - Javascript event
      *
-     * ...
+     * Handler for text input that allows the user to type a speed value.
      */
     function handleSpeedInputChange(evt)
     {
@@ -810,7 +853,7 @@ const Controls = () =>
      * ------------------------------------------------------------------------
      * param evt - Javascript event
      *
-     * ...
+     * Handler for toggling the visibility of the scene's gridded floor.
      */
     function handleFloors(evt)
     {
@@ -820,6 +863,26 @@ const Controls = () =>
         }
         else if (winId.includes('2')) {
             visualizers[2].instance.displayFloor(evt.target.checked);
+        }
+    }
+    
+    /* ------------------------------------------------------------------------
+     * handleLockCamera
+     * ------------------------------------------------------------------------
+     * param evt - Javascript event
+     *
+     * Handler that will make the scene's camera follow the model. This
+     * prevents the normal user input for looking around the scene (panning,
+     * zooming, and orbiting).
+     */
+    function handleLockCamera(evt)
+    {
+        const winId = evt.target.dataset.window;
+        if (winId.includes('1')) {
+            visualizers[1].instance.cameraLock(evt.target.checked);
+        }
+        else if (winId.includes('2')) {
+            visualizers[2].instance.cameraLock(evt.target.checked);
         }
     }
 
@@ -869,6 +932,7 @@ const Controls = () =>
      */
     function loadRefAnimation(urlRef)
     {
+        splashScreen.dataset.state = "hidden";
         fetch(urlRef).then((res) => res.json()).then(async (data) => {
             loadNewVisualizer(data).then(() => {
                 updateControls();
@@ -890,6 +954,7 @@ An example path here is:\n\n :userName/:repoName/branchName/path/to/fileName.jso
      */
     function loadTestAnimation(animation)
     {
+        splashScreen.dataset.state = "hidden";
         loadNewVisualizer(testModels[animation]).then(() => {
             updateControls();
         });
@@ -920,6 +985,9 @@ An example path here is:\n\n :userName/:repoName/branchName/path/to/fileName.jso
 
         // Add event listener to toggle-floor
         winw.querySelector('.floor-toggle input').addEventListener('change', handleFloors);
+
+        // Add event listener to toggle-camera
+        winw.querySelector('.camera-toggle input').addEventListener('change', handleLockCamera);
 
         // Load animation represented by data and store assoc info
         const animation = await activeVisualizer.loadAnimation(dat);
@@ -1004,7 +1072,6 @@ An example path here is:\n\n :userName/:repoName/branchName/path/to/fileName.jso
         inactive.dataset.state = 'inactive';
 
         if (numActive === 1) {
-
             // Adjust active to full screen and hide inactive
             active.style.width = '100%';
             active.style.left  = '0';
@@ -1013,9 +1080,7 @@ An example path here is:\n\n :userName/:repoName/branchName/path/to/fileName.jso
             active.querySelector('.rm-file').dataset.state = 'disabled';
         }
         else if (numActive === 2) {
-
             // Assign each window half of the total width of the screen
-            // TODO: implement responsive checking here
             active.style.left  = '0';
             active.style.width = '50%';
             active.classList.remove('window-inactive');
@@ -1038,7 +1103,7 @@ An example path here is:\n\n :userName/:repoName/branchName/path/to/fileName.jso
     }
 
 
-    // Constructed Controls object
+    // Return interfacing functions
     return {
         init,
         notify
