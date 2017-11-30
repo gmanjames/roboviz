@@ -84,7 +84,6 @@ const Controls = () =>
      */
     const playPauseBtn = document.getElementById('playPauseBtn');
 
-
     /*
      * Button to pause all animations
      */
