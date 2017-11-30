@@ -865,8 +865,8 @@ const Controls = () =>
             visualizers[2].instance.displayFloor(evt.target.checked);
         }
     }
-
-	/* ------------------------------------------------------------------------
+    
+    /* ------------------------------------------------------------------------
      * handleLockCamera
      * ------------------------------------------------------------------------
      * param evt - Javascript event
@@ -986,8 +986,8 @@ An example path here is:\n\n :userName/:repoName/branchName/path/to/fileName.jso
         // Add event listener to toggle-floor
         winw.querySelector('.floor-toggle input').addEventListener('change', handleFloors);
 
-		// Add event listener to toggle-camera
-		winw.querySelector('.camera-toggle input').addEventListener('change', handleLockCamera);
+        // Add event listener to toggle-camera
+        winw.querySelector('.camera-toggle input').addEventListener('change', handleLockCamera);
 
         // Load animation represented by data and store assoc info
         const animation = await activeVisualizer.loadAnimation(dat);
