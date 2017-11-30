@@ -1,8 +1,24 @@
 'use strict';
 
-/**
- * app.js:
+/* ------------------------------------------------------------------------
+ * visualizer.js:
+ * ------------------------------------------------------------------------
+ *  - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+ * Authors: Michael Brattin,
+ *          Kyle Finter,
+ *          Garren Ijames,
+ *          Brett Spatz,
+ *          Jesse Stewart
+ *
+ * Date Last Modified: 11-29-2017
+ * Description:
+ *      visualizer.js contains all of the logic that deals with the 3D
+ * environment and animation itself. This includes all of Threejs classes
+ * that are necessary to display the scene, as well as a game loop
+ * implementation for rendering the frames of the animation.
+ *
  */
+
 const Visualizer = (fps) =>
 {
     /*
@@ -89,27 +105,28 @@ const Visualizer = (fps) =>
      * Default ground for the 3D environment.
      */
     let ground;
-	
+
 	/*
 	 * Scene spotlight focused on model.
 	 */
 	let spotLight;
-	
+
 	/*
 	 * Current position of model.
 	 */
 	let modelPos;
-	
+
 	/*
 	 * Spotlight target.
 	 */
 	let lightTarg;
-	
+
 	/*
 	 * Boolean for toggling camera following.
 	 */
 	let freeCam;
-	
+
+
     /* ------------------------------------------------------------------------
      * init:
      * ------------------------------------------------------------------------
@@ -125,7 +142,7 @@ const Visualizer = (fps) =>
         closeBtn.dataset.window = windowElem.id;
         closeBtn.appendChild(document.createTextNode('x'));
         windowElem.appendChild(closeBtn);
-		
+
 		// Create checkbox for toggling floor visibility.
         const floorToggle = document.createElement('p');
         const floorInput  = document.createElement('input');
@@ -136,7 +153,7 @@ const Visualizer = (fps) =>
         floorToggle.appendChild(document.createTextNode('Display Floor'));
         floorToggle.appendChild(floorInput);
         windowElem.appendChild(floorToggle);
-		
+
 		// Create checkbox for toggling camera lock.
         const cameraToggle = document.createElement('p');
         const cameraInput  = document.createElement('input');
@@ -147,11 +164,11 @@ const Visualizer = (fps) =>
         cameraToggle.appendChild(document.createTextNode('Cam Control'));
         cameraToggle.appendChild(cameraInput);
         windowElem.appendChild(cameraToggle);
-		
+
 		// Set default camera position.
         camera.position.set(600, 600, 1000);
         camera.lookAt(new THREE.Vector3(0,0,0));
-		
+
 		// Spotlight.
 		spotLight = new THREE.SpotLight();
 		spotLight.position.set(0,1000,0);
@@ -160,13 +177,13 @@ const Visualizer = (fps) =>
 		spotLight.castShadow = true;
 		spotLight.distance = 2000;
 		scene.add(spotLight);
-		
+
 		// Directional light to enhance shadow.
         let defaultLight1 = new THREE.DirectionalLight(0xffffff, 0.4);
 		defaultLight1.castShadow = true;
         defaultLight1.position.set(500, 1000, 500);
         scene.add(defaultLight1);
-		
+
 		let defaultLight2 = new THREE.DirectionalLight(0xffffff, 0.4);
 		defaultLight2.castShadow = true;
         defaultLight2.position.set(-500, -1000, -500);
@@ -184,7 +201,7 @@ const Visualizer = (fps) =>
 		/*
 		let skyGeo = new THREE.SphereGeometry(3000, 60, 40);
         //texture = loader.load( "http://7-themes.com/data_images/out/41/6908236-space-high-resolution-wallpapers.jpg" );
-		let skyMaterial = new THREE.MeshPhongMaterial({ 
+		let skyMaterial = new THREE.MeshPhongMaterial({
 			color: 0x00c9ed,
 			side: THREE.BackSide
 		});
@@ -351,7 +368,9 @@ const Visualizer = (fps) =>
     /* ------------------------------------------------------------------------
      * updateModel:
      * ------------------------------------------------------------------------
-     * ...
+     * Apply the data contained within the frames to the model. This data
+     * includes rotation information and position information for each component
+     * of the model.
      */
     function updateModel()
     {
@@ -366,7 +385,7 @@ const Visualizer = (fps) =>
         }
 
         if (isActive)
-            window.controls.notify(frame * animation.step);
+            replay.controls.notify(frame * animation.step);
 
         for (const group of animation.model.children) {
             group.position.set(animation.frames[frame][group.name].position[0],
@@ -378,7 +397,7 @@ const Visualizer = (fps) =>
                 animation.frames[frame][group.name].quaternion[2],
                 animation.frames[frame][group.name].quaternion[3]
             );
-			
+
 			//modelPos = group.position;
 			//lightTarg = group;
 			modelPos = animation.model.children[0].position;
@@ -390,7 +409,7 @@ const Visualizer = (fps) =>
     /* ------------------------------------------------------------------------
      * render:
      * ------------------------------------------------------------------------
-     * ...
+     * Call Threejs function to render to the canvas.
      */
     function render()
     {
@@ -407,7 +426,10 @@ const Visualizer = (fps) =>
      * ------------------------------------------------------------------------
      * param dat - Data for a new animation.
      *
-     * ...
+     * Create model from parsed JSON data originating from log-file.
+     *
+     * returns - Animation information that will be used to update the GUI
+     * controls.
      */
     const loadAnimation = async function(dat)
     {
@@ -486,40 +508,43 @@ const Visualizer = (fps) =>
     };
 
 
-    /*
+    /* ------------------------------------------------------------------------
      * setIsActive:
-     *
+     * ------------------------------------------------------------------------
      * param active - New boolean for if this visualizer is active
      *
      * Set whether or not this visualizer is active. This value is used to
      * determine if the visualizer should be notifying controls of clock time.
      */
-    const setIsActive = function(active) {
+    const setIsActive = function(active)
+    {
         isActive = active;
     };
 
 
-    /*
+    /* ------------------------------------------------------------------------
      * resetCamera
-     *
+     * ------------------------------------------------------------------------
      * Reset the camera to the default values when the camera was created.
      */
-    const resetCamera = function () {
+    const resetCamera = function ()
+    {
         camera.position.set(600, 600, 1000);
         camera.lookAt(new THREE.Vector3(0, 0, 0));
         camera.updateProjectionMatrix();
     }
 
 
-    /*
+    /* ------------------------------------------------------------------------
      * changeColor:
-     *
+     * ------------------------------------------------------------------------
      * param modelName - String of the model name to have it's color changed
      * param color - String of the color to be changed in Hexadecimal
      *
      * Creates a new material in order to apply the new color
      */
-    const changeColor = function(groupName, color) {
+    const changeColor = function(groupName, color)
+    {
         for (const group of animation.model.children) {
             if (group.name == groupName) {
                 const oldTransparency = group.children[0].material.opacity;
@@ -532,15 +557,16 @@ const Visualizer = (fps) =>
     }
 
 
-    /*
+    /* ------------------------------------------------------------------------
      * changeTexture:
-     *
+     * ------------------------------------------------------------------------
      * param modelName - String of the model name to have it's color changed
      * param texture - String of the texture to be applied
      *
      * Creates a new material in order to apply the new texture using a path to the texture
      */
-    const changeTexture = function(modelName, texturePath) {
+    const changeTexture = function(modelName, texturePath)
+    {
         texture = textureLoader.load(texturePath, function( newTexture ) {
             let newMaterial = new THREE.MeshLambertMaterial( { map: newTexture, overdraw: 0.5 } );
             for (const group of animation.model.children) {
@@ -561,15 +587,16 @@ const Visualizer = (fps) =>
     };
 
 
-    /*
+    /* ------------------------------------------------------------------------
      * changeTransparency:
-     *
+     * ------------------------------------------------------------------------
      * param modelName - String of the model name to have it's transparency changed
      * param transparency - Floating point number between 0 and 1 that scales the opacity
      *
      * Change the transparency of the model
      */
-    const changeTransparency = function(modelName, transparency) {
+    const changeTransparency = function(modelName, transparency)
+    {
         for (const group of animation.model.children) {
             if(group.name==modelName) {
                 group.children[0].material.opacity = transparency;
@@ -578,41 +605,48 @@ const Visualizer = (fps) =>
     };
 
 
-    /*
+    /* ------------------------------------------------------------------------
      * resize:
-     *
+     * ------------------------------------------------------------------------
      * param width - New width of the visualizer
      * param height - New height for the visualizer
      *
-     * ...
+     * Adjust aspect ratio of the camera based on new browser window size.
+     * Update the size of the canvas.
      */
-    const resize = function(width, height) {
+    const resize = function(width, height)
+    {
         renderer.setSize(width, height);
         camera.aspect = width / height;
         camera.updateProjectionMatrix();
     };
 
-    /*
+
+    /* ------------------------------------------------------------------------
      * displayFloor:
-     *
+     * ------------------------------------------------------------------------
      * Hide or display the floor mesh and grid
      */
-    const displayFloor = function(visible) {
+    const displayFloor = function(visible)
+    {
         ground.visible = visible;
         grid.visible = visible;
     };
-	
-	/*
+
+
+	/* ------------------------------------------------------------------------
      * cameraLock:
-     *
+     * ------------------------------------------------------------------------
      * Lock or unlock camera controls and toggle automatic model following
      */
-    const cameraLock = function(unlocked) {
+    const cameraLock = function(unlocked)
+    {
 		controls.enabled = unlocked;
 		freeCam = unlocked;
     };
 
-    // Constructed application object
+
+    // Return interfacing functions
     return {
         init,
         loadAnimation,

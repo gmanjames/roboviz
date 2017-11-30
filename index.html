@@ -157,28 +157,15 @@
         <script src="vendor/OrbitControls.js"></script>
         <script src="js/controls.js"></script>
         <script src="js/visualizer.js"></script>
+        <script src="js/main.js"></script>
         <script>
 
-            const controls = Controls();
-            controls.init();
-
-            // Add to the global space
-            window['controls'] = controls;
+            //
+            // Start the application
+            //
+            
+            replay.start();
 
         </script>
-        <!-- <script>
-            document.getElementById('hide-button').onclick = function() {removeSplash()};
-            document.getElementById('show-button').onclick = function() {revealSplash()};
-
-            function removeSplash() {
-              var s = document.getElementById('splash-screen');
-              s.className += " slide-right";
-            }
-
-            function revealSplash() {
-              var s = document.getElementById('splash-screen');
-              s.className = "";
-            }
-        </script> -->
     </body>
 </html>
