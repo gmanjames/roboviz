@@ -1,8 +1,24 @@
 'use strict';
 
-/**
- * app.js:
+/* ------------------------------------------------------------------------
+ * visualizer.js:
+ * ------------------------------------------------------------------------
+ *  - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+ * Authors: Michael Brattin,
+ *          Kyle Finter,
+ *          Garren Ijames,
+ *          Brett Spatz,
+ *          Jesse Stewart
+ *
+ * Date Last Modified: 11-29-2017
+ * Description:
+ *      visualizer.js contains all of the logic that deals with the 3D
+ * environment and animation itself. This includes all of Threejs classes
+ * that are necessary to display the scene, as well as a game loop
+ * implementation for rendering the frames of the animation.
+ *
  */
+
 const Visualizer = (fps) =>
 {
     /*
@@ -80,17 +96,44 @@ const Visualizer = (fps) =>
      */
     let texture;
 
-
-    ////////////////////////////////////////////////////
-    //              Application Logic                 //
-    ////////////////////////////////////////////////////
+    /*
+     * Grid helper for the scene.
+     */
+    let grid;
 
     /*
+     * Default ground for the 3D environment.
+     */
+    let ground;
+
+    /*
+     * Scene spotlight focused on model.
+     */
+    let spotLight;
+
+    /*
+     * Current position of model.
+     */
+    let modelPos;
+
+    /*
+     * Spotlight target.
+     */
+    let lightTarg;
+
+    /*
+     * Boolean for toggling camera following.
+     */
+    let freeCam;
+
+
+    /* ------------------------------------------------------------------------
      * init:
-     *
+     * ------------------------------------------------------------------------
      * Logic for setting up the initial Three.js scene, event listeners, etc.
      */
-    const init = function(windowElem) {
+    const init = function(windowElem)
+    {
         renderer.setSize(windowElem.clientWidth, windowElem.clientHeight);
         windowElem.appendChild(renderer.domElement);
 
@@ -100,50 +143,84 @@ const Visualizer = (fps) =>
         closeBtn.appendChild(document.createTextNode('x'));
         windowElem.appendChild(closeBtn);
 
+        // Create checkbox for toggling floor visibility.
+        const floorToggle = document.createElement('p');
+        const floorInput  = document.createElement('input');
+        floorInput.type = 'checkbox';
+        floorInput.checked = true;
+        floorInput.dataset.window = windowElem.id;
+        floorToggle.classList.add('floor-toggle');
+        floorToggle.appendChild(document.createTextNode('Display Floor'));
+        floorToggle.appendChild(floorInput);
+        windowElem.appendChild(floorToggle);
 
+        // Create checkbox for toggling camera lock.
+        const cameraToggle = document.createElement('p');
+        const cameraInput  = document.createElement('input');
+        cameraInput.type = 'checkbox';
+        cameraInput.checked = true;
+        cameraInput.dataset.window = windowElem.id;
+        cameraToggle.classList.add('camera-toggle');
+        cameraToggle.appendChild(document.createTextNode('Cam Control'));
+        cameraToggle.appendChild(cameraInput);
+        windowElem.appendChild(cameraToggle);
+
+        // Set default camera position.
         camera.position.set(600, 600, 1000);
         camera.lookAt(new THREE.Vector3(0,0,0));
 
+        // Spotlight.
+        spotLight = new THREE.SpotLight();
+        spotLight.position.set(0,1000,0);
+        spotLight.angle = .4;
+        spotLight.penumbra = 1;
+        spotLight.castShadow = true;
+        spotLight.distance = 2000;
+        scene.add(spotLight);
+
         // Directional light to enhance shadow.
-        let defaultLight = new THREE.DirectionalLight(0xffffff);
-        defaultLight.position.set(0, 1000, 0);
-        defaultLight.lookAt(new THREE.Vector3(0, 0, 0));
-        scene.add(defaultLight);
+        let defaultLight1 = new THREE.DirectionalLight(0xffffff, 0.4);
+        defaultLight1.castShadow = true;
+        defaultLight1.position.set(500, 1000, 500);
+        scene.add(defaultLight1);
+
+        let defaultLight2 = new THREE.DirectionalLight(0xffffff, 0.4);
+        defaultLight2.castShadow = true;
+        defaultLight2.position.set(-500, -1000, -500);
+        scene.add(defaultLight2);
 
         // Ambient light to make sure contrast isn't drastic.
-        let ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
+        let ambientLight = new THREE.AmbientLight(0xffffff, 0.3);
         scene.add(ambientLight);
 
-		// Scene background.
-		renderer.gammaInput = true;
-		renderer.gammaOutput = true;
-		renderer.setClearColor(0x001a0d, 1.0);
-		renderer.shadowMap.enabled = true;
+        // Scene background.
+        renderer.gammaInput = true;
+        renderer.gammaOutput = true;
+        renderer.setClearColor(0x001a0d, 1.0);
+        renderer.shadowMap.enabled = true;
 
-		// Grid floor and fog to add perspective for model movement.
-		scene.fog = new THREE.Fog(0x001a0d, 1500, 4500);
-		let grid = new THREE.GridHelper(10000, 100, 0x001a0d, 0x006633);
-		scene.add(grid);
+        // Grid floor and fog to add perspective for model movement.
+        scene.fog = new THREE.Fog(0x001a0d, 1500, 5000);
+        grid = new THREE.GridHelper(10000, 100, 0x001a0d, 0x006633);
+        scene.add(grid);
 
-
-		// Ground plane geometry matching grid size.
+        // Ground plane geometry matching grid size.
         let groundGeometry = new THREE.PlaneGeometry(10000, 10000, 1, 1);
 
-		// Transparent and not-shiny ground plane material.
-        let groundMaterial = new THREE.MeshLambertMaterial({
-			color: 0x4dffa6,
-			transparent: true,
-			opacity: 0.6,
-			side: THREE.DoubleSide,
-			emissive: 0x4dffa6,
-			// Helps solve z-plane clipping by off setting the ground plane from the grid.
-			polygonOffset: true,
-			polygonOffsetFactor: 1.0,
-			polygonOffsetUnits: 4.0
-		});
+        // Transparent and not-shiny ground plane material.
+        let groundMaterial = new THREE.MeshPhongMaterial({
+            color: 0x4dffa6,
+            transparent: true,
+            opacity: 0.6,
+            side: THREE.DoubleSide,
+            // Helps solve z-plane clipping by off setting the ground plane from the grid.
+            polygonOffset: true,
+            polygonOffsetFactor: 1.0,
+            polygonOffsetUnits: 10.0
+        });
 
-		// Create ground plane and rotate into horizontal position.
-        let ground = new THREE.Mesh(groundGeometry, groundMaterial);
+        // Create ground plane and rotate into horizontal position.
+        ground = new THREE.Mesh(groundGeometry, groundMaterial);
         ground.receiveShadow = true;
         ground.rotation.x = -0.5 * Math.PI;
 
@@ -155,9 +232,9 @@ const Visualizer = (fps) =>
     };
 
 
-    /*
+    /* ------------------------------------------------------------------------
      * createModel:
-     *
+     * ------------------------------------------------------------------------
      * param data - JSON data for model parsed from file.
      *
      * Extract model information from JSON data.
@@ -188,7 +265,7 @@ const Visualizer = (fps) =>
                     }
                     else if (obj.type === "ellipsoid") {
                         geometry = new THREE.SphereBufferGeometry(obj.scale[0] * 0.5, 32, 32);
-                        material = new THREE.MeshLambertMaterial( { color: parseInt(obj.color), overdraw: 0.5 } );
+                        material = new THREE.MeshLambertMaterial( { color: parseInt(obj.color), overdraw: 0.5, transparent: true } );
                         let matrix = new THREE.Matrix4();
                         matrix.makeScale(1.0, obj.scale[1] / obj.scale[0], obj.scale[2] / obj.scale[0]);
                         geometry.applyMatrix(matrix);
@@ -204,6 +281,11 @@ const Visualizer = (fps) =>
 
                     material.transparent = true;
                     let mesh = new THREE.Mesh(geometry, material);
+
+                    if (obj.type === "mesh" && obj.scale !== undefined) {
+                        mesh.scale.set(obj.scale[0], obj.scale[1], obj.scale[2]);
+                    }
+
                     comp.add(mesh);
                 }
 
@@ -219,18 +301,19 @@ const Visualizer = (fps) =>
         return new Promise((resolve, reject) => {
             stlLoader.load(url, geom => {
                 resolve(geom);
-            })
+            });
         });
     }
 
 
-    /*
+    /* ------------------------------------------------------------------------
      * animationLoop:
-     *
+     * ------------------------------------------------------------------------
      * Game loop implementation for updating logical coordinates of models and
      * rendering the scene.
      */
-    function animationLoop() {
+    function animationLoop()
+    {
         let then = Date.now();
         let loop = () => {
 
@@ -245,20 +328,20 @@ const Visualizer = (fps) =>
                 render();
                 then = Date.now();
             }
-        }
+        };
 
         loop();
     }
 
 
-    /*
+    /* ------------------------------------------------------------------------
      * update:
-     *
+     * ------------------------------------------------------------------------
      * Progress the time of the animation that will be used to calculate the
      * current frame. Notify the controls of the change in time.
      */
-    function update() {
-
+    function update()
+    {
         let delta = clock.getDelta() * playbackSpeed;
 
         if (isPlaying) {
@@ -271,21 +354,27 @@ const Visualizer = (fps) =>
     }
 
 
-    /*
+    /* ------------------------------------------------------------------------
      * updateModel:
-     *
-     * ...
+     * ------------------------------------------------------------------------
+     * Apply the data contained within the frames to the model. This data
+     * includes rotation information and position information for each component
+     * of the model.
      */
-    function updateModel() {
-
+    function updateModel()
+    {
         if (currentTime < 0) {
             currentTime = animation.stop;
         }
 
         let frame = Math.round((currentTime % animation.stop) / animation.step);
 
+        if (frame >= (animation.stop - animation.start) / animation.step) {
+            frame = frame - 1;
+        }
+
         if (isActive)
-            window.controls.notify(frame * animation.step);
+            replay.controls.notify(frame * animation.step);
 
         for (const group of animation.model.children) {
             group.position.set(animation.frames[frame][group.name].position[0],
@@ -297,32 +386,40 @@ const Visualizer = (fps) =>
                 animation.frames[frame][group.name].quaternion[2],
                 animation.frames[frame][group.name].quaternion[3]
             );
+
+            modelPos = animation.model.children[0].position;
+            lightTarg = animation.model.children[0];
         }
     }
 
 
-    /*
+    /* ------------------------------------------------------------------------
      * render:
-     *
-     * ...
+     * ------------------------------------------------------------------------
+     * Call Threejs function to render to the canvas.
      */
-    function render() {
+    function render()
+    {
+        if (freeCam == false) {
+            camera.lookAt(modelPos);
+        }
+        spotLight.target = lightTarg;
         renderer.render( scene, camera );
     }
 
 
-    ////////////////////////////////////////////////////
-    //              Visualizer Methods                //
-    ////////////////////////////////////////////////////
-
-    /*
+    /* ------------------------------------------------------------------------
      * loadAnimation:
-     *
+     * ------------------------------------------------------------------------
      * param dat - Data for a new animation.
      *
-     * ...
+     * Create model from parsed JSON data originating from log-file.
+     *
+     * returns - Animation information that will be used to update the GUI
+     * controls.
      */
-    const loadAnimation = async function(dat) {
+    const loadAnimation = async function(dat)
+    {
         await createModel(dat);
 
         // Return information about the animation loaded
@@ -336,7 +433,7 @@ const Visualizer = (fps) =>
             let groupObj = {};
             groupObj.name = group.name;
             groupObj.transparency = group.children[0].material.opacity;
-            groupObj.color = group.children[0].material.color;
+            groupObj.color = "#" + group.children[0].material.color.getHexString();
             groups.push(groupObj);
         }
 
@@ -350,95 +447,113 @@ const Visualizer = (fps) =>
     };
 
 
-    /*
+    /* ------------------------------------------------------------------------
      * togglePlay:
-     *
+     * ------------------------------------------------------------------------
      * Pause or resume animation
      */
-    const togglePlay = function() {
+    const togglePlay = function()
+    {
         isPlaying = !isPlaying;
     };
 
 
-    /*
+    /* ------------------------------------------------------------------------
+     * togglePlay:
+     * ------------------------------------------------------------------------
+     * Pause or resume animation
+     */
+    const setPlay = function(play)
+    {
+        isPlaying = play;
+    };
+
+
+    /* ------------------------------------------------------------------------
      * setTime:
-     *
+     * ------------------------------------------------------------------------
      * param timeVal - The position in the animation to play from
      *
      * Move the animation to the frame specified by the param timeVal
      */
-    const setTime = function(timeVal) {
+    const setTime = function(timeVal)
+    {
         currentTime = timeVal;
     };
 
 
-    /*
+    /* ------------------------------------------------------------------------
      * setSpeed:
-     *
+     * ------------------------------------------------------------------------
      * param speedVal - Multiplier for playback speed
      *
      * Set the speed and direction of the animation
      */
-    const setSpeed = function(speedVal) {
+    const setSpeed = function(speedVal)
+    {
         playbackSpeed = speedVal;
     };
 
 
-    /*
+    /* ------------------------------------------------------------------------
      * setIsActive:
-     *
+     * ------------------------------------------------------------------------
      * param active - New boolean for if this visualizer is active
      *
      * Set whether or not this visualizer is active. This value is used to
      * determine if the visualizer should be notifying controls of clock time.
      */
-    const setIsActive = function(active) {
+    const setIsActive = function(active)
+    {
         isActive = active;
     };
 
 
-    /*
+    /* ------------------------------------------------------------------------
      * resetCamera
-     *
+     * ------------------------------------------------------------------------
      * Reset the camera to the default values when the camera was created.
      */
-    const resetCamera = function () {
+    const resetCamera = function ()
+    {
         camera.position.set(600, 600, 1000);
         camera.lookAt(new THREE.Vector3(0, 0, 0));
         camera.updateProjectionMatrix();
-    }
+    };
 
 
-    /*
+    /* ------------------------------------------------------------------------
      * changeColor:
-     *
+     * ------------------------------------------------------------------------
      * param modelName - String of the model name to have it's color changed
      * param color - String of the color to be changed in Hexadecimal
      *
      * Creates a new material in order to apply the new color
      */
-    const changeColor = function(groupName, color) {
+    const changeColor = function (groupName, color)
+    {
         for (const group of animation.model.children) {
             if (group.name == groupName) {
                 const oldTransparency = group.children[0].material.opacity;
-                let newMaterial = new THREE.MeshLambertMaterial( { color: color, overdraw: 0.5 } );
+                let newMaterial = new THREE.MeshLambertMaterial({ color: color, overdraw: 0.5 });
                 group.children[0].material = newMaterial;
                 group.children[0].material.transparent = true;
                 group.children[0].material.opacity = oldTransparency;
             }
         }
-    }
+    };
 
 
-    /*
+    /* ------------------------------------------------------------------------
      * changeTexture:
-     *
+     * ------------------------------------------------------------------------
      * param modelName - String of the model name to have it's color changed
      * param texture - String of the texture to be applied
      *
      * Creates a new material in order to apply the new texture using a path to the texture
      */
-    const changeTexture = function(modelName, texturePath) {
+    const changeTexture = function(modelName, texturePath)
+    {
         texture = textureLoader.load(texturePath, function( newTexture ) {
             let newMaterial = new THREE.MeshLambertMaterial( { map: newTexture, overdraw: 0.5 } );
             for (const group of animation.model.children) {
@@ -459,15 +574,16 @@ const Visualizer = (fps) =>
     };
 
 
-    /*
+    /* ------------------------------------------------------------------------
      * changeTransparency:
-     *
+     * ------------------------------------------------------------------------
      * param modelName - String of the model name to have it's transparency changed
      * param transparency - Floating point number between 0 and 1 that scales the opacity
      *
      * Change the transparency of the model
      */
-    const changeTransparency = function(modelName, transparency) {
+    const changeTransparency = function(modelName, transparency)
+    {
         for (const group of animation.model.children) {
             if(group.name==modelName) {
                 group.children[0].material.opacity = transparency;
@@ -476,26 +592,53 @@ const Visualizer = (fps) =>
     };
 
 
-    /*
+    /* ------------------------------------------------------------------------
      * resize:
-     *
+     * ------------------------------------------------------------------------
      * param width - New width of the visualizer
      * param height - New height for the visualizer
      *
-     * ...
+     * Adjust aspect ratio of the camera based on new browser window size.
+     * Update the size of the canvas.
      */
-    const resize = function(width, height) {
+    const resize = function(width, height)
+    {
         renderer.setSize(width, height);
         camera.aspect = width / height;
         camera.updateProjectionMatrix();
     };
 
 
-    // Constructed application object
+    /* ------------------------------------------------------------------------
+     * displayFloor:
+     * ------------------------------------------------------------------------
+     * Hide or display the floor mesh and grid
+     */
+    const displayFloor = function(visible)
+    {
+        ground.visible = visible;
+        grid.visible = visible;
+    };
+
+
+    /* ------------------------------------------------------------------------
+     * cameraLock:
+     * ------------------------------------------------------------------------
+     * Lock or unlock camera controls and toggle automatic model following
+     */
+    const cameraLock = function(unlocked)
+    {
+        controls.enabled = unlocked;
+        freeCam = unlocked;
+    };
+
+
+    // Return interfacing functions
     return {
         init,
         loadAnimation,
         togglePlay,
+        setPlay,
         resetCamera,
         setSpeed,
         setTime,
@@ -503,6 +646,8 @@ const Visualizer = (fps) =>
         changeColor,
         changeTexture,
         changeTransparency,
-        resize
+        resize,
+        displayFloor,
+        cameraLock
     };
 };
