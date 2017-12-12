@@ -370,6 +370,21 @@ const Controls = () =>
     function playbackCtrlsEvtListeners()
     {
         playPauseBtn.addEventListener('click', handlePlayPause);
+        window.addEventListener('keypress', function (e) {
+            let key = e.which || e.keyCode;
+            if (key === 32) {
+                const state = getState('playing');
+
+                visualizers[getCurrentActive()].state.playing = !state;
+                activeVisualizer.togglePlay();
+                
+                if (state) {
+                    playPauseBtn.dataset.toggle = "pause";
+                } else {
+                    playPauseBtn.dataset.toggle = "play";
+                }
+            }
+        });
         playAll.addEventListener('click', handlePlayAll);
         pauseAll.addEventListener('click', handlePauseAll);
         playbackSpeed.addEventListener('input', handleSpeedSlideInput);
