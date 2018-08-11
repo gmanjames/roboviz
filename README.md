@@ -1,6 +1,8 @@
 # Project RePLAY  
 ## A Robotics Visualizer  
-![Screen capture of RePLAY](/assets/images/readme.png)
+![Screen capture of RePLAY](/assets/images/readme.png)  
+[Try it here!](http://gmanjames.github.io/roboviz/?test=3)  
+
 ## Project Description  
 Project Replay is a web based application for displaying robotics simulations, with the following goals in mind:  
 
